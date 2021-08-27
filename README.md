@@ -7,7 +7,7 @@ Based on the book, lectures and notebooks on the geommetric deep learning by Mic
 and of course also on [the original paper](http://proceedings.mlr.press/v48/cohenc16.html) on group convolutions by Taco Cohen and Max Welling.
 All credit goes to them, and all mistakes are my own.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/GroupConv/blob/GroupConv-Keras.ipynb)]
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/GroupConv/blob/GroupConv-Keras.ipynb)
 The colab notebook (click the button above) is meant to be pedagogical and I hope can be useful as an introduction to group convolutions. 
 I recommend to go through it after or in parallel with the sources above. 
 I go into more detail in some areas and less in other. 
