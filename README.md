@@ -8,6 +8,7 @@ and of course also on [the original paper](http://proceedings.mlr.press/v48/cohe
 All credit goes to them, and all mistakes are my own.
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/GroupConv/blob/GroupConv-Keras.ipynb)
+
 The colab notebook (click the button above) is meant to be pedagogical and I hope can be useful as an introduction to group convolutions. 
 I recommend to go through it after or in parallel with the sources above. 
 I go into more detail in some areas and less in other. 
@@ -15,6 +16,8 @@ In particular the implementation of a group convolution layer in Keras is explai
 
 For pedagogical purposes I think it is already useful in its current state. 
 The implementation itself needs some work. 
-In particular it is still 2-3 times slower than a similar sized network of regular convolutions, it lacks invariant pooling layers, and I want to add more groups.
+It is already possible to create a fully equivariant/invariant model for the group we consider here, if one is careful with hyperparameters (see the strides section).
+But it lacks other groups, subsampling to smaller groups, 
+speed (it is 2-3 times slower than a similar sized network of regular convolutions), and more safeguards for incompatible hyperparameters.
 
 Any feedback or questions are welcome.
