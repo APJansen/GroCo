@@ -154,7 +154,7 @@ class GroupConv2D(Conv2D):
 
     def _repeat_bias(self):
         """Transform the bias to group_order repeated copies of itself."""
-        return tf.repeat(self.bias, self.group.order, axis=0) if self.use_bias else None
+        return tf.concat([self.bias for _ in range(self.group.order)], axis=0) if self.use_bias else None
 
     def _restore_group_axis(self, outputs):
         """
