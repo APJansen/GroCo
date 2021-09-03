@@ -16,9 +16,22 @@ I recommend to go through it after or in parallel with the sources above.
 I go into more detail in some areas and less in other. 
 In particular the implementation of a group convolution layer in Keras is explained in detail.
 
+Implemented functionality:
+- `GroupConv2D`: performs the group convolution, for any of the implemented groups. Includes automatic padding to maintain equivariance.
+- `GroupMaxPooling2D` and `GroupAveragePooling2D`: does the same padding to maintain equivariance if necessary, then pools over the spatial part
+- groups: p4m (discussed in the Colab notebook) and all its subgroups
 
-The implementation itself needs some work, but the group convolution layer itself is already functional for the most common groups.
-It still needs pooling layers, more testing, and can probably be sped up more (it is currently 2-3 times slower than a similar sized network of regular convolutions).
-It is already possible though to create a fully equivariant/invariant (on the last layer) model using strided convolutions rather than pooling to subsample.
+The layers are intended to work as closely to Keras's as possible. Group convolutions with the same total kernel size take nearly 50% longer than regular ones. 
+This can perhaps be improved, though it's not super obvious how.
+
+This is enough functionality already to make fully group-equivariant/invariant networks, but it does still need more testing.
+
+One thing I definitely want to add is pooling/subsampling not just on the grid but also on the full group.
+
+Others that I might have a look at adding:
+- dilations (currently not implemented, only strides)
+- transpose group convolutions
+- 3D and 1D group convolutions
+- groups on a hexagonal (2D) lattice
 
 Any feedback or questions are welcome.
