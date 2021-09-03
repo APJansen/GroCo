@@ -181,6 +181,12 @@ class GroupConv2D(Conv2D):
 
         return transformed_signal
 
+    def get_config(self):
+        config = super().get_config()
+        config['group'] = self.group.name
+        config['allow_non_equivariance'] = self.equivariant_padding.allow_non_equivariance
+        return config
+
     def _conv2d_call(self, reshaped_inputs, reshaped_kernel, reshaped_bias):
         """
         This is the original call method, with replacements:
