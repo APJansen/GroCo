@@ -62,7 +62,7 @@ class GroupConv2D(Conv2D):
 
     def _transformed_kernel(self):
         """Perform the group action on the kernel, as a signal on the group, or on the grid in a lifting convolution."""
-        return tf.gather(self.kernel, indices=self.transformed_kernel_indices, axis=0)
+        return tf.gather(tf.reshape(self.kernel, [-1]), indices=self.transformed_kernel_indices, axis=0)
 
     def _repeated_bias(self):
         """Transform the bias to group.order repeated copies of itself."""
@@ -102,8 +102,6 @@ class GroupConv2D(Conv2D):
 
         self.repeated_bias_indices = self._compute_repeated_bias_indices()
         self.transformed_kernel_indices = self._compute_transformed_kernel_indices()
-
-        self.kernel = tf.reshape(self.kernel, [-1])
 
     def _compute_repeated_bias_indices(self):
         """Compute a 1D tensor of indices used to gather from the bias in order to repeat it across the group axis."""
