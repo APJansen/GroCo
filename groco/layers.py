@@ -128,7 +128,12 @@ class GroupConv2D(Conv2D):
         (height, width, group_order, channels_in, channels_out) = kernel.shape
 
         transformed_kernel = tf.reshape(kernel, (height, width, group_order * group_order, channels_in // group_order, channels_out))
-        transformed_kernel = tf.gather(transformed_kernel, axis=-3, indices=self.group.composition_indices)
+
+        group_composition_indices = tf.constant([[i * self.group.order + c for c in row] for i, row in
+                                                 enumerate(self.group.composition.numpy())])
+        group_composition_indices = tf.reshape(group_composition_indices, [-1])
+        transformed_kernel = tf.gather(transformed_kernel, axis=2, indices=group_composition_indices)
+
         transformed_kernel = tf.reshape(transformed_kernel, (height, width, group_order, channels_in, channels_out))
         return transformed_kernel
 

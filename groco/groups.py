@@ -12,14 +12,6 @@ class WallpaperGroup:
         self.action = partial(action, height_axis=height_axis, width_axis=width_axis, new_group_axis=new_group_axis)
         self.name = name
 
-        self.composition_indices = self.compute_indices()
-
-    def compute_indices(self):
-        flattened_composition = tf.constant([[i * self.order + c for c in row] for i, row in
-                                         enumerate(self.composition.numpy())])
-        flattened_composition = tf.reshape(flattened_composition, (self.order * self.order))
-        return flattened_composition
-
 
 def P4M_action(kernel, height_axis, width_axis, new_group_axis):
     kernel = tf.expand_dims(kernel, axis=new_group_axis)
