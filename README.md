@@ -29,9 +29,8 @@ This is enough functionality already to make fully group-equivariant/invariant n
 One thing I definitely want to add is pooling/subsampling not just on the grid but also on the full group.
 
 Others that I might have a look at adding:
-- dilations (currently not implemented, only strides)
 - transpose group convolutions
-- 3D and 1D group convolutions
+- adapt everything to 1D and 3D convolutions
 - groups on a hexagonal (2D) lattice
 
 Any feedback or questions are welcome.
