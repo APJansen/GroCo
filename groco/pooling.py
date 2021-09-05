@@ -14,7 +14,7 @@ class GroupPooling2D(Layer):
     Only meant to be subclassed by GroupMaxPooling2D and GroupAveragePooling2D.
     """
     def __init__(self, group, pool_type: str, allow_non_equivariance: bool = False, pool_size=(2, 2), **kwargs):
-        self.group = group if isinstance(group, groups.WallpaperGroup) else groups.group_dict[group]
+        self.group = group if isinstance(group, groups.Group) else groups.group_dict[group]
 
         self.equivariant_padding = EquivariantPadding(allow_non_equivariance=allow_non_equivariance,
                                                       kernel_size=pool_size, **kwargs)

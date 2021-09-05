@@ -22,7 +22,7 @@ class GroupConv2D(Conv2D):
     """
 
     def __init__(self, group, kernel_size, allow_non_equivariance: bool=False, **kwargs):
-        self.group = group if isinstance(group, groups.WallpaperGroup) else groups.group_dict[group]
+        self.group = group if isinstance(group, groups.Group) else groups.group_dict[group]
 
         self.equivariant_padding = EquivariantPadding(allow_non_equivariance=allow_non_equivariance,
                                                       kernel_size=kernel_size, **kwargs)

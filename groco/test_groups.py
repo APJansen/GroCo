@@ -54,7 +54,7 @@ class TestWallpaperGroup(TestCase):
                 products = tf.gather(products, axis=0, indices=subgroup_inverses)
                 products = tf.sort(tf.reshape(products, [-1]))
 
-                msg = f'Subgroup {coset_name} multiplied with its cosets does not recover full group {group.name}. {products}'
+                msg = f'Subgroup {coset_name} multiplied with its cosets does not recover full group {group.name}.'
                 self.assertAllEqual(tf.range(group.order), products, msg=msg)
 
     def test_action_composition(self):
@@ -67,6 +67,48 @@ class TestWallpaperGroup(TestCase):
                 h_inv_gi_signal = tf.gather(group.action(gi_signal), axis=2, indices=group.inverses)
                 h_inv_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
                 h_inv_gi_at_signal = tf.gather(group.action(signal), axis=2, indices=h_inv_gi)
+
+                msg = f'Action of {group.name} not compatible with its composition.'
+                self.assertAllEqual(h_inv_gi_signal, h_inv_gi_at_signal, msg=msg)
+
+    def test_action_shape(self):
+        signal = tf.random.normal((28, 28, 3), seed=42)
+        for group in group_dict.values():
+            g_signal = group.action_on_grid(signal, spatial_axes=[0, 1], new_group_axis=0)
+            self.assertEqual(g_signal.shape, (group.order) + signal.shape)
+
+    def test_action_on_signal_composition(self):
+        signal = tf.random.normal((28, 28, 3), seed=42)
+        new_group_axis = 3
+        for group in group_dict.values():
+            g_signal = group.action_on_grid(signal, spatial_axes=[0, 1], new_group_axis=new_group_axis)
+            for gi in range(group.order):
+                gi_signal = tf.reshape(tf.gather(g_signal, axis=new_group_axis, indices=[gi]), signal.shape)
+                h_inv_gi_signal = tf.gather(
+                    group.action_on_grid(gi_signal, spatial_axes=[0, 1], new_group_axis=new_group_axis),
+                    axis=new_group_axis, indices=group.inverses)
+                h_inv_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
+                h_inv_gi_at_signal = tf.gather(
+                    group.action_on_grid(signal, spatial_axes=[0, 1], new_group_axis=new_group_axis),
+                    axis=new_group_axis, indices=h_inv_gi)
+
+                msg = f'Action of {group.name} not compatible with its composition.'
+                self.assertAllEqual(h_inv_gi_signal, h_inv_gi_at_signal, msg=msg)
+
+    def test_action_on_group_composition(self):
+        new_group_axis = 3
+        for group in group_dict.values():
+            signal = tf.random.normal((28, 28, group.order, 3), seed=42)
+            g_signal = group.action_on_group(signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis)
+            for gi in range(group.order):
+                gi_signal = tf.reshape(tf.gather(g_signal, axis=new_group_axis, indices=[gi]), signal.shape)
+                h_inv_gi_signal = tf.gather(
+                    group.action_on_group(gi_signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis),
+                    axis=new_group_axis, indices=group.inverses)
+                h_inv_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
+                h_inv_gi_at_signal = tf.gather(
+                    group.action_on_group(signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis),
+                    axis=new_group_axis, indices=h_inv_gi)
 
                 msg = f'Action of {group.name} not compatible with its composition.'
                 self.assertAllEqual(h_inv_gi_signal, h_inv_gi_at_signal, msg=msg)
