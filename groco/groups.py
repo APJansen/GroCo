@@ -21,14 +21,27 @@ class Group:
         self.composition = tf.constant(composition)
         self.subgroup = subgroup
         self.cosets = cosets
-        self.action = action
+        self._action = action
         self.name = name
+
+    def action(self, signal, spatial_axes: tuple, new_group_axis: int, group_axis=None, subgroup_name: str = None):
+        if group_axis is None:
+            return self.action_on_grid(signal,
+                                       spatial_axes=spatial_axes,
+                                       new_group_axis=new_group_axis,
+                                       subgroup_name=subgroup_name)
+        else:
+            return self.action_on_group(signal,
+                                        spatial_axes=spatial_axes,
+                                        group_axis=group_axis,
+                                        new_group_axis=new_group_axis,
+                                        subgroup_name=subgroup_name)
 
     def action_on_grid(self, signal, new_group_axis: int, spatial_axes: tuple, subgroup_name: str = None):
         subgroup_name = self.name if subgroup_name is None else subgroup_name
         subgroup_indices = self.subgroup[subgroup_name]
 
-        transformed_signal = self.action(signal, spatial_axes=spatial_axes, new_group_axis=new_group_axis)
+        transformed_signal = self._action(signal, spatial_axes=spatial_axes, new_group_axis=new_group_axis)
         transformed_signal = tf.gather(transformed_signal, axis=new_group_axis, indices=subgroup_indices)
 
         return transformed_signal

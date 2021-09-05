@@ -112,30 +112,18 @@ class GroupConv2D(Conv2D):
     def _compute_transformed_kernel_indices(self):
         """Compute a tensor of indices used to gather from the kernel to produce the group action on it."""
         indices = tf.reshape(tf.range(tf.size(self.kernel)), self.kernel.shape)
-        indices = self.group.action(indices)
-        if self.group_valued_input:
-            indices = self._permute_group_axis(indices)
+        if not self.group_valued_input:
+            indices = self.group.action_on_grid(indices, spatial_axes=(0, 1), new_group_axis=2)
+        else:
+            (height, width, channels_in, channels_out) = indices.shape
+            indices = tf.reshape(indices, (height, width, self.group.order, channels_in // self.group.order, channels_out))
+
+            indices = self.group.action_on_group(indices, spatial_axes=(0, 1), group_axis=2, new_group_axis=2)
+
+            indices = tf.reshape(indices, (height, width, self.group.order, channels_in, channels_out))
+
         indices = self._merge_group_channels_out(indices)
         return indices
-
-    def _permute_group_axis(self, kernel):
-        """
-        After the action on the spatial part has been done, perform the action on the group argument.
-        Permute the input group axis according to the group composition.
-
-        (height, width, group_order, group_order * channels_in, channels_out) -> same
-        """
-        (height, width, group_order, channels_in, channels_out) = kernel.shape
-
-        transformed_kernel = tf.reshape(kernel, (height, width, group_order * group_order, channels_in // group_order, channels_out))
-
-        group_composition_indices = tf.constant([[i * self.group.order + c for c in row] for i, row in
-                                                 enumerate(self.group.composition.numpy())])
-        group_composition_indices = tf.reshape(group_composition_indices, [-1])
-        transformed_kernel = tf.gather(transformed_kernel, axis=2, indices=group_composition_indices)
-
-        transformed_kernel = tf.reshape(transformed_kernel, (height, width, group_order, channels_in, channels_out))
-        return transformed_kernel
 
     @staticmethod
     def _merge_group_channels_out(kernel):
@@ -147,44 +135,6 @@ class GroupConv2D(Conv2D):
         height, width, group_order, channels_in, channels_out = kernel.shape
         transformed_kernel = tf.transpose(kernel, (0, 1, 3, 2, 4))
         return tf.reshape(transformed_kernel, (height, width, channels_in, group_order * channels_out))
-
-    def group_transform(self, signal, group_element=None):
-        """
-        Act with the whole group on a signal, which can be a signal on the domain or the group.
-        Used only as a helper method to check equivariance, not internally.
-
-        :param signal: Tensor of shape (batch, height, width, group_order, channels), group_order possibly omitted.
-        :param group_element: Index of group element to act with. Defaults to None meaning all group elements are used.
-        :return: transformed tensor of shape (group_order, batch, height, width, group_order, channels).
-        The first axis indicates which element was acted with, and is omitted if a group_element is specified.
-        """
-        group_valued_signal = signal.shape.rank == 5
-
-        # reshape to match the kernel
-        if group_valued_signal:
-            (batch, height, width, group_order, channels) = signal.shape
-            assert group_order == self.group.order, f'Got input shape {signal.shape}, expected {(batch, height, width, self.group.order, channels)}.'
-            transformed_signal = tf.transpose(signal, (1, 2, 3, 4, 0))
-            transformed_signal = tf.reshape(transformed_signal, (height, width, group_order * channels, batch))
-        else:
-            transformed_signal = tf.transpose(signal, (1, 2, 3, 0))
-        # shape now (height, width, channels, batch)
-
-        transformed_signal = self.group.action(transformed_signal)
-        # shape now (height, width, group_order, channel, batch)
-
-        if group_valued_signal:
-            transformed_signal = self._permute_group_axis(transformed_signal)
-
-        transformed_signal = tf.transpose(transformed_signal, (2, 4, 0, 1, 3))
-        # shape now (group_order, batch, height, width, channel)
-        if group_valued_signal:
-          transformed_signal = tf.reshape(transformed_signal, (group_order, batch, height, width, group_order, channels))
-
-        if group_element is not None:
-          transformed_signal = transformed_signal[group_element]
-
-        return transformed_signal
 
     def get_config(self):
         config = super().get_config()
