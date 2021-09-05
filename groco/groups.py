@@ -3,12 +3,13 @@ from functools import partial
 
 
 class WallpaperGroup:
-    def __init__(self, order: int, inverses: list, composition: list, subgroup: dict, action, name: str,
+    def __init__(self, order: int, inverses: list, composition: list, subgroup: dict, cosets: dict, action, name: str,
                  height_axis=0, width_axis=1, new_group_axis=2):
         self.order = order
         self.inverses = tf.constant(inverses)
         self.composition = tf.constant(composition)
         self.subgroup = subgroup
+        self.cosets = cosets
         self.action = partial(action, height_axis=height_axis, width_axis=width_axis, new_group_axis=new_group_axis)
         self.name = name
 
@@ -88,6 +89,15 @@ P4M = WallpaperGroup(
             'P2': [0, 2],
             'P1': [0]
         },
+    cosets={
+        'P4M': [0],
+        'P4': [0, 4],
+        'P2MM': [0, 1],
+        'PMw': [0, 1, 2, 3],
+        'PMh': [0, 1, 2, 3],
+        'P2': [0, 1, 4, 5],
+        'P1': [0, 1, 2, 3, 4, 5, 6, 7]
+    },
     action=P4M_action
 )
 
@@ -105,6 +115,11 @@ P4 = WallpaperGroup(
             'P2': [0, 2],
             'P1': [0]
         },
+    cosets={
+        'P4': [0],
+        'P2': [0, 1],
+        'P1': [0, 1, 2, 3]
+    },
     action=P4_action
 )
 
@@ -123,6 +138,12 @@ P2MM = WallpaperGroup(
             'PMw': [0, 1],
             'P1': [0]
         },
+    cosets={
+        'P2MM': [0],
+        'PMh': [0, 1],
+        'PMw': [0, 2],
+        'P1': [0, 1, 2, 3]
+    },
     action=P2MM_action
 )
 
@@ -137,6 +158,10 @@ PMh = WallpaperGroup(
             'PMh': [0, 1],
             'P1': [0]
         },
+    cosets={
+        'PMh': [0],
+        'P1': [0, 1]
+    },
     action=PMh_action
 )
 
@@ -151,6 +176,10 @@ PMw = WallpaperGroup(
             'PMw': [0, 1],
             'P1': [0]
         },
+    cosets={
+        'PMw': [0],
+        'P1': [0, 1]
+    },
     action=PMw_action
 )
 
@@ -165,6 +194,10 @@ P2 = WallpaperGroup(
         'P2': [0, 1],
         'P1': [0]
     },
+    cosets={
+        'P2': [0],
+        'P1': [0, 1]
+    },
     action=P2_action
 )
 
@@ -174,6 +207,7 @@ P1 = WallpaperGroup(
     inverses=[0],
     composition=[[0]],
     subgroup={'P1': [0]},
+    cosets={'P1': [0]},
     action=P1_action
 )
 
