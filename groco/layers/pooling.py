@@ -1,7 +1,8 @@
 from tensorflow.keras.layers import MaxPooling2D, AveragePooling2D, Layer
 import tensorflow as tf
-from groco import groups
-from groco.utils import EquivariantPadding
+from groco.groups.base import Group
+from groco.groups import wallpaper_groups
+from groco.layers.padding import EquivariantPadding
 
 # was planning to subclass `Pooling2D` layer, but this is not meant to be exposed outside of Keras internals
 # so a. not sure how to do it, and b. might not be a good idea?
@@ -14,7 +15,7 @@ class GroupPooling2D(Layer):
     Only meant to be subclassed by GroupMaxPooling2D and GroupAveragePooling2D.
     """
     def __init__(self, group, pool_type: str, allow_non_equivariance: bool = False, pool_size=(2, 2), **kwargs):
-        self.group = group if isinstance(group, groups.Group) else groups.group_dict[group]
+        self.group = group if isinstance(group, Group) else wallpaper_groups.group_dict[group]
 
         self.equivariant_padding = EquivariantPadding(allow_non_equivariance=allow_non_equivariance,
                                                       kernel_size=pool_size, **kwargs)

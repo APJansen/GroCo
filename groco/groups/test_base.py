@@ -1,5 +1,5 @@
 from tensorflow.test import TestCase
-from groco.groups import group_dict
+from groco.groups.wallpaper_groups import group_dict
 import tensorflow as tf
 
 

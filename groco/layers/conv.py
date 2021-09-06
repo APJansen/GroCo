@@ -1,8 +1,9 @@
 from tensorflow.keras.layers import Conv2D
 import tensorflow as tf
 from functools import partial
-from groco import groups
-from groco.utils import EquivariantPadding
+from groco.groups import wallpaper_groups
+from groco.groups.base import Group
+from groco.layers.padding import EquivariantPadding
 
 
 class GroupConv2D(Conv2D):
@@ -22,9 +23,9 @@ class GroupConv2D(Conv2D):
     """
 
     def __init__(self, group, kernel_size, allow_non_equivariance: bool = False, subgroup=None, **kwargs):
-        self.group = group if isinstance(group, groups.Group) else groups.group_dict[group]
+        self.group = group if isinstance(group, Group) else wallpaper_groups.group_dict[group]
         self.subgroup_name = subgroup
-        self.subgroup = self.group if subgroup is None else groups.group_dict[subgroup]
+        self.subgroup = self.group if subgroup is None else wallpaper_groups.group_dict[subgroup]
 
         self.equivariant_padding = EquivariantPadding(allow_non_equivariance=allow_non_equivariance,
                                                       kernel_size=kernel_size, **kwargs)
@@ -201,10 +202,10 @@ class GroupConv2D(Conv2D):
         return tf.TensorShape(out_shape)
 
 
-P4MConv2D = partial(GroupConv2D, group=groups.P4M)
-P4Conv2D = partial(GroupConv2D, group=groups.P4)
-P2MMConv2D = partial(GroupConv2D, group=groups.P2MM)
-PMhConv2D = partial(GroupConv2D, group=groups.PMh)
-PMwConv2D = partial(GroupConv2D, group=groups.PMw)
-P2Conv2D = partial(GroupConv2D, group=groups.P2)
-P1Conv2D = partial(GroupConv2D, group=groups.P1)
+P4MConv2D = partial(GroupConv2D, group=wallpaper_groups.P4M)
+P4Conv2D = partial(GroupConv2D, group=wallpaper_groups.P4)
+P2MMConv2D = partial(GroupConv2D, group=wallpaper_groups.P2MM)
+PMhConv2D = partial(GroupConv2D, group=wallpaper_groups.PMh)
+PMwConv2D = partial(GroupConv2D, group=wallpaper_groups.PMw)
+P2Conv2D = partial(GroupConv2D, group=wallpaper_groups.P2)
+P1Conv2D = partial(GroupConv2D, group=wallpaper_groups.P1)
