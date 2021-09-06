@@ -21,8 +21,10 @@ class GroupConv2D(Conv2D):
     NOTE: the option data_format='channels_first' is not supported.
     """
 
-    def __init__(self, group, kernel_size, allow_non_equivariance: bool=False, **kwargs):
+    def __init__(self, group, kernel_size, allow_non_equivariance: bool = False, subgroup=None, **kwargs):
         self.group = group if isinstance(group, groups.Group) else groups.group_dict[group]
+        self.subgroup_name = subgroup
+        self.subgroup = self.group if subgroup is None else groups.group_dict[subgroup]
 
         self.equivariant_padding = EquivariantPadding(allow_non_equivariance=allow_non_equivariance,
                                                       kernel_size=kernel_size, **kwargs)
@@ -76,7 +78,7 @@ class GroupConv2D(Conv2D):
         """
         batch, height, width, channels = outputs.shape
         batch = -1 if batch is None else batch
-        return tf.reshape(outputs, (batch, height, width, self.group.order, channels // self.group.order))
+        return tf.reshape(outputs, (batch, height, width, self.subgroup.order, channels // self.subgroup.order))
 
     def build(self, input_shape):
         """
@@ -106,21 +108,23 @@ class GroupConv2D(Conv2D):
     def _compute_repeated_bias_indices(self):
         """Compute a 1D tensor of indices used to gather from the bias in order to repeat it across the group axis."""
         indices = tf.range(tf.size(self.bias))
-        indices = tf.concat([indices for _ in range(self.group.order)], axis=0)
+        indices = tf.concat([indices for _ in range(self.subgroup.order)], axis=0)
         return indices
 
     def _compute_transformed_kernel_indices(self):
         """Compute a tensor of indices used to gather from the kernel to produce the group action on it."""
         indices = tf.reshape(tf.range(tf.size(self.kernel)), self.kernel.shape)
         if not self.group_valued_input:
-            indices = self.group.action_on_grid(indices, spatial_axes=(0, 1), new_group_axis=2)
+            indices = self.group.action_on_grid(indices, spatial_axes=(0, 1), new_group_axis=2,
+                                                subgroup_name=self.subgroup_name)
         else:
             (height, width, channels_in, channels_out) = indices.shape
             indices = tf.reshape(indices, (height, width, self.group.order, channels_in // self.group.order, channels_out))
 
-            indices = self.group.action_on_group(indices, spatial_axes=(0, 1), group_axis=2, new_group_axis=2)
+            indices = self.group.action_on_group(indices, spatial_axes=(0, 1), group_axis=2, new_group_axis=2,
+                                                 subgroup_name=self.subgroup_name)
 
-            indices = tf.reshape(indices, (height, width, self.group.order, channels_in, channels_out))
+            indices = tf.reshape(indices, (height, width, self.subgroup.order, channels_in, channels_out))
 
         indices = self._merge_group_channels_out(indices)
         return indices

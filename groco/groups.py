@@ -51,15 +51,14 @@ class Group:
         """
         Act on a signal on the group, potentially only with a subgroup.
         """
-        assert signal.shape[group_axis] == self.order, \
-            f"group_axis={group_axis} does not have group.order {self.order} size but {signal.shape[group_axis]}."
-
         # action on grid
         transformed_signal = self.action_on_grid(signal, new_group_axis=group_axis, spatial_axes=spatial_axes)
 
-        # act on point group
         subgroup_name = self.name if subgroup_name is None else subgroup_name
         subgroup_indices = self.subgroup[subgroup_name]
+        transformed_signal = tf.gather(transformed_signal, axis=group_axis, indices=self.subgroup[subgroup_name])
+
+        # act on point group
         subgroup_order = len(subgroup_indices)
         shape = transformed_signal.shape
         transformed_signal = tf.reshape(transformed_signal,
@@ -68,7 +67,6 @@ class Group:
         composition_indices = self.composition_flat_indices(subgroup_name)
 
         transformed_signal = tf.gather(transformed_signal, axis=group_axis, indices=composition_indices)
-
         transformed_signal = tf.reshape(transformed_signal, shape)
 
         # put the acting group as the specified axis, keeping the order of the other axes the same

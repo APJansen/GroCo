@@ -60,13 +60,17 @@ class TestWallpaperGroup(TestCase):
     def test_action_composition(self):
         signal = tf.random.normal((28, 28, 3), seed=42)
         for group in group_dict.values():
-            g_signal = group.action(signal)
+            g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=2)
             for gi in range(group.order):
                 gi_signal = tf.gather(g_signal, axis=2, indices=[gi])
                 gi_signal = tf.reshape(gi_signal, (28, 28, 3))
-                h_inv_gi_signal = tf.gather(group.action(gi_signal), axis=2, indices=group.inverses)
+
+                h_inv_gi_signal = group.action(gi_signal, spatial_axes=[0, 1], new_group_axis=2)
+                h_inv_gi_signal = tf.gather(h_inv_gi_signal, axis=2, indices=group.inverses)
                 h_inv_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
-                h_inv_gi_at_signal = tf.gather(group.action(signal), axis=2, indices=h_inv_gi)
+
+                h_inv_gi_at_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=2)
+                h_inv_gi_at_signal = tf.gather(h_inv_gi_at_signal, axis=2, indices=h_inv_gi)
 
                 msg = f'Action of {group.name} not compatible with its composition.'
                 self.assertAllEqual(h_inv_gi_signal, h_inv_gi_at_signal, msg=msg)
@@ -74,7 +78,7 @@ class TestWallpaperGroup(TestCase):
     def test_action_shape(self):
         signal = tf.random.normal((28, 28, 3), seed=42)
         for group in group_dict.values():
-            g_signal = group.action_on_grid(signal, spatial_axes=[0, 1], new_group_axis=0)
+            g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=0)
             self.assertEqual(g_signal.shape, (group.order) + signal.shape)
 
     def test_action_on_signal_composition(self):
@@ -99,19 +103,31 @@ class TestWallpaperGroup(TestCase):
         new_group_axis = 3
         for group in group_dict.values():
             signal = tf.random.normal((28, 28, group.order, 3), seed=42)
-            g_signal = group.action_on_group(signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis)
+            g_signal = group.action(signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis)
             for gi in range(group.order):
                 gi_signal = tf.reshape(tf.gather(g_signal, axis=new_group_axis, indices=[gi]), signal.shape)
                 h_inv_gi_signal = tf.gather(
-                    group.action_on_group(gi_signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis),
+                    group.action(gi_signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis),
                     axis=new_group_axis, indices=group.inverses)
                 h_inv_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
                 h_inv_gi_at_signal = tf.gather(
-                    group.action_on_group(signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis),
+                    group.action(signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis),
                     axis=new_group_axis, indices=h_inv_gi)
 
                 msg = f'Action of {group.name} not compatible with its composition.'
                 self.assertAllEqual(h_inv_gi_signal, h_inv_gi_at_signal, msg=msg)
+
+    def test_subgroup_action_on_grid(self):
+        signal = tf.random.normal((28, 28, 3))
+        for group in group_dict.values():
+            g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=0)
+            for subgroup_name, subgroup_indices in group.subgroup.items():
+                subgroup = group_dict[subgroup_name]
+                h_signal = subgroup.action(signal, spatial_axes=[0, 1], new_group_axis=0)
+                g_signal_sub = tf.gather(g_signal, axis=0, indices=subgroup_indices)
+
+                msg = f'Action of subgroup {subgroup_name} on signal on grid not the same as corresponding indices in action of full group {group.name}'
+                self.assertAllEqual(h_signal, g_signal_sub, msg=msg)
 
 
 
