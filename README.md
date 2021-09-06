@@ -50,9 +50,8 @@ To prevent this the default `padding` option is `valid_equiv`, which pads a mini
 | Group Interpretation  | again subsample on subgroup of strides, but first aggregate on its cosets closest to the identity |
 | Generalization  | subsampling onto any subgroup of the wallpaper group |
 | Implementation | `GroupMaxPooling2D(group='group_name', subgroup='subgroup_name', ...)`, and the same with `GroupAveragePooling2D`|
-| Resulting differences | in addition to pooling over the grid, potentially subsample on a subgroup of the point group, after aggregating on its cosets\* |
+| Resulting differences | in addition to pooling over the grid, potentially subsample on a subgroup of the point group, after aggregating on its cosets |
 
-(* only the regular pooling implemented so far)
 
 Intended additions:
 - The 1D and 3D versions of `GroupConv`, `GroupMaxPooling` and `GroupAveragePooling`
