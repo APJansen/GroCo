@@ -129,6 +129,10 @@ class TestWallpaperGroup(TestCase):
                 msg = f'Action of subgroup {subgroup_name} on signal on grid not the same as corresponding indices in action of full group {group.name}'
                 self.assertAllEqual(h_signal, g_signal_sub, msg=msg)
 
+    def test_subgroups_cosets(self):
+        """Test only if the keys are the same."""
+        for group in group_dict.values():
+            self.assertAllEqual(set(group.subgroup.keys()), set(group.cosets.keys()))
 
 
 tf.test.main()

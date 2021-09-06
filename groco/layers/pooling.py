@@ -4,9 +4,6 @@ from groco.groups.base import Group
 from groco.groups import wallpaper_groups
 from groco.layers.padding import EquivariantPadding
 
-# was planning to subclass `Pooling2D` layer, but this is not meant to be exposed outside of Keras internals
-# so a. not sure how to do it, and b. might not be a good idea?
-# would remove the code duplication though
 
 class GroupPooling2D(Layer):
     """
@@ -14,14 +11,18 @@ class GroupPooling2D(Layer):
 
     Only meant to be subclassed by GroupMaxPooling2D and GroupAveragePooling2D.
     """
-    def __init__(self, group, pool_type: str, allow_non_equivariance: bool = False, pool_size=(2, 2), **kwargs):
+    def __init__(self, group, pool_type: str, allow_non_equivariance: bool = False, pool_size=(2, 2), subgroup=None,
+                 **kwargs):
         self.group = group if isinstance(group, Group) else wallpaper_groups.group_dict[group]
+        self.subgroup_name = self.group.name if subgroup is None else subgroup
+        self.subgroup = self.group if subgroup is None else wallpaper_groups.group_dict[subgroup]
 
         self.equivariant_padding = EquivariantPadding(allow_non_equivariance=allow_non_equivariance,
                                                       kernel_size=pool_size, **kwargs)
         if 'padding' in kwargs and kwargs['padding'].endswith('_equiv'):
             kwargs['padding'] = kwargs['padding'][:-6]
 
+        self.pool_type = pool_type
         if pool_type == 'max':
             self.pooling = MaxPooling2D(pool_size=pool_size, **kwargs)
         else:
@@ -29,11 +30,16 @@ class GroupPooling2D(Layer):
 
         super().__init__()
 
+        self.pooling_indices = None # created during build
+
     def call(self, inputs):
         inputs = self._merge_group_axis(inputs)
         inputs = self.equivariant_padding(inputs)
         outputs = self.pooling(inputs)
         outputs = self._restore_group_axis(outputs)
+
+        outputs = self._subgroup_pooling(outputs)
+
         return outputs
 
     def _merge_group_axis(self, inputs):
@@ -56,6 +62,14 @@ class GroupPooling2D(Layer):
         batch = -1 if batch is None else batch
         return tf.reshape(outputs, (batch, height, width, self.group.order, channels // self.group.order))
 
+    def _subgroup_pooling(self, outputs):
+        outputs = tf.gather(outputs, axis=3, indices=self.pooling_indices)
+        if self.pool_type == 'max':
+            outputs = tf.reduce_max(outputs, axis=4)
+        else:
+            outputs = tf.reduce_mean(outputs, axis=4)
+        return outputs
+
     def build(self, input_shape):
         """
         Merge the group axis with the channel axis.
@@ -69,6 +83,15 @@ class GroupPooling2D(Layer):
 
         self.equivariant_padding.build(input_shape)
         self.pooling.build(input_shape)
+
+        self.pooling_indices = self._create_pooling_indices()
+
+    def _create_pooling_indices(self):
+        indices = tf.gather(self.group.composition, axis=1, indices=self.group.cosets[self.subgroup_name])
+        subgroup_indices = [self.group.inverses[i] for i in self.group.subgroup[self.subgroup_name]]
+        indices = tf.gather(indices, axis=0, indices=subgroup_indices)
+
+        return indices
 
     def get_config(self):
         config = self.pooling.get_config()

@@ -67,7 +67,7 @@ class TestGroupConv2D(TestCase):
                                          subgroup=subgroup_name)
                 conv_layer(signal_on_grid)
                 conv_layer.bias = 1 + tf.random.normal(shape=conv_layer.bias.shape)
-                equiv_diff = test_equivariance(conv_layer, signal_on_grid, subgroup_name=subgroup_name)
+                equiv_diff = test_equivariance(conv_layer, signal_on_grid, subgroup=subgroup_name)
                 self.assertAllLess(equiv_diff, 1e-4)
 
     def test_gc_equiv(self):
@@ -87,7 +87,7 @@ class TestGroupConv2D(TestCase):
                 signal_on_group = tf.random.normal(shape=(10, 28, 28, group.order, 3), seed=42)
                 conv_layer = GroupConv2D(group=group, kernel_size=3, filters=filters, padding='same_equiv',
                                          subgroup=subgroup_name)
-                equiv_diff = test_equivariance(conv_layer, signal_on_group, group_axis=3, subgroup_name=subgroup_name)
+                equiv_diff = test_equivariance(conv_layer, signal_on_group, group_axis=3, subgroup=subgroup_name)
 
                 self.assertAllLess(equiv_diff, 1e-4)
 

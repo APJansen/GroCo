@@ -24,21 +24,21 @@ class Group:
         self._action = action
         self.name = name
 
-    def action(self, signal, spatial_axes: tuple, new_group_axis: int, group_axis=None, subgroup_name: str = None):
+    def action(self, signal, spatial_axes: tuple, new_group_axis: int, group_axis=None, subgroup: str = None):
         if group_axis is None:
             return self.action_on_grid(signal,
                                        spatial_axes=spatial_axes,
                                        new_group_axis=new_group_axis,
-                                       subgroup_name=subgroup_name)
+                                       subgroup=subgroup)
         else:
             return self.action_on_group(signal,
                                         spatial_axes=spatial_axes,
                                         group_axis=group_axis,
                                         new_group_axis=new_group_axis,
-                                        subgroup_name=subgroup_name)
+                                        subgroup=subgroup)
 
-    def action_on_grid(self, signal, new_group_axis: int, spatial_axes: tuple, subgroup_name: str = None):
-        subgroup_name = self.name if subgroup_name is None else subgroup_name
+    def action_on_grid(self, signal, new_group_axis: int, spatial_axes: tuple, subgroup: str = None):
+        subgroup_name = self.name if subgroup is None else subgroup
         subgroup_indices = self.subgroup[subgroup_name]
 
         transformed_signal = self._action(signal, spatial_axes=spatial_axes, new_group_axis=new_group_axis)
@@ -47,14 +47,14 @@ class Group:
         return transformed_signal
 
     def action_on_group(self, signal, group_axis: int, new_group_axis: int, spatial_axes: tuple,
-                        subgroup_name: str = None):
+                        subgroup: str = None):
         """
         Act on a signal on the group, potentially only with a subgroup.
         """
         # action on grid
         transformed_signal = self.action_on_grid(signal, new_group_axis=group_axis, spatial_axes=spatial_axes)
 
-        subgroup_name = self.name if subgroup_name is None else subgroup_name
+        subgroup_name = self.name if subgroup is None else subgroup
         subgroup_indices = self.subgroup[subgroup_name]
         transformed_signal = tf.gather(transformed_signal, axis=group_axis, indices=self.subgroup[subgroup_name])
 
