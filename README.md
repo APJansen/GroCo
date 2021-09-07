@@ -7,15 +7,22 @@ It was inspired by the book, lectures and notebooks on the geometric deep learni
 I am not aware of any other Keras implementation. The main implementation is by the authors themselves in pytorch, [GrouPy](https://github.com/tscohen/GrouPy).
 The intent is to not only translate this to Keras but also to expand on that functionalty.
 I started this to learn, both about group convolutions and geometric deep learning more generally, but also about tensorflow and Keras. 
-Any feedback is highly appreciated.
+Any feedback is highly appreciated, you can reach me on twitter @aron_jansen.
 
 # Introduction to group convolutions
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/GroupConv/blob/GroupConv_intro.ipynb)
 
-This Colab notebook is an introduction to group convolutions, meant to be read after/in parallel with the lectures, book or paper mentioned above.
+This Colab notebook is a standalone introduction to group convolutions, meant to be read after/in parallel with the lectures, book or paper mentioned above.
 It does not use the implementation in GroCo, but rather derives an early version of it from scratch, going into many of the nitty gritty aspects.
 I hope it can be useful in parallel with the other sources.
+
+# Example notebook
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/GroupConv/blob/example_MNIST.ipynb)
+
+This Colab notebook illustrates how to use GroCo by constructing a group convolutional network, training it on MNIST and comparing to a regular network.
+It also illustrates how to pool onto subgroups, which increases performance on MNIST. (Though not compared to the regular convolution, it is just used as a simple example but doesn't lend itself well to group convolutions as orientation matters in MNIST images.)
 
 
 # Overview
