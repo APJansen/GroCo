@@ -2,7 +2,7 @@
 
 The aim of GroCo is to generalize the convolutional layers and all related functionality in Keras to group convolutions, following [the original paper on group convolutions by Taco Cohen and Max Welling](http://proceedings.mlr.press/v48/cohenc16.html), and to keep the interface as close as possible to the standard layers.
 
-It was inspired by the book, lectures and notebooks on the geometric deep learning by Micheal Bronstein, Joan Bruna, Taco Cohen and Petar Veličković, found [here](https://geometricdeeplearning.com), which I highly recommend.
+It was inspired by the book, lectures and notebooks on the geometric deep learning by Michael Bronstein, Joan Bruna, Taco Cohen and Petar Veličković, found [here](https://geometricdeeplearning.com), which I highly recommend.
 
 I am not aware of any other Keras implementation. The main implementation is by the authors themselves in pytorch, [GrouPy](https://github.com/tscohen/GrouPy).
 The intent is to not only translate this to Keras but also to expand on that functionalty.
@@ -19,6 +19,9 @@ I hope it can be useful in parallel with the other sources.
 
 
 # Overview
+
+Convolutions are _equivariant_ to translations, meaning if we have a convolutional layer `L`, an input `x` and a translation `T`, then if we translate the input and then apply the layer, we obtain the same result as if we apply the layer first, and then perform the translation: `L(T(x)) == T(L(x))`.
+Group convolutions generalize this and are equivariant to a larger group.
 
 All of the generalizations follow the same three step procedure:
 1. Interpret the existing functionality in terms of a group. Most importantly, we interpret a grid (of pixels say) not as points but rather as translations. The mapping is trivial: the grid point with indices `(i, j)` is a translation that maps any point `(x, y)` to `(x + i, y + j)`.
@@ -50,9 +53,8 @@ To prevent this the default `padding` option is `valid_equiv`, which pads a mini
 | Group Interpretation  | again subsample on subgroup of strides, but first aggregate on its cosets closest to the identity |
 | Generalization  | subsampling onto any subgroup of the wallpaper group |
 | Implementation | `GroupMaxPooling2D(group='group_name', subgroup='subgroup_name', ...)`, and the same with `GroupAveragePooling2D`|
-| Resulting differences | in addition to pooling over the grid, potentially subsample on a subgroup of the point group, after aggregating on its cosets\* |
+| Resulting differences | in addition to pooling over the grid, potentially subsample on a subgroup of the point group, after aggregating on its cosets |
 
-(* only the regular pooling implemented so far)
 
 Intended additions:
 - The 1D and 3D versions of `GroupConv`, `GroupMaxPooling` and `GroupAveragePooling`
