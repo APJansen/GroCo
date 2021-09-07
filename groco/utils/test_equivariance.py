@@ -34,7 +34,7 @@ def test_equivariance(layer, signal, group_name=None, spatial_axes: tuple = (1, 
     # GroupConv2D always outputs signals on the group, but if the layer is a regular convolution it will still be
     # on the grid
     group_axis = spatial_axes[-1] + 1 if signal.shape.rank != g_signal.shape.rank else None
-    g_layer_signal = subgroup.action(layer_signal, spatial_axes=spatial_axes, group_axis=None, new_group_axis=0)
+    g_layer_signal = subgroup.action(layer_signal, spatial_axes=spatial_axes, group_axis=group_axis, new_group_axis=0)
     g_layer_signal = tf.reshape(g_layer_signal,
                                 (g_layer_signal.shape[0] * g_layer_signal.shape[1]) + g_layer_signal.shape[2:])
 
