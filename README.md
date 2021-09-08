@@ -4,7 +4,7 @@ The aim of GroCo is to generalize the convolutional layers and all related funct
 
 It was inspired by the book, lectures and notebooks on the geometric deep learning by Michael Bronstein, Joan Bruna, Taco Cohen and Petar Veličković, found [here](https://geometricdeeplearning.com), which I highly recommend.
 
-I am not aware of any other Keras implementation. The main implementation is by the authors themselves in pytorch, [GrouPy](https://github.com/tscohen/GrouPy).
+I am not aware of any other Keras implementation. The implementation by the authors themselves is in Chainer/Tensorflow, [GrouPy](https://github.com/tscohen/GrouPy).
 The intent is to not only translate this to Keras but also to expand on that functionalty.
 I started this to learn, both about group convolutions and geometric deep learning more generally, but also about tensorflow and Keras. 
 Any feedback is highly appreciated, you can reach me on twitter @aron_jansen.
@@ -61,6 +61,18 @@ To prevent this the default `padding` option is `valid_equiv`, which pads a mini
 | Generalization  | subsampling onto any subgroup of the wallpaper group |
 | Implementation | `GroupMaxPooling2D(group='group_name', subgroup='subgroup_name', ...)`, and the same with `GroupAveragePooling2D`|
 | Resulting differences | in addition to pooling over the grid, potentially subsample on a subgroup of the point group, after aggregating on its cosets |
+
+
+# Implemented groups
+| name | symmetries |
+| ------------- | ------------- |
+| P4M | 90 degree rotations and mirroring on both axes |
+| P4  | 90 degree rotations |
+| P2MM | mirroring on both axes, 180 degree rotation |
+| PMh | mirroring on horizontal axis |
+| PMv | mirroring on vertical axis |
+| P2 | 180 degree rotation |
+| P1 | nothing |
 
 
 Intended additions:
