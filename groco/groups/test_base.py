@@ -85,15 +85,15 @@ class TestWallpaperGroup(TestCase):
         signal = tf.random.normal((28, 28, 3), seed=42)
         new_group_axis = 3
         for group in group_dict.values():
-            g_signal = group.action_on_grid(signal, spatial_axes=[0, 1], new_group_axis=new_group_axis)
+            g_signal = group._action_on_grid(signal, new_group_axis=new_group_axis, spatial_axes=[0, 1])
             for gi in range(group.order):
                 gi_signal = tf.reshape(tf.gather(g_signal, axis=new_group_axis, indices=[gi]), signal.shape)
                 h_inv_gi_signal = tf.gather(
-                    group.action_on_grid(gi_signal, spatial_axes=[0, 1], new_group_axis=new_group_axis),
+                    group._action_on_grid(gi_signal, new_group_axis=new_group_axis, spatial_axes=[0, 1]),
                     axis=new_group_axis, indices=group.inverses)
                 h_inv_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
                 h_inv_gi_at_signal = tf.gather(
-                    group.action_on_grid(signal, spatial_axes=[0, 1], new_group_axis=new_group_axis),
+                    group._action_on_grid(signal, new_group_axis=new_group_axis, spatial_axes=[0, 1]),
                     axis=new_group_axis, indices=h_inv_gi)
 
                 msg = f'Action of {group.name} not compatible with its composition.'

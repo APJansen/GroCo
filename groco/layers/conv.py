@@ -115,14 +115,12 @@ class GroupConv2D(Conv2D):
         """Compute a tensor of indices used to gather from the kernel to produce the group action on it."""
         indices = tf.reshape(tf.range(tf.size(self.kernel)), self.kernel.shape)
         if not self.group_valued_input:
-            indices = self.group.action_on_grid(indices, spatial_axes=(0, 1), new_group_axis=2,
-                                                subgroup=self.subgroup_name)
+            indices = self.group.action(indices, new_group_axis=2, spatial_axes=(0, 1), subgroup=self.subgroup_name)
         else:
             (height, width, channels_in, channels_out) = indices.shape
             indices = tf.reshape(indices, (height, width, self.group.order, channels_in // self.group.order, channels_out))
 
-            indices = self.group.action_on_group(indices, spatial_axes=(0, 1), group_axis=2, new_group_axis=2,
-                                                 subgroup=self.subgroup_name)
+            indices = self.group.action(indices, spatial_axes=(0, 1), group_axis=2, new_group_axis=2, subgroup=self.subgroup_name)
 
             indices = tf.reshape(indices, (height, width, self.subgroup.order, channels_in, channels_out))
 
