@@ -80,3 +80,5 @@ Intended additions:
 - `SeparableGroupConv`
 - `GroupConv2DTranspose`
 - `DepthwiseGroupConv2D`
+- `GroupDense`, for when the group does not include translations
+- something like `GroupReduce`, reducing equivariance to a subgroup, but rather than pooling keep all the features (merge with channel axis)
