@@ -1,8 +1,7 @@
 from tensorflow.keras.layers import MaxPooling2D, AveragePooling2D, Layer
 import tensorflow as tf
-from groco.groups.base import Group
-from groco.groups import wallpaper_groups
-from groco.layers.padding import EquivariantPadding
+from groco.groups import Group, wallpaper_groups
+from groco.layers import EquivariantPadding
 
 
 class GroupPooling2D(Layer):

@@ -1,9 +1,8 @@
 from tensorflow.keras.layers import Conv2D
 import tensorflow as tf
 from functools import partial
-from groco.groups import wallpaper_groups
-from groco.groups.base import Group
-from groco.layers.padding import EquivariantPadding
+from groco.groups import Group, wallpaper_groups
+from groco.layers import EquivariantPadding
 
 
 class GroupConv2D(Conv2D):

@@ -15,7 +15,7 @@ def test_equivariance(layer, signal, group_name=None, spatial_axes: tuple = (1, 
     :param spatial_axes: tuple of integers indicating the spatial axes.
     :param group_axis: defaults to None, in which case the input signal is on the grid only.
     :param subgroup: defaults to None, in which case the full group will be used
-    :return:
+    :return: maximal absolute difference between first transforming vs first applying layer.
     """
     group_name = layer.group.name if group_name is None else group_name
     group = group_dict[group_name]

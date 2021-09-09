@@ -1,7 +1,7 @@
 from tensorflow.test import TestCase
 from groco.groups.wallpaper_groups import group_dict
-from groco.layers.conv import GroupConv2D
-from groco.utils.test_equivariance import test_equivariance
+from groco.layers import GroupConv2D
+from groco.utils import test_equivariance
 import tensorflow as tf
 
 

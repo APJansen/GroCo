@@ -1,3 +1,3 @@
-from . import conv
-from . import pooling
-from . import padding
+from .padding import *
+from .conv import *
+from .pooling import *
