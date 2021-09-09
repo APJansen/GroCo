@@ -101,15 +101,18 @@ class GroupPooling2D(Layer):
 
 class GroupMaxPooling2D(GroupPooling2D):
     """
-    Layer for pooling on signals on a group. Checks and restores equivariance in the same way as GroupConv2D.
+    Layer for pooling on signals on a group. Allows for pooling on the grid as usual,
+    but also on subgroups of the point group.
+    Checks and restores equivariance in the same way as GroupConv2D.
 
     Additional arguments to MaxPooling2D:
-    - group: one of the wallpaper groups, string name or the object itself, see groups.group_dict for implemented groups
-    - padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal extra amount
-               to maintain equivariance
-    - allow_non_equivariance: set to true along with setting padding to either `valid` or `same` to insist using
-                              non-equivariant padding
-
+    group: one of the wallpaper groups, string name or the object itself, see groups.group_dict for implemented groups.
+    padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal extra amount
+    to maintain equivariance.
+    allow_non_equivariance: set to true along with setting padding to either `valid` or `same` to insist using
+    non-equivariant padding.
+    subgroup: defaults to None meaning no pooling over the point group. Can be set to the name of a subgroup,
+    which will pool over the cosets of that subgroup, maintaining equivariance only to the subgroup.
     """
     def __init__(self, **kwargs):
         super().__init__(pool_type='max', **kwargs)
@@ -117,15 +120,18 @@ class GroupMaxPooling2D(GroupPooling2D):
 
 class GroupAveragePooling2D(GroupPooling2D):
     """
-    Layer for pooling on signals on a group. Checks and restores equivariance in the same way as GroupConv2D.
+    Layer for pooling on signals on a group. Allows for pooling on the grid as usual,
+    but also on subgroups of the point group.
+    Checks and restores equivariance in the same way as GroupConv2D.
 
-    Additional arguments to MaxPooling2D:
-    - group: one of the wallpaper groups, string name or the object itself, see groups.group_dict for implemented groups
-    - padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal extra amount
-               to maintain equivariance
-    - allow_non_equivariance: set to true along with setting padding to either `valid` or `same` to insist using
-                              non-equivariant padding
-
+    Additional arguments to AveragePooling2D:
+    group: one of the wallpaper groups, string name or the object itself, see groups.group_dict for implemented groups.
+    padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal extra amount
+    to maintain equivariance.
+    allow_non_equivariance: set to true along with setting padding to either `valid` or `same` to insist using
+    non-equivariant padding.
+    subgroup: defaults to None meaning no pooling over the point group. Can be set to the name of a subgroup,
+    which will pool over the cosets of that subgroup, maintaining equivariance only to the subgroup.
     """
     def __init__(self, **kwargs):
         super().__init__(pool_type='average', **kwargs)
