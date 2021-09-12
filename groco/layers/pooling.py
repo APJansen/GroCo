@@ -16,8 +16,8 @@ class GroupPooling2D(Layer):
         self.subgroup_name = self.group.name if subgroup is None else subgroup
         self.subgroup = self.group if subgroup is None else wallpaper_groups.group_dict[subgroup]
 
-        self.equivariant_padding = EquivariantPadding(allow_non_equivariance=allow_non_equivariance,
-                                                      kernel_size=pool_size, **kwargs)
+        self.equivariant_padding = EquivariantPadding(
+            allow_non_equivariance=allow_non_equivariance, kernel_size=pool_size, dimensions=2, **kwargs)
         if 'padding' in kwargs and kwargs['padding'].endswith('_equiv'):
             kwargs['padding'] = kwargs['padding'][:-6]
 

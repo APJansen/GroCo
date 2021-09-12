@@ -26,8 +26,8 @@ class GroupConv2D(Conv2D):
         self.subgroup_name = subgroup
         self.subgroup = self.group if subgroup is None else wallpaper_groups.group_dict[subgroup]
 
-        self.equivariant_padding = EquivariantPadding(allow_non_equivariance=allow_non_equivariance,
-                                                      kernel_size=kernel_size, **kwargs)
+        self.equivariant_padding = EquivariantPadding(
+            allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=2, **kwargs)
         if 'padding' in kwargs and kwargs['padding'].endswith('_equiv'):
             kwargs['padding'] = kwargs['padding'][:-6]
 
