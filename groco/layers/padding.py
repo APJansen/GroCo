@@ -17,7 +17,8 @@ class EquivariantPadding(Layer):
      The options `valid_equiv` and `same_equiv` for the padding argument will do the minimal amount of extra padding
      on top of their usual counterparts to maintain equivariance.
     """
-    def __init__(self, kernel_size, strides=1, padding='valid_equiv', allow_non_equivariance=False, dimensions=2, **kwargs):
+    def __init__(self, kernel_size, dimensions: int, strides=1, padding='valid_equiv', allow_non_equivariance=False,
+                 data_format='channels_last', **kwargs):
         self.padding_option = self.format_padding_option(padding)
         self.allow_non_equivariance = allow_non_equivariance
         self.dimensions = dimensions
@@ -25,7 +26,7 @@ class EquivariantPadding(Layer):
                                    tuple(strides for _ in range(self.dimensions)))
         self.kernel_sizes = tf.constant(kernel_size if isinstance(kernel_size, tuple) else
                                         tuple(kernel_size for _ in range(self.dimensions)))
-
+        self.data_format = data_format
         # set during build
         self.equivariant_padding = None
         self.needs_padding = None
@@ -43,7 +44,10 @@ class EquivariantPadding(Layer):
             self.needs_padding = False
             return
 
-        spatial_shape = tf.constant(input_shape[1:1 + self.dimensions])
+        if self.data_format == 'channels_last':
+            spatial_shape = tf.constant(input_shape[1:1 + self.dimensions])
+        else:
+            spatial_shape = tf.constant(input_shape[2:])
         extra_padding, total_padding = self.compute_equivariant_padding(spatial_shape)
 
         self.needs_padding = tf.math.reduce_any(extra_padding != 0).numpy()
@@ -73,20 +77,20 @@ class EquivariantPadding(Layer):
 
     def compute_extra_padding(self, spatial_shape, built_in_padding):
         extra_padding = (-(spatial_shape + built_in_padding - self.kernel_sizes)) % self.strides
-
         # add stride where necessary to make total padding even
         total_padding = extra_padding + built_in_padding
         extra_padding = extra_padding + (total_padding % 2) * self.strides
         total_padding = extra_padding + built_in_padding
-
         return extra_padding, total_padding
 
-    @staticmethod
-    def split_padding(paddings):
+    def split_padding(self, paddings):
         # add 0 at both ends, not to pad the batch and channel axes
-        paddings = tf.pad(paddings, [[1, 1]])
+        if self.data_format == 'channels_last':
+            paddings = tf.pad(paddings, [[1, 1]])
+        else:
+            paddings = tf.pad(paddings, [[2, 0]])
 
-        # paddings may be odd if the same paddings are too, must make sure to do this oposite to same padding
+        # paddings may be odd if the 'same' paddings are too, must make sure to do this opposite to 'same' padding
         # to make the total padding the same on both sides
         pads_after = paddings // 2
         pads_before = paddings - pads_after
