@@ -4,10 +4,10 @@ The aim of GroCo is to generalize the convolutional layers and all related funct
 
 It was inspired by the book, lectures and notebooks on the geometric deep learning by Michael Bronstein, Joan Bruna, Taco Cohen and Petar Veličković, found [here](https://geometricdeeplearning.com), which I highly recommend.
 
-I am not aware of any other Keras implementation. The implementation by the authors themselves is in Chainer/Tensorflow, [GrouPy](https://github.com/tscohen/GrouPy).
+I am not aware of any other Keras implementation. The implementation by the authors themselves is in Chainer/Tensorflow 1, [GrouPy](https://github.com/tscohen/GrouPy).
 The intent is to not only translate this to Keras but also to expand on that functionalty.
-I started this to learn, both about group convolutions and geometric deep learning more generally, but also about tensorflow and Keras. 
-Any feedback is highly appreciated, you can reach me on twitter @aron_jansen.
+I started this to learn, both about group convolutions and geometric deep learning more generally, but also about tensorflow and Keras, 
+so any feedback is highly appreciated, you can reach me on twitter @aron_jansen.
 
 # Introduction to group convolutions
 
@@ -80,3 +80,5 @@ Intended additions:
 - `SeparableGroupConv`
 - `GroupConv2DTranspose`
 - `DepthwiseGroupConv2D`
+- `GroupDense`, for when the group does not include translations
+- something like `GroupReduce`, reducing equivariance to a subgroup, but rather than pooling keep all the features (merge with channel axis)
