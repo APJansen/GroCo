@@ -187,7 +187,7 @@ class GroupConv2D(Conv2D):
         shape[target_axis] *= shape[merged_axis]
         shape.pop(merged_axis)
         shape = [s if s is not None else -1 for s in shape]
-        return tf.TensorShape(shape)
+        return shape
 
     def _split_axes(self, tensor, factor: int, split_axis: int, target_axis: int):
         """
