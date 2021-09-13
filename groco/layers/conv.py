@@ -1,4 +1,4 @@
-from tensorflow.keras.layers import Conv2D
+from tensorflow.keras.layers import Conv2D, Flatten
 import tensorflow as tf
 from functools import partial
 from groco.groups import Group, wallpaper_groups
@@ -84,12 +84,15 @@ class GroupConv2D(Conv2D):
 
         Shapes in 2D case (with default data_format='channels_last'):
         (batch, height, width, subgroup.order * channels) -> (batch, height, width, subgroup.order, channels)
+        (batch, subgroup.order * channels, height, width)
+        (batch, subgroup.order, channels, height, width)
         """
         group_channels_axis = self.channels_axis
         if self.group_valued_input and self.data_format == 'channels_last':
             group_channels_axis -= 1
+        group_axis = self.group_axis + (self.data_format == 'channels_first')
         return self._split_axes(
-            outputs, factor=self.subgroup.order, split_axis=group_channels_axis, target_axis=self.group_axis)
+            outputs, factor=self.subgroup.order, split_axis=group_channels_axis, target_axis=group_axis)
 
     def build(self, input_shape):
         self.group_valued_input = len(input_shape) == self.dimensions + 3  # this includes the batch dimension
@@ -102,14 +105,16 @@ class GroupConv2D(Conv2D):
                 f'Got input shape {input_shape[self.group_axis]} in group axis {self.group_axis},' \
                 f'expected {self.group.order}.'
 
-            input_shape = self._merge_shapes(input_shape, merged_axis=self.group_axis, target_axis=self.channels_axis)
+            reshaped_input = self._merge_shapes(input_shape, merged_axis=self.group_axis, target_axis=self.channels_axis)
+        else:
+            reshaped_input = input_shape
 
-        super().build(input_shape)
+        super().build(reshaped_input)
 
         if self.group_valued_input:
             self.input_spec.axes = {self._get_channel_axis(): channels}
 
-        self.equivariant_padding.build(input_shape)
+        self.equivariant_padding.build(reshaped_input)
 
         self.repeated_bias_indices = self._compute_repeated_bias_indices()
         self.transformed_kernel_indices = self._compute_transformed_kernel_indices()
