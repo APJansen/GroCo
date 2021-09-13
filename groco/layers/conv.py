@@ -104,6 +104,7 @@ class GroupConv2D(Conv2D):
 
             input_shape = self._merge_shapes(input_shape, merged_axis=self.group_axis, target_axis=self.channels_axis)
 
+        print(input_shape)
         super().build(input_shape)
 
         if self.group_valued_input:
@@ -178,6 +179,7 @@ class GroupConv2D(Conv2D):
     def _merge_axes(self, tensor, merged_axis: int, target_axis: int):
         """Transpose the merge_axis to the left of the target_axis and then merge them."""
         shape = self._merge_shapes(tensor.shape, merged_axis=merged_axis, target_axis=target_axis)
+        shape = [s if s is not None else -1 for s in shape]
         transposed_tensor = self._move_axis_to_left_of(tensor, moved_axis=merged_axis, target_axis=target_axis)
         return tf.reshape(transposed_tensor, shape)
 
@@ -186,7 +188,6 @@ class GroupConv2D(Conv2D):
         shape = list(shape)
         shape[target_axis] *= shape[merged_axis]
         shape.pop(merged_axis)
-        shape = [s if s is not None else -1 for s in shape]
         return shape
 
     def _split_axes(self, tensor, factor: int, split_axis: int, target_axis: int):
