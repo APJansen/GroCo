@@ -186,6 +186,7 @@ class GroupConv2D(Conv2D):
         shape = list(shape)
         shape[target_axis] *= shape[merged_axis]
         shape.pop(merged_axis)
+        shape = [s if s is not None else -1 for s in shape]
         return tf.TensorShape(shape)
 
     def _split_axes(self, tensor, factor: int, split_axis: int, target_axis: int):
@@ -196,6 +197,7 @@ class GroupConv2D(Conv2D):
         shape = list(tensor.shape)
         shape[split_axis] //= factor
         shape = tf.TensorShape(shape[:split_axis] + [factor] + shape[split_axis:])
+        shape = [s if s is not None else -1 for s in shape]
         tensor_reshaped = tf.reshape(tensor, shape)
         tensor_transposed = self._move_axis_to_left_of(tensor_reshaped, moved_axis=split_axis, target_axis=target_axis)
         return tensor_transposed
