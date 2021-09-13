@@ -62,7 +62,6 @@ class TestGroupConv2D(TestCase):
         signal_on_grid = tf.random.normal(shape=(10, 28, 28, 7), seed=42)
         for group in group_dict.values():
             for subgroup_name in group.subgroup.keys():
-                subgroup = group_dict[subgroup_name]
                 conv_layer = GroupConv2D(group=group, kernel_size=3, filters=filters, padding='same_equiv',
                                          subgroup=subgroup_name)
                 conv_layer(signal_on_grid)
@@ -76,14 +75,12 @@ class TestGroupConv2D(TestCase):
             signal_on_group = tf.random.normal(shape=(10, 28, 28, group.order, 7), seed=42)
             conv_layer = GroupConv2D(group=group, kernel_size=3, filters=filters, padding='same_equiv')
             equiv_diff = test_equivariance(conv_layer, signal_on_group, group_axis=3)
-
             self.assertAllLess(equiv_diff, 1e-4)
 
     def test_gc_equiv_subgroup(self):
         filters = 5
         for group in group_dict.values():
             for subgroup_name in group.subgroup.keys():
-                subgroup = group_dict[subgroup_name]
                 signal_on_group = tf.random.normal(shape=(10, 28, 28, group.order, 7), seed=42)
                 conv_layer = GroupConv2D(group=group, kernel_size=3, filters=filters, padding='same_equiv',
                                          subgroup=subgroup_name)
