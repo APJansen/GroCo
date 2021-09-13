@@ -104,7 +104,6 @@ class GroupConv2D(Conv2D):
 
             input_shape = self._merge_shapes(input_shape, merged_axis=self.group_axis, target_axis=self.channels_axis)
 
-        print(input_shape)
         super().build(input_shape)
 
         if self.group_valued_input:
