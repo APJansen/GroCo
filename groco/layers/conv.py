@@ -84,8 +84,6 @@ class GroupConv2D(Conv2D):
 
         Shapes in 2D case (with default data_format='channels_last'):
         (batch, height, width, subgroup.order * channels) -> (batch, height, width, subgroup.order, channels)
-        (batch, subgroup.order * channels, height, width)
-        (batch, subgroup.order, channels, height, width)
         """
         group_channels_axis = self.channels_axis
         if self.group_valued_input and self.data_format == 'channels_last':
@@ -274,8 +272,8 @@ class GroupConv2D(Conv2D):
         consistent with the conv2d_call method.
         """
         out_shape = super().compute_output_shape(input_shape)
-        batch, height, width, channels = out_shape
-        out_shape = batch, height, width, channels * self.subgroup.order
+        channels_axis = 1 if self.data_format == 'channels_first' else -1
+        out_shape[channels_axis] *= self.subgroup.order
         return tf.TensorShape(out_shape)
 
 
