@@ -1,6 +1,6 @@
 import tensorflow as tf
 from groco.layers import EquivariantPadding
-from tensorflow.keras.layers import Layer
+from tensorflow.keras.layers import Layer, Flatten
 from groco.groups import Group, wallpaper_groups
 
 
@@ -11,11 +11,12 @@ class GroupConvTransforms(Layer):
 
     All public methods involve at most a single tf.gather and tf.reshape call, using precomputed indices.
 
-    Methods:
+    Methods used during call (all optimized into a single reshape and gather of precomputed indices):
         merge_group_axis_and_pad
         repeat_bias
         transform_kernel
         restore_group_axis
+    Methods used during build:
         multiply_channels
         build
         compute_indices
@@ -30,8 +31,10 @@ class GroupConvTransforms(Layer):
 
         self.equivariant_padding = EquivariantPadding(
             allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=dimensions, **kwargs)
+        self.flatten = Flatten()
 
         super().__init__()
+
         self.data_format = data_format
         # axes refer to input
         self.channels_axis = 1 if self.data_format == 'channels_first' else self.dimensions + 1
@@ -53,8 +56,7 @@ class GroupConvTransforms(Layer):
         Shapes in 2D case (with default data_format='channels_last'):
         (batch, height, width, group.order, channels) -> (batch, height', width', group.order * channels)
         """
-        if self.group_valued_input:
-            inputs = self._merge_axes(inputs, merged_axis=self.group_axis, target_axis=self.channels_axis)
+        inputs = tf.gather(self.flatten(inputs), indices=self._input_indices, axis=1)
         inputs = self.equivariant_padding(inputs)
         return inputs
 
@@ -105,6 +107,7 @@ class GroupConvTransforms(Layer):
     def compute_indices(self, input_shape, kernel, bias):
         self._repeated_bias_indices = self._compute_repeated_bias_indices(bias)
         self._transformed_kernel_indices = self._compute_transformed_kernel_indices(kernel)
+        self._input_indices = self._compute_input_indices(input_shape)
 
     def _compute_repeated_bias_indices(self, bias):
         """Compute a 1D tensor of indices used to gather from the bias in order to repeat it across the group axis."""
@@ -159,13 +162,23 @@ class GroupConvTransforms(Layer):
         channels_out_axis = self.dimensions + 2
         return self._merge_axes(kernel, merged_axis=group_axis, target_axis=channels_out_axis)
 
+    def _compute_input_indices(self, input_shape):
+        indices = self._get_index_tensor(input_shape[1:])
+        if self.group_valued_input:
+            # -1 on axes because this doesn't include the batch dimension
+            indices = self._merge_axes(indices, merged_axis=self.group_axis - 1, target_axis=self.channels_axis - 1)
+        return indices
+
     @staticmethod
     def _get_index_tensor(tensor):
         """
         Return a tensor of indices that reproduces the input through
         `tf.gather(tf.reshape(tensor, -1), indices=indices)`
         """
-        return tf.reshape(tf.range(tf.size(tensor)), tensor.shape)
+        if isinstance(tensor, tf.TensorShape):
+            return tf.reshape(tf.range(tf.reduce_prod(tensor)), tensor)
+        else:
+            return tf.reshape(tf.range(tf.size(tensor)), tensor.shape)
 
     def _merge_axes(self, tensor, merged_axis: int, target_axis: int):
         """Transpose the merge_axis to the left of the target_axis and then merge them."""
@@ -211,7 +224,6 @@ class GroupConvTransforms(Layer):
         return tf.TensorShape(output_shape)
 
     def get_config(self):
-        config = {'group': self.group.name,
-                  'subgroup': self.subgroup.name,
-                  'allow_non_equivariance': self.equivariant_padding.allow_non_equivariance}
+        config = {'group': self.group.name, 'subgroup': self.subgroup.name}
+        config.update(self.equivariant_padding.get_config())
         return config
