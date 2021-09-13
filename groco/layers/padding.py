@@ -100,7 +100,12 @@ class EquivariantPadding(Layer):
             tf.expand_dims(pads_after, axis=1)], axis=1)
 
     def get_config(self):
-        return {'allow_non_equivariance': self.allow_non_equivariance}
+        return {
+            'kernel_size': self.kernel_size,
+            'strides': self.strides,
+            'padding': self.padding,
+            'allow_non_equivariance': self.allow_non_equivariance,
+            'dimensions': self.dimensions}
 
     @staticmethod
     def format_padding_option(padding_option):
