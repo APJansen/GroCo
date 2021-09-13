@@ -271,7 +271,7 @@ class GroupConv2D(Conv2D):
         Note the layer's output shape is changed later to have a separate group index, this is to be
         consistent with the conv2d_call method.
         """
-        out_shape = super().compute_output_shape(input_shape)
+        out_shape = list(super().compute_output_shape(input_shape))
         channels_axis = 1 if self.data_format == 'channels_first' else -1
         out_shape[channels_axis] *= self.subgroup.order
         return tf.TensorShape(out_shape)
