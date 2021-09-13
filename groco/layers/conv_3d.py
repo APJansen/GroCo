@@ -1,12 +1,12 @@
-from tensorflow.keras.layers import Conv2D
+from tensorflow.keras.layers import Conv3D
 from functools import partial
 from groco.layers import GroupConvTransforms, conv_call
-from groco.groups import wallpaper_groups
+from groco.groups import space_groups
 
 
-class GroupConv2D(Conv2D):
+class GroupConv3D(Conv3D):
     """
-    Group convolution layer built on Keras's Conv2D layer.
+    Group convolution layer built on Keras's Conv3D layer.
     Additional arguments:
     - group: one of the wallpaper groups, string name or the object itself, see groups.group_dict for implemented groups
     - subgroup: name of subgroup to act with (analog of a stride in the group direction), defaults to None,
@@ -16,12 +16,12 @@ class GroupConv2D(Conv2D):
     - allow_non_equivariance: set to true along with setting padding to either `valid` or `same` to insist using
                               non-equivariant padding
 
-    Expected input shape: (batch, height, width, group.order, in_channels),
+    Expected input shape: (batch, height, width, depth, group.order, in_channels),
     with the group.order axis omitted for the first layer (the lifting convolution).
     """
     def __init__(self, group, kernel_size, allow_non_equivariance: bool = False, subgroup=None, **kwargs):
         self.group_transforms = GroupConvTransforms(
-            allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=2,
+            allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=3,
             group=group, subgroup=subgroup, **kwargs)
         self.group = self.group_transforms.group
         self.subgroup = self.group_transforms.subgroup
@@ -57,10 +57,4 @@ class GroupConv2D(Conv2D):
         return self.group_transforms.multiply_channels(super().compute_output_shape(input_shape))
 
 
-P4MConv2D = partial(GroupConv2D, group=wallpaper_groups.P4M)
-P4Conv2D = partial(GroupConv2D, group=wallpaper_groups.P4)
-P2MMConv2D = partial(GroupConv2D, group=wallpaper_groups.P2MM)
-PMhConv2D = partial(GroupConv2D, group=wallpaper_groups.PMh)
-PMwConv2D = partial(GroupConv2D, group=wallpaper_groups.PMw)
-P2Conv2D = partial(GroupConv2D, group=wallpaper_groups.P2)
-P1Conv2D = partial(GroupConv2D, group=wallpaper_groups.P1)
+P4MtestConv2D = partial(GroupConv3D, group=space_groups.P4M_test_3d)

@@ -1,5 +1,4 @@
 import tensorflow as tf
-
 from groco.groups.base import Group
 
 
