@@ -1,7 +1,6 @@
 from tensorflow.keras.layers import MaxPooling2D, AveragePooling2D, Layer
 import tensorflow as tf
-from groco.groups import Group, group_dict
-from groco.layers import EquivariantPadding
+from groco.layers import GroupConvTransforms
 
 
 class GroupPooling2D(Layer):
@@ -12,54 +11,27 @@ class GroupPooling2D(Layer):
     """
     def __init__(self, group, pool_type: str, allow_non_equivariance: bool = False, pool_size=(2, 2), subgroup=None,
                  **kwargs):
-        self.group = group if isinstance(group, Group) else group_dict[group]
-        self.subgroup_name = self.group.name if subgroup is None else subgroup
-        self.subgroup = self.group if subgroup is None else group_dict[subgroup]
-
-        self.equivariant_padding = EquivariantPadding(
-            allow_non_equivariance=allow_non_equivariance, kernel_size=pool_size, dimensions=2, **kwargs)
-        if 'padding' in kwargs and kwargs['padding'].endswith('_equiv'):
-            kwargs['padding'] = kwargs['padding'][:-6]
+        self.group_transforms = GroupConvTransforms(
+            allow_non_equivariance=allow_non_equivariance, kernel_size=pool_size, dimensions=2,
+            group=group, subgroup=subgroup, **kwargs)
+        kwargs['padding'] = self.group_transforms.built_in_padding_option
+        self.group = self.group_transforms.group
+        self.subgroup = self.group_transforms.subgroup
 
         self.pool_type = pool_type
-        if pool_type == 'max':
-            self.pooling = MaxPooling2D(pool_size=pool_size, **kwargs)
-        else:
-            self.pooling = AveragePooling2D(pool_size=pool_size, **kwargs)
+        pool_layer = MaxPooling2D if self.pool_type == 'max' else AveragePooling2D
+        self.pooling = pool_layer(pool_size=pool_size, **kwargs)
 
         super().__init__()
 
-        self.pooling_indices = None # created during build
+        self.pooling_indices = None  # created during build
 
     def call(self, inputs):
-        inputs = self._merge_group_axis(inputs)
-        inputs = self.equivariant_padding(inputs)
+        inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
         outputs = self.pooling(inputs)
-        outputs = self._restore_group_axis(outputs)
+        outputs = self.group_transforms.restore_group_axis(outputs, subgroup=False)
 
-        outputs = self._subgroup_pooling(outputs)
-
-        return outputs
-
-    def _merge_group_axis(self, inputs):
-        """
-        If the input is a signal on the group, join the group axis with the channel axis.
-
-        (batch, height, width, group_order, channels) -> (batch, height, width, group_order * channels)
-        """
-        batch, height, width, group_order, channels = inputs.shape
-        batch = -1 if batch is None else batch
-        return tf.reshape(inputs, (batch, height, width, group_order * channels))
-
-    def _restore_group_axis(self, outputs):
-        """
-        Reshape the output of the pooling, splitting off the group index from the channel axis.
-
-        (batch, height, width, group_order * channels) -> (batch, height, width, group_order, channels)
-        """
-        batch, height, width, channels = outputs.shape
-        batch = -1 if batch is None else batch
-        return tf.reshape(outputs, (batch, height, width, self.group.order, channels // self.group.order))
+        return self._subgroup_pooling(outputs)
 
     def _subgroup_pooling(self, outputs):
         outputs = tf.gather(outputs, axis=3, indices=self.pooling_indices)
@@ -70,32 +42,20 @@ class GroupPooling2D(Layer):
         return outputs
 
     def build(self, input_shape):
-        """
-        Merge the group axis with the channel axis.
-        Then run the parent class's build.
-        Run the EquivariantPadding layer's build on the merged input.
-        """
-        super().build(input_shape)
-        (batch, height, width, group_order, channels) = input_shape
-        assert group_order == self.group.order, f'Got input shape {input_shape}, expected {(batch, height, width, self.group.order, channels)}.'
-        input_shape = (batch, height, width, channels * group_order)
-
-        self.equivariant_padding.build(input_shape)
-        self.pooling.build(input_shape)
-
+        reshaped_input = self.group_transforms.build(input_shape)
+        self.pooling.build(reshaped_input)
         self.pooling_indices = self._create_pooling_indices()
 
     def _create_pooling_indices(self):
-        indices = tf.gather(self.group.composition, axis=1, indices=self.group.cosets[self.subgroup_name])
-        subgroup_indices = self.group.subgroup[self.subgroup_name]
+        indices = tf.gather(self.group.composition, axis=1, indices=self.group.cosets[self.subgroup.name])
+        subgroup_indices = self.group.subgroup[self.subgroup.name]
         indices = tf.gather(indices, axis=0, indices=subgroup_indices)
 
         return indices
 
     def get_config(self):
         config = self.pooling.get_config()
-        config['group'] = self.group
-        config['allow_non_equivariance'] = self.equivariant_padding.allow_non_equivariance
+        config.update(self.group_transforms.get_config())
         return config
 
 

@@ -23,10 +23,10 @@ class GroupConv2D(Conv2D):
         self.group_transforms = GroupConvTransforms(
             allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=2,
             group=group, subgroup=subgroup, **kwargs)
+        kwargs['padding'] = self.group_transforms.built_in_padding_option
         self.group = self.group_transforms.group
         self.subgroup = self.group_transforms.subgroup
-        if 'padding' in kwargs and kwargs['padding'].endswith('_equiv'):
-            kwargs['padding'] = kwargs['padding'][:-6]
+
         super().__init__(kernel_size=kernel_size, **kwargs)
         self.group_valued_input = None
 

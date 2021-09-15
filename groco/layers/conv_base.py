@@ -31,6 +31,7 @@ class GroupConvTransforms(Layer):
 
         self.equivariant_padding = EquivariantPadding(
             allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=dimensions, **kwargs)
+        self.built_in_padding_option = self.equivariant_padding.built_in_padding_option
 
         super().__init__()
         self.data_format = data_format
@@ -73,7 +74,7 @@ class GroupConvTransforms(Layer):
         """
         return tf.gather(tf.reshape(kernel, [-1]), indices=self._transformed_kernel_indices, axis=0)
 
-    def restore_group_axis(self, outputs):
+    def restore_group_axis(self, outputs, subgroup=True):
         """
         Reshape the output of the convolution, splitting off the group index from the channel axis.
 
@@ -84,8 +85,8 @@ class GroupConvTransforms(Layer):
         if self.group_valued_input and self.data_format == 'channels_last':
             group_channels_axis -= 1
         group_axis = self.group_axis + (self.data_format == 'channels_first')
-        return self._split_axes(
-            outputs, factor=self.subgroup.order, split_axis=group_channels_axis, target_axis=group_axis)
+        order = self.subgroup.order if subgroup else self.group.order
+        return self._split_axes(outputs, factor=order, split_axis=group_channels_axis, target_axis=group_axis)
 
     def build(self, input_shape):
         self.group_valued_input = len(input_shape) == self.dimensions + 3  # this includes the batch dimension

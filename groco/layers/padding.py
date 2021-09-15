@@ -20,6 +20,8 @@ class EquivariantPadding(Layer):
     def __init__(self, kernel_size, dimensions: int, strides=1, padding='valid_equiv', allow_non_equivariance=False,
                  data_format='channels_last', **kwargs):
         self.padding_option = self.format_padding_option(padding)
+        self.built_in_padding_option = padding[:-6] if padding.endswith('_equiv') else padding
+
         self.allow_non_equivariance = allow_non_equivariance
         self.dimensions = dimensions
         self.strides = tf.constant(strides if isinstance(strides, tuple) else
