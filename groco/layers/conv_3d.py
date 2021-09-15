@@ -57,4 +57,7 @@ class GroupConv3D(Conv3D):
         return self.group_transforms.multiply_channels(super().compute_output_shape(input_shape))
 
 
-P4MtestConv2D = partial(GroupConv3D, group=space_groups.P4M_test_3d)
+OhConv3D = partial(GroupConv3D, group=space_groups.Oh)
+OConv3D = partial(GroupConv3D, group=space_groups.O)
+D4hConv3D = partial(GroupConv3D, group=space_groups.D4h)
+D4Conv3D = partial(GroupConv3D, group=space_groups.D4)
