@@ -44,6 +44,7 @@ The largest wallpaper group on a square lattice, p4m, and all its subgroups have
 | Generalization  | Before the regular convolution transform the kernel with the point group  |
 | Implementation | `GroupConv2D(group='point_group_name', ...)` |
 | Resulting differences | kernel gets copied `\|G\|` times, number of parameters stays the same but output channel grows by factor `\|G\|` |
+| reference | [CohenWelling2016](#groupconv) |
 
 | -  | stride |
 | ------------- | ------------- |
@@ -51,9 +52,8 @@ The largest wallpaper group on a square lattice, p4m, and all its subgroups have
 | Generalization  | subsampling onto any subgroup of the wallpaper group |
 | Implementation | `GroupConv2D(..., stride=s, subgroup='point_subgroup_name', ...)` |
 | Resulting differences | strides are done as usual*, and independently we can subsample on a subgroup of the point group |
-
-(* strides are tricky in that they can cause the origin of the new, smaller grid to not coincide with the original origin and this breaks equivariance.
-To prevent this the default `padding` option is `valid_equiv`, which pads a minimal extra amount to prevent this. Can be turned off by setting it back to `valid`, and `same_equiv` is also possible.)
+| reference | [CohenWelling2016](#groupconv) |
+| comments | Strides are tricky in that they can cause the origin of the new, smaller grid to not coincide with the original origin and this breaks equivariance. To prevent this the default `padding` option is `valid_equiv`, which pads a minimal extra amount to prevent this. Can be turned off by setting it back to `valid`, and `same_equiv` is also possible. |
 
 | -  | pooling |
 | ------------- | ------------- |
@@ -61,24 +61,57 @@ To prevent this the default `padding` option is `valid_equiv`, which pads a mini
 | Generalization  | subsampling onto any subgroup of the wallpaper group |
 | Implementation | `GroupMaxPooling2D(group='group_name', subgroup='subgroup_name', ...)`, and the same with `GroupAveragePooling2D`|
 | Resulting differences | in addition to pooling over the grid, potentially subsample on a subgroup of the point group, after aggregating on its cosets |
+| reference | [CohenWelling2016](#groupconv) |
 
+| -  | 3D Convolution |
+| ------------- | ------------- |
+| Group Interpretation  | Apply group transformations to a kernel, multiply with signal and sum  |
+| Generalization  | Before the regular convolution transform the kernel with the point group  |
+| Implementation | `GroupConv2D(group='point_group_name', ...)` |
+| Resulting differences | kernel gets copied `\|G\|` times, number of parameters stays the same but output channel grows by factor `\|G\|` |
+| reference | [WinkelsCohen2018](#groupconv3d) |
+| comments | This is conceptually identical to 2d convolutions, but the groups get a lot bigger. Still to be tested. |
 
 # Implemented groups
-| name | symmetries |
-| ------------- | ------------- |
-| P4M | 90 degree rotations and mirroring on both axes |
-| P4  | 90 degree rotations |
-| P2MM | mirroring on both axes, 180 degree rotation |
-| PMh | mirroring on horizontal axis |
-| PMv | mirroring on vertical axis |
-| P2 | 180 degree rotation |
-| P1 | nothing |
+
+## 2D
+
+| name | symmetries | order |
+| ------------- | ------------- | ------------- |
+| P4M | 90 degree rotations and mirroring on both axes | 8 |
+| P4  | 90 degree rotations | 4 |
+| P2MM | mirroring on both axes, 180 degree rotation | 4 |
+| PMh | mirroring on horizontal axis | 2 |
+| PMv | mirroring on vertical axis | 2 |
+| P2 | 180 degree rotation | 2 |
+| P1 | nothing | 1 |
+
+## 3D
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/GroupConv/blob/SpaceGroups.ipynb)
+
+See this Colab notebook for a very simple derivation of these groups, from a tensor perspective.
 
 
-Intended additions:
+|name | symmetries | order |
+| ------------- | ------------- | ------------- |
+Oh | all rotations and reflections of a cube | 48 |
+O | all rotations of a cube, so preserving orientation | 24 |
+D4h | all rotations and reflections of a cuboid (with depth different from height and width) | 16 |
+D4 | all rotations of a cuboid, preserving orientation | 8 |
+
+(further subgroups perhaps to be implemented later)
+
+# Intended additions:
 - The 1D and 3D versions of `GroupConv`, `GroupMaxPooling` and `GroupAveragePooling`
 - `SeparableGroupConv`
 - `GroupConv2DTranspose`
 - `DepthwiseGroupConv2D`
 - `GroupDense`, for when the group does not include translations
 - something like `GroupReduce`, reducing equivariance to a subgroup, but rather than pooling keep all the features (merge with channel axis)
+
+# References
+
+- <a name="groupconv"/> Group Equivariant Convolutional Networks, Taco Cohen and Max Welling, 2016, [PMLR 48:2990-2999](http://proceedings.mlr.press/v48/cohenc16.html)
+
+- <a name="groupconv3d"/> 3D G-CNNs for Pulmonary Nodule Detection, Marysia Winkels and Taco Cohen, 2018, [International conference on Medical Imaging with Deep Learning](https://arxiv.org/abs/1804.04656)
