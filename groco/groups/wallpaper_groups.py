@@ -1,5 +1,5 @@
 import tensorflow as tf
-from groco.groups.base import Group
+from groco.groups.group import Group
 
 
 def P4M_action(signal, spatial_axes=(0, 1), new_group_axis=2):
@@ -238,7 +238,7 @@ P1 = Group(
     cosets={'P1': [0]},
     action=P1_action
 )
-group_dict = {
+wallpaper_group_dict = {
     'P1': P1,
     'P2': P2,
     'PMw': PMw,

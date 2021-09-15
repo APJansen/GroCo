@@ -3,7 +3,7 @@ import tensorflow as tf
 
 class Group:
     """
-    Class representing the point group  of a wallpaper group.
+    Class representing a group along with its actions on a grid.
 
     Attributes:
         order: the number of elements.

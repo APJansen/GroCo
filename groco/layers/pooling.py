@@ -12,9 +12,9 @@ class GroupPooling2D(Layer):
     """
     def __init__(self, group, pool_type: str, allow_non_equivariance: bool = False, pool_size=(2, 2), subgroup=None,
                  **kwargs):
-        self.group = group if isinstance(group, Group) else wallpaper_groups.group_dict[group]
+        self.group = group if isinstance(group, Group) else wallpaper_groups.wallpaper_group_dict[group]
         self.subgroup_name = self.group.name if subgroup is None else subgroup
-        self.subgroup = self.group if subgroup is None else wallpaper_groups.group_dict[subgroup]
+        self.subgroup = self.group if subgroup is None else wallpaper_groups.wallpaper_group_dict[subgroup]
 
         self.equivariant_padding = EquivariantPadding(
             allow_non_equivariance=allow_non_equivariance, kernel_size=pool_size, dimensions=2, **kwargs)

@@ -1,5 +1,5 @@
 import tensorflow as tf
-from groco.groups.base import Group
+from groco.groups.group import Group
 import itertools
 
 
@@ -98,7 +98,7 @@ D4h = Group(name='D4h', order=16, parent=Oh)
 D4 = Group(name='D4', order=8, parent=Oh)
 
 
-group_dict = {
+space_group_dict = {
     'Oh': Oh,
     'O': O,
     'D4h': D4h,

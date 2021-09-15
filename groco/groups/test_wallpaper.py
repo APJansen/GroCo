@@ -1,5 +1,5 @@
 from tensorflow.test import TestCase
-from groco.groups.wallpaper_groups import group_dict
+from groco.groups import wallpaper_group_dict
 import tensorflow as tf
 
 
@@ -9,7 +9,7 @@ class TestWallpaperGroup(TestCase):
         The composition attribute gives the composition of an inverse with another group element,
         so for the inverse to be correct the diagonal needs to be the identity.
         """
-        for group in group_dict.values():
+        for group in wallpaper_group_dict.values():
             identities = tf.reshape(
                 tf.concat([group.composition[r][c] for r, c in enumerate(group.inverses)], axis=0),
                 (group.order,))
@@ -19,7 +19,7 @@ class TestWallpaperGroup(TestCase):
         """
         A subset H of a group G is a subgroup if and only if for all g, h in H, g^-1 h is also in H.
         """
-        for group in group_dict.values():
+        for group in wallpaper_group_dict.values():
             for subgroup_name, subgroup_indices in group.subgroup.items():
                 subgroup_invs = [group.inverses[i] for i in subgroup_indices]
                 subgroup_composition = tf.gather(group.composition, axis=0, indices=subgroup_invs)
@@ -32,16 +32,16 @@ class TestWallpaperGroup(TestCase):
 
     def test_cosets_identity(self):
         """Cosets contain identity."""
-        for group in group_dict.values():
+        for group in wallpaper_group_dict.values():
             for coset_name, coset in group.cosets.items():
                 msg = f'Coset {coset_name} of group {group.name} does not contain identity.'
                 self.assertEqual(tf.reduce_min(coset), tf.constant([0]), msg=msg)
 
     def test_cosets_size(self):
         """Number of cosets times corresponding group order equals the full group order."""
-        for group in group_dict.values():
+        for group in wallpaper_group_dict.values():
             for coset_name, coset in group.cosets.items():
-                subgroup = group_dict[coset_name]
+                subgroup = wallpaper_group_dict[coset_name]
 
                 msg = f'Cosets of subgroup {coset_name} of group {group.name} not the right size.'
                 self.assertEqual(group.order, subgroup.order * len(coset), msg=msg)
@@ -50,7 +50,7 @@ class TestWallpaperGroup(TestCase):
         """
         Check that multiplying the subgroup with its cosets recovers the full group.
         """
-        for group in group_dict.values():
+        for group in wallpaper_group_dict.values():
             for coset_name, coset in group.cosets.items():
                 subgroup_indices = group.subgroup[coset_name]
                 products = tf.gather(group.composition, axis=1, indices=coset)
@@ -63,7 +63,7 @@ class TestWallpaperGroup(TestCase):
 
     def test_action_composition(self):
         signal = tf.random.normal((28, 28, 3), seed=42)
-        for group in group_dict.values():
+        for group in wallpaper_group_dict.values():
             g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=2)
             for gi in range(group.order):
                 gi_signal = tf.gather(g_signal, axis=2, indices=[gi])
@@ -80,14 +80,14 @@ class TestWallpaperGroup(TestCase):
 
     def test_action_shape(self):
         signal = tf.random.normal((28, 28, 3), seed=42)
-        for group in group_dict.values():
+        for group in wallpaper_group_dict.values():
             g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=0)
             self.assertEqual(g_signal.shape, (group.order) + signal.shape)
 
     def test_action_on_signal_composition(self):
         signal = tf.random.normal((28, 28, 3), seed=42)
         new_group_axis = 3
-        for group in group_dict.values():
+        for group in wallpaper_group_dict.values():
             g_signal = group._action_on_grid(signal, new_group_axis=new_group_axis, spatial_axes=[0, 1])
             for gi in range(group.order):
                 gi_signal = tf.reshape(tf.gather(g_signal, axis=new_group_axis, indices=[gi]), signal.shape)
@@ -102,7 +102,7 @@ class TestWallpaperGroup(TestCase):
 
     def test_action_on_group_composition(self):
         new_group_axis = 3
-        for group in group_dict.values():
+        for group in wallpaper_group_dict.values():
             signal = tf.random.normal((28, 28, group.order, 3), seed=42)
             g_signal = group.action(signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis)
             for gi in range(group.order):
@@ -119,10 +119,10 @@ class TestWallpaperGroup(TestCase):
 
     def test_subgroup_action_on_grid(self):
         signal = tf.random.normal((28, 28, 3))
-        for group in group_dict.values():
+        for group in wallpaper_group_dict.values():
             g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=0)
             for subgroup_name, subgroup_indices in group.subgroup.items():
-                subgroup = group_dict[subgroup_name]
+                subgroup = wallpaper_group_dict[subgroup_name]
                 h_signal = subgroup.action(signal, spatial_axes=[0, 1], new_group_axis=0)
                 g_signal_sub = tf.gather(g_signal, axis=0, indices=subgroup_indices)
 
@@ -131,7 +131,7 @@ class TestWallpaperGroup(TestCase):
 
     def test_subgroups_cosets(self):
         """Test only if the keys are the same."""
-        for group in group_dict.values():
+        for group in wallpaper_group_dict.values():
             self.assertAllEqual(set(group.subgroup.keys()), set(group.cosets.keys()))
 
 

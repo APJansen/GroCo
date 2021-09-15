@@ -25,8 +25,8 @@ class GroupConvTransforms(Layer):
 
     def __init__(self, group, kernel_size, dimensions: int, data_format='channels_last',
                  allow_non_equivariance: bool = False, subgroup=None, **kwargs):
-        self.group = group if isinstance(group, Group) else wallpaper_groups.group_dict[group]
-        self.subgroup = self.group if subgroup is None else wallpaper_groups.group_dict[subgroup]
+        self.group = group if isinstance(group, Group) else group_dict[group]
+        self.subgroup = self.group if subgroup is None else group_dict[subgroup]
         self.dimensions = dimensions
 
         self.equivariant_padding = EquivariantPadding(

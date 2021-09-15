@@ -1,5 +1,5 @@
 import tensorflow as tf
-from groco.groups.wallpaper_groups import group_dict
+from groco.groups import group_dict
 
 
 def test_equivariance(layer, signal, group_name=None, spatial_axes: tuple = (1, 2), group_axis=None,
