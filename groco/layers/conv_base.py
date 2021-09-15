@@ -32,10 +32,8 @@ class GroupConvTransforms(Layer):
 
         self.equivariant_padding = EquivariantPadding(
             allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=dimensions, **kwargs)
-        self.flatten = Flatten()
 
         super().__init__()
-
         self.data_format = data_format
         # axes refer to input
         self.channels_axis = 1 if self.data_format == 'channels_first' else self.dimensions + 1
@@ -109,7 +107,6 @@ class GroupConvTransforms(Layer):
     def compute_indices(self, input_shape, kernel, bias):
         self._repeated_bias_indices = self._compute_repeated_bias_indices(bias)
         self._transformed_kernel_indices = self._compute_transformed_kernel_indices(kernel)
-        self._input_indices = self._compute_input_indices(input_shape)
 
     def _compute_repeated_bias_indices(self, bias):
         """Compute a 1D tensor of indices used to gather from the bias in order to repeat it across the group axis."""
@@ -163,13 +160,6 @@ class GroupConvTransforms(Layer):
         group_axis = self.dimensions
         channels_out_axis = self.dimensions + 2
         return self._merge_axes(kernel, merged_axis=group_axis, target_axis=channels_out_axis)
-
-    def _compute_input_indices(self, input_shape):
-        indices = self._get_index_tensor(input_shape[1:])
-        if self.group_valued_input:
-            # -1 on axes because this doesn't include the batch dimension
-            indices = self._merge_axes(indices, merged_axis=self.group_axis - 1, target_axis=self.channels_axis - 1)
-        return indices
 
     @staticmethod
     def _get_index_tensor(tensor):
