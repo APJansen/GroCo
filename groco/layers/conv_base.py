@@ -1,8 +1,7 @@
 import tensorflow as tf
 from groco.layers import EquivariantPadding
 from tensorflow.keras.layers import Layer
-from groco.groups import Group
-from groco.groups.space_groups import group_dict  # includes space and wallpaper groups
+from groco.groups import Group, group_dict
 
 
 class GroupConvTransforms(Layer):
