@@ -1,7 +1,8 @@
 import tensorflow as tf
 from groco.layers import EquivariantPadding
-from tensorflow.keras.layers import Layer, Flatten
-from groco.groups import Group, wallpaper_groups
+from tensorflow.keras.layers import Layer
+from groco.groups import Group
+from groco.groups.space_groups import group_dict  # includes space and wallpaper groups
 
 
 class GroupConvTransforms(Layer):
@@ -11,7 +12,7 @@ class GroupConvTransforms(Layer):
 
     All public methods involve at most a single tf.gather and tf.reshape call, using precomputed indices.
 
-    Methods used during call (all optimized into a single reshape and gather of precomputed indices):
+    Methods:
         merge_group_axis_and_pad
         repeat_bias
         transform_kernel
@@ -56,7 +57,8 @@ class GroupConvTransforms(Layer):
         Shapes in 2D case (with default data_format='channels_last'):
         (batch, height, width, group.order, channels) -> (batch, height', width', group.order * channels)
         """
-        inputs = tf.gather(self.flatten(inputs), indices=self._input_indices, axis=1)
+        if self.group_valued_input:
+            inputs = self._merge_axes(inputs, merged_axis=self.group_axis, target_axis=self.channels_axis)
         inputs = self.equivariant_padding(inputs)
         return inputs
 
