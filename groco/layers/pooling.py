@@ -87,7 +87,7 @@ class GroupPooling2D(Layer):
 
     def _create_pooling_indices(self):
         indices = tf.gather(self.group.composition, axis=1, indices=self.group.cosets[self.subgroup_name])
-        subgroup_indices = [self.group.inverses[i] for i in self.group.subgroup[self.subgroup_name]]
+        subgroup_indices = self.group.subgroup[self.subgroup_name]
         indices = tf.gather(indices, axis=0, indices=subgroup_indices)
 
         return indices

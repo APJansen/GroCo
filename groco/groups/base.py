@@ -19,20 +19,22 @@ class Group:
         action: performs the action of the whole group on a signal on the grid or on the group itself.
     """
     def __init__(self,
+                 name: str,
                  order: int,
-                 inverses: list,
-                 composition: list,
-                 subgroup: dict,
-                 cosets: dict,
-                 action,
-                 name: str):
-        self.order = order
-        self.inverses = tf.constant(inverses)
-        self.composition = tf.constant(composition)
-        self.subgroup = subgroup
-        self.cosets = cosets
-        self._action = action
+                 inverses=None,
+                 composition=None,
+                 subgroup=None,
+                 cosets=None,
+                 action=None,
+                 parent=None):
         self.name = name
+        self.order = order
+        self.parent = parent
+        self.composition = self._compute_composition(composition)
+        self.inverses = self._compute_inverses(inverses)
+        self.subgroup = self._compute_subgroup(subgroup)
+        self.cosets = self._compute_cosets(cosets)
+        self._action = self._compute_action(action)
 
     def action(self, signal, spatial_axes: tuple = (1, 2), new_group_axis: int = 0, group_axis=None, subgroup: str = None):
         """
@@ -46,14 +48,12 @@ class Group:
         :return: Tensor of the signal acted on by the group.
         """
         if group_axis is None:
-            return self._action_on_grid(signal, new_group_axis=new_group_axis, spatial_axes=spatial_axes,
-                                        subgroup=subgroup)
+            return self._action_on_grid(
+                signal, new_group_axis=new_group_axis, spatial_axes=spatial_axes, subgroup=subgroup)
         else:
-            return self._action_on_group(signal,
-                                         spatial_axes=spatial_axes,
-                                         group_axis=group_axis,
-                                         new_group_axis=new_group_axis,
-                                         subgroup=subgroup)
+            return self._action_on_group(
+                signal, spatial_axes=spatial_axes, group_axis=group_axis, new_group_axis=new_group_axis,
+                subgroup=subgroup)
 
     def _action_on_grid(self, signal, new_group_axis: int, spatial_axes: tuple, subgroup: str = None):
         subgroup_name = self.name if subgroup is None else subgroup
@@ -97,8 +97,60 @@ class Group:
 
     def _composition_flat_indices(self, subgroup_name):
         subgroup_indices = self.subgroup[subgroup_name]
-
-        subgroup_composition = tf.gather(self.composition, axis=0, indices=subgroup_indices)
+        inverse_indices = [self.inverses[i] for i in subgroup_indices]
+        subgroup_composition = tf.gather(self.composition, axis=0, indices=inverse_indices)
         group_composition_indices = tf.constant([[i * self.order + c for c in row] for i, row in
                                                  enumerate(subgroup_composition.numpy())])
         return tf.reshape(group_composition_indices, [-1])
+
+    def _compute_inverses(self, inverses):
+        if inverses is not None:
+            return tf.constant(inverses)
+        return [[c for c in range(self.order) if self.composition[r][c] == 0][0] for r in range(self.order)]
+
+    def _compute_composition(self, composition):
+        """Compute the composition induced by the parent group."""
+        if composition is not None:
+            return tf.constant(composition)
+
+        parent_indices = self.parent.subgroup[self.name]
+        composition = tf.gather(self.parent.composition, indices=parent_indices, axis=0)
+        composition = tf.gather(composition, indices=parent_indices, axis=1)
+        composition = [self._convert_parent_indices(composition[r].numpy()) for r in range(self.order)]
+        return tf.constant(composition)
+
+    def _compute_action(self, action):
+        if action is not None:
+            return action
+
+        def subgroup_action(signal, spatial_axes, new_group_axis):
+            group_transformed = self.parent.action(signal, spatial_axes, new_group_axis)
+            subgroup_transformed = tf.gather(
+                group_transformed, indices=self.parent.subgroup[self.name], axis=new_group_axis)
+            return subgroup_transformed
+
+        return subgroup_action
+
+    def _compute_subgroup(self, subgroup):
+        if subgroup is not None:
+            return subgroup
+        parent_subgroups = self.parent.subgroup
+        this_subgroup = set(parent_subgroups[self.name])
+        subgroups = {name: self._convert_parent_indices(indices) for name, indices in parent_subgroups.items() if
+                     set(indices).issubset(this_subgroup)}
+        return subgroups
+
+    def _compute_cosets(self, cosets):
+        if cosets is not None:
+            return cosets
+        parent_cosets = self.parent.cosets
+        this_subgroup = set(self.parent.subgroup[self.name])
+        cosets = {name: self._convert_parent_indices([i for i in indices if i in this_subgroup])
+                  for name, indices in parent_cosets.items() if name in self.subgroup.keys()}
+        return cosets
+
+    def _convert_parent_indices(self, parent_indices):
+        mapping = {parent: this for parent, this in
+                   zip(list(self.parent.subgroup[self.name]), list(range(self.order)))}
+        return [mapping[i] for i in parent_indices]
+
