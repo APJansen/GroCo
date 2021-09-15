@@ -1,7 +1,7 @@
 from tensorflow.keras.layers import Conv3D
 from functools import partial
 from groco.layers import GroupConvTransforms, conv_call
-from groco.groups import space_groups
+from groco.groups import space_groups, group_dict
 
 
 class GroupConv3D(Conv3D):

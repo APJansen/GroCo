@@ -1,7 +1,7 @@
 from tensorflow.keras.layers import Conv2D
 from functools import partial
 from groco.layers import GroupConvTransforms, conv_call
-from groco.groups import wallpaper_groups
+from groco.groups import wallpaper_groups, group_dict
 
 
 class GroupConv2D(Conv2D):
