@@ -1,6 +1,6 @@
 from tensorflow.keras.layers import Conv3D
 from functools import partial
-from groco.layers import GroupConvTransforms, conv_call
+from groco.layers import GroupTransforms, conv_call
 from groco.groups import space_groups, group_dict
 
 
@@ -20,7 +20,7 @@ class GroupConv3D(Conv3D):
     with the group.order axis omitted for the first layer (the lifting convolution).
     """
     def __init__(self, group, kernel_size, allow_non_equivariance: bool = False, subgroup=None, **kwargs):
-        self.group_transforms = GroupConvTransforms(
+        self.group_transforms = GroupTransforms(
             allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=3,
             group=group, subgroup=subgroup, **kwargs)
         kwargs['padding'] = self.group_transforms.built_in_padding_option
@@ -43,7 +43,7 @@ class GroupConv3D(Conv3D):
         reshaped_input = self.group_transforms.build(input_shape)
         self.group_valued_input = self.group_transforms.group_valued_input
         super().build(reshaped_input)
-        self.group_transforms.compute_indices(input_shape, self.kernel, self.bias)
+        self.group_transforms.compute_conv_indices(input_shape, self.kernel, self.bias)
         if self.group_valued_input:
             self.input_spec.axes = {self._get_channel_axis(): input_shape[self.group_transforms.channels_axis]}
 

@@ -4,9 +4,9 @@ from tensorflow.keras.layers import Layer
 from groco.groups import Group, group_dict
 
 
-class GroupConvTransforms(Layer):
+class GroupTransforms(Layer):
     """
-    Helper layer meant only for use within the group convolutional layers.
+    Helper layer meant only for use within other layers involving group operations.
     Takes care of all group related transformations.
 
     All public methods involve at most a single tf.gather and tf.reshape call, using precomputed indices.
@@ -46,6 +46,7 @@ class GroupConvTransforms(Layer):
         self._transformed_kernel_indices = None
         self._input_indices = None
         self._output_indices = None
+        self._pooling_indices = None
 
     def merge_group_axis_and_pad(self, inputs):
         """
@@ -88,6 +89,18 @@ class GroupConvTransforms(Layer):
         order = self.subgroup.order if subgroup else self.group.order
         return self._split_axes(outputs, factor=order, split_axis=group_channels_axis, target_axis=group_axis)
 
+    def subgroup_pooling(self, inputs, pool_type: str):
+        """
+        Pool in the group direction, over a set of coset representatives, keeping the subgroup.
+
+        Shapes in 2D case (with default data_format='channels_last'):
+        (batch, height, width, group.order, channels) -> (batch, height, width, subgroup.order, channels)
+        """
+        outputs = tf.gather(inputs, axis=self.group_axis, indices=self._pooling_indices)
+        pooling = tf.reduce_max if pool_type == 'max' else tf.reduce_mean
+        outputs = pooling(outputs, axis=self.group_axis + 1)
+        return outputs
+
     def build(self, input_shape):
         self.group_valued_input = len(input_shape) == self.dimensions + 3  # this includes the batch dimension
         if self.data_format == 'channels_last' and self.group_valued_input:
@@ -104,9 +117,14 @@ class GroupConvTransforms(Layer):
             reshaped_input = input_shape
         return reshaped_input
 
-    def compute_indices(self, input_shape, kernel, bias):
+    def compute_conv_indices(self, input_shape, kernel, bias):
         self._repeated_bias_indices = self._compute_repeated_bias_indices(bias)
         self._transformed_kernel_indices = self._compute_transformed_kernel_indices(kernel)
+
+    def compute_pooling_indices(self):
+        indices = tf.gather(self.group.composition, axis=1, indices=self.group.cosets[self.subgroup.name])
+        subgroup_indices = self.group.subgroup[self.subgroup.name]
+        self._pooling_indices = tf.gather(indices, axis=0, indices=subgroup_indices)
 
     def _compute_repeated_bias_indices(self, bias):
         """Compute a 1D tensor of indices used to gather from the bias in order to repeat it across the group axis."""
