@@ -104,3 +104,6 @@ space_group_dict = {
     'D4h': D4h,
     'D4': D4
 }
+
+from groco.groups.wallpaper_groups import wallpaper_group_dict
+group_dict = {**wallpaper_group_dict, **space_group_dict}
