@@ -4,8 +4,10 @@ The aim of GroCo is to generalize the convolutional layers and all related funct
 
 It was inspired by the book, lectures and notebooks on the geometric deep learning by Michael Bronstein, Joan Bruna, Taco Cohen and Petar Veličković, found [here](https://geometricdeeplearning.com), which I highly recommend.
 
-I am not aware of any other Keras implementation. The implementation by the authors themselves is in Chainer/Tensorflow 1, [GrouPy](https://github.com/tscohen/GrouPy).
-The intent is to not only translate this to Keras but also to expand on that functionalty.
+The implementation by the authors themselves is in Chainer/Tensorflow 1, [GrouPy](https://github.com/tscohen/GrouPy).
+There is also another Keras implementation [keras-gcnn](https://github.com/basveeling/keras-gcnn) that I came across while developing this.
+Here we expand the functionality, to 3D convolutions, transpose convolutions, and hopefully eventually all of Keras's convolutional and related layers.
+
 I started this to learn, both about group convolutions and geometric deep learning more generally, but also about tensorflow and Keras, 
 so any feedback is highly appreciated, you can reach me on twitter @aron_jansen.
 
@@ -70,7 +72,16 @@ The largest wallpaper group on a square lattice, p4m, and all its subgroups have
 | Implementation | `GroupConv2D(group='point_group_name', ...)` |
 | Resulting differences | kernel gets copied `\|G\|` times, number of parameters stays the same but output channel grows by factor `\|G\|` |
 | reference | [WinkelsCohen2018](#groupconv3d) |
-| comments | This is conceptually identical to 2d convolutions, but the groups get a lot bigger. Still to be tested. |
+| comments | This is conceptually identical to 2d convolutions, but the groups get a lot bigger. |
+
+| -  | Transposed Convolution |
+| ------------- | ------------- |
+| Group Interpretation  | A transpose convolution can be seen as an upsampling to a larger group, of which the starting group is a subgroup (I don't think there's a group theoretic word for this but let's call it a supergroup). The signal is filled in to be zero on the part of the supergroup outside of the current group.   |
+| Generalization  | Similarly we can upsample to a supergroup of the wallpaper group, which may just be going to a finer grid and keeping the point group, but may also go to a supergroup of the point group.  |
+| Implementation | `GroupConv2D(group='point_group_name', super_group='super_group_name)` |
+| Resulting differences | Spatial dimensions behave as usual, the group dimension potentially increases to a supergroup.|
+| comments | Still to be tested further (may need modified padding). |
+
 
 # Implemented groups
 
@@ -103,9 +114,7 @@ D4 | all rotations of a cuboid, preserving orientation | 8 |
 (further subgroups perhaps to be implemented later)
 
 # Intended additions:
-- The 1D and 3D versions of `GroupConv`, `GroupMaxPooling` and `GroupAveragePooling`
 - `SeparableGroupConv`
-- `GroupConv2DTranspose`
 - `DepthwiseGroupConv2D`
 - `GroupDense`, for when the group does not include translations
 - something like `GroupReduce`, reducing equivariance to a subgroup, but rather than pooling keep all the features (merge with channel axis)
@@ -114,4 +123,4 @@ D4 | all rotations of a cuboid, preserving orientation | 8 |
 
 - <a name="groupconv"/> Group Equivariant Convolutional Networks, Taco Cohen and Max Welling, 2016, [PMLR 48:2990-2999](http://proceedings.mlr.press/v48/cohenc16.html)
 
-- <a name="groupconv3d"/> 3D G-CNNs for Pulmonary Nodule Detection, Marysia Winkels and Taco Cohen, 2018, [International conference on Medical Imaging with Deep Learning](https://arxiv.org/abs/1804.04656)
+- <a name="groupconv3d"/> 3D G-CNNs for Pulmonary Nodule Detection, Marysia Winkels and Taco Cohen, 2018, [International conference on Medical Imaging with Deep Learning](https://arxiv.org/abs/1804.04656)  also see [here](https://github.com/marysia/GrouPy) for an implementation based on GrouPy
