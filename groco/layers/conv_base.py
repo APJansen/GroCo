@@ -135,7 +135,7 @@ class GroupTransforms(Layer):
     def _compute_transformed_kernel_indices(self, kernel, transpose):
         """Compute a tensor of indices used to gather from the kernel to produce the group action on it."""
         if transpose:
-            kernel = tf.transpose(kernel, (0, 1, 3, 2))
+            kernel = self._switch_in_out(kernel)
         indices = self._get_index_tensor(kernel)
 
         axes_info = {'new_group_axis': self.dimensions,
@@ -150,8 +150,14 @@ class GroupTransforms(Layer):
 
         indices = self._merge_group_channels_out(indices)
         if transpose:
-            indices = tf.transpose(indices, (0, 1, 3, 2))
+            indices = self._switch_in_out(indices)
         return indices
+
+    @staticmethod
+    def _switch_in_out(kernel):
+        axes = list(range(kernel.shape.rank))
+        axes[-1], axes[-2] = axes[-2], axes[-1]
+        return tf.transpose(kernel, tuple(axes))
 
     def _restore_kernel_group_axis(self, kernel):
         """
