@@ -16,11 +16,11 @@ class GroupTransforms(Layer):
         repeat_bias
         transform_kernel
         restore_group_axis
+        subgroup_pooling
     Methods used during build:
-        multiply_channels
         build
-        compute_indices
-        get_config
+        compute_conv_indices
+        compute_pooling_indices
     """
 
     def __init__(self, group, kernel_size, dimensions: int, data_format='channels_last',
@@ -231,57 +231,7 @@ class GroupTransforms(Layer):
         axes = axes[:target_axis] + (moved_axis,) + axes[target_axis:]
         return tf.transpose(tensor, axes)
 
-    def multiply_channels(self, output_shape):
-        output_shape = list(output_shape)
-        channels_axis = 1 if self.data_format == 'channels_first' else -1
-        output_shape[channels_axis] *= self.subgroup.order
-        return tf.TensorShape(output_shape)
-
     def get_config(self):
         config = {'group': self.group.name, 'subgroup': self.subgroup.name}
         config.update(self.equivariant_padding.get_config())
         return config
-
-
-def conv_call(self, reshaped_inputs, reshaped_kernel, reshaped_bias):
-    """
-    This is the original call method, with replacements:
-    - self.kernel -> reshaped_kernel (argument)
-    - self.bias -> reshaped_bias (argument)
-    - self.filters -> filters_multiplied = self.filters * self.group.order
-    """
-    input_shape = reshaped_inputs.shape
-
-    if self._is_causal:  # Apply causal padding to inputs for Conv1D.
-        reshaped_inputs = tf.pad(reshaped_inputs, self._compute_causal_padding(reshaped_inputs))
-
-    outputs = self._convolution_op(reshaped_inputs, reshaped_kernel)  # had to add underscore to make it work
-
-    if self.use_bias:
-        output_rank = outputs.shape.rank
-        if self.rank == 1 and self._channels_first:
-            # nn.bias_add does not accept a 1D input tensor.
-            filters_multiplied = self.filters * self.group.order
-            bias = tf.reshape(reshaped_bias, (1, filters_multiplied, 1))
-            outputs += bias
-        else:
-            # Handle multiple batch dimensions.
-            if output_rank is not None and output_rank > 2 + self.rank:
-
-                def _apply_fn(o):
-                    return tf.nn.bias_add(o, reshaped_bias, data_format=self._tf_data_format)
-
-                outputs = tf.keras.utils.conv_utils.squeeze_batch_dims(
-                    outputs, _apply_fn, inner_rank=self.rank + 1)
-            else:
-                outputs = tf.nn.bias_add(
-                    outputs, reshaped_bias, data_format=self._tf_data_format)
-
-    if not tf.executing_eagerly():
-        # Infer the static output shape:
-        out_shape = self._compute_output_shape(input_shape)
-        outputs.set_shape(out_shape)
-
-    if self.activation is not None:
-        return self.activation(outputs)
-    return outputs

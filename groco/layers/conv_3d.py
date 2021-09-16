@@ -1,7 +1,8 @@
 from tensorflow.keras.layers import Conv3D
 from functools import partial
-from groco.layers import GroupTransforms, conv_call
-from groco.groups import space_groups, group_dict
+from groco.layers import GroupTransforms
+from groco.groups import space_groups
+from groco.utils import backup_and_restore_attributes
 
 
 class GroupConv3D(Conv3D):
@@ -30,12 +31,14 @@ class GroupConv3D(Conv3D):
         super().__init__(kernel_size=kernel_size, **kwargs)
         self.group_valued_input = None
 
+    @backup_and_restore_attributes
     def call(self, inputs):
         inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
-        kernel = self.group_transforms.transform_kernel(self.kernel)
-        bias = self.group_transforms.repeat_bias(self.bias)
+        self.kernel = self.group_transforms.transform_kernel(self.kernel)
+        self.bias = self.group_transforms.repeat_bias(self.bias)
+        self.filters *= self.subgroup.order
 
-        outputs = conv_call(self, inputs, kernel, bias)  # to avoid duplication this is not a class method
+        outputs = super().call(inputs)
 
         return self.group_transforms.restore_group_axis(outputs)
 
@@ -51,10 +54,6 @@ class GroupConv3D(Conv3D):
         config = super().get_config()
         config.update(self.group_transforms.get_config())
         return config
-
-    def _compute_output_shape(self, input_shape):
-        """Called in conv_call to set an intermediate output shape."""
-        return self.group_transforms.multiply_channels(super().compute_output_shape(input_shape))
 
 
 OhConv3D = partial(GroupConv3D, group=space_groups.Oh)
