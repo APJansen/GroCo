@@ -117,9 +117,9 @@ class GroupTransforms(Layer):
             reshaped_input = input_shape
         return reshaped_input
 
-    def compute_conv_indices(self, input_shape, kernel, bias):
+    def compute_conv_indices(self, input_shape, kernel, bias, transpose=False):
         self._repeated_bias_indices = self._compute_repeated_bias_indices(bias)
-        self._transformed_kernel_indices = self._compute_transformed_kernel_indices(kernel)
+        self._transformed_kernel_indices = self._compute_transformed_kernel_indices(kernel, transpose)
 
     def compute_pooling_indices(self):
         indices = tf.gather(self.group.composition, axis=1, indices=self.group.cosets[self.subgroup.name])
@@ -132,8 +132,10 @@ class GroupTransforms(Layer):
         indices = tf.concat([indices for _ in range(self.subgroup.order)], axis=0)
         return indices
 
-    def _compute_transformed_kernel_indices(self, kernel):
+    def _compute_transformed_kernel_indices(self, kernel, transpose):
         """Compute a tensor of indices used to gather from the kernel to produce the group action on it."""
+        if transpose:
+            kernel = tf.transpose(kernel, (0, 1, 3, 2))
         indices = self._get_index_tensor(kernel)
 
         axes_info = {'new_group_axis': self.dimensions,
@@ -147,6 +149,8 @@ class GroupTransforms(Layer):
             indices = self._merge_kernel_group_axis(indices)
 
         indices = self._merge_group_channels_out(indices)
+        if transpose:
+            indices = tf.transpose(indices, (0, 1, 3, 2))
         return indices
 
     def _restore_kernel_group_axis(self, kernel):
