@@ -24,14 +24,16 @@ class GroupTransforms(Layer):
     """
 
     def __init__(self, group, kernel_size, dimensions: int, data_format='channels_last',
-                 allow_non_equivariance: bool = False, subgroup=None, **kwargs):
+                 allow_non_equivariance: bool = False, subgroup=None, transpose=False, **kwargs):
         self.group = group if isinstance(group, Group) else group_dict[group]
         self.subgroup = self.group if subgroup is None else group_dict[subgroup]
         self.dimensions = dimensions
 
         self.equivariant_padding = EquivariantPadding(
-            allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=dimensions, **kwargs)
+            allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=dimensions,
+            transpose=transpose, **kwargs)
         self.built_in_padding_option = self.equivariant_padding.built_in_padding_option
+        self.transpose = transpose
 
         super().__init__()
         self.data_format = data_format
@@ -117,9 +119,9 @@ class GroupTransforms(Layer):
             reshaped_input = input_shape
         return reshaped_input
 
-    def compute_conv_indices(self, input_shape, kernel, bias, transpose=False):
+    def compute_conv_indices(self, input_shape, kernel, bias):
         self._repeated_bias_indices = self._compute_repeated_bias_indices(bias)
-        self._transformed_kernel_indices = self._compute_transformed_kernel_indices(kernel, transpose)
+        self._transformed_kernel_indices = self._compute_transformed_kernel_indices(kernel)
 
     def compute_pooling_indices(self):
         indices = tf.gather(self.group.composition, axis=1, indices=self.group.cosets[self.subgroup.name])
@@ -132,9 +134,9 @@ class GroupTransforms(Layer):
         indices = tf.concat([indices for _ in range(self.subgroup.order)], axis=0)
         return indices
 
-    def _compute_transformed_kernel_indices(self, kernel, transpose):
+    def _compute_transformed_kernel_indices(self, kernel):
         """Compute a tensor of indices used to gather from the kernel to produce the group action on it."""
-        if transpose:
+        if self.transpose:
             kernel = self._switch_in_out(kernel)
         indices = self._get_index_tensor(kernel)
 
@@ -149,7 +151,7 @@ class GroupTransforms(Layer):
             indices = self._merge_kernel_group_axis(indices)
 
         indices = self._merge_group_channels_out(indices)
-        if transpose:
+        if self.transpose:
             indices = self._switch_in_out(indices)
         return indices
 

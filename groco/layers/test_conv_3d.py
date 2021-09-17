@@ -14,6 +14,7 @@ class TestGroupConv3D(TestCase):
         self.filters = 5
         self.conv = GroupConv3D
         self.group_dict = space_group_dict
+        self.example_group = self.group_dict['D4']
 
     def test_lift_shape(self):
         signal_on_grid = tf.random.normal(shape=self.shape, seed=42)
@@ -90,6 +91,18 @@ class TestGroupConv3D(TestCase):
                     conv_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes,
                     subgroup=subgroup_name)
 
+                self.assertAllLess(equiv_diff, 1e-4)
+
+    def test_padding_equiv(self):
+        for padding in ['same_equiv', 'valid_equiv']:
+            for strides in [3, 5]:
+                group = self.example_group
+                signal_on_group = tf.random.normal(shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42)
+                conv_layer = self.conv(group=group, kernel_size=3, strides=strides, filters=self.filters, padding=padding,
+                                       subgroup=None)
+                equiv_diff = test_equivariance(
+                    conv_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes,
+                    subgroup=None)
                 self.assertAllLess(equiv_diff, 1e-4)
 
 
@@ -102,6 +115,7 @@ class TestGroupConv3DTranspose(TestCase):
         self.filters = 5
         self.conv = GroupConv3DTranspose
         self.group_dict = space_group_dict
+        self.example_group = self.group_dict['D4']
 
     def test_lift_shape(self):
         signal_on_grid = tf.random.normal(shape=self.shape, seed=42)
@@ -178,6 +192,18 @@ class TestGroupConv3DTranspose(TestCase):
                     conv_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes,
                     subgroup=subgroup_name)
 
+                self.assertAllLess(equiv_diff, 1e-4)
+
+    def test_padding_equiv(self):
+        for padding in ['same_equiv', 'valid_equiv']:
+            for strides in [3, 5]:
+                group = self.example_group
+                signal_on_group = tf.random.normal(shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42)
+                conv_layer = self.conv(group=group, kernel_size=3, strides=strides, filters=self.filters, padding=padding,
+                                       subgroup=None)
+                equiv_diff = test_equivariance(
+                    conv_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes,
+                    subgroup=None)
                 self.assertAllLess(equiv_diff, 1e-4)
 
 tf.test.main()

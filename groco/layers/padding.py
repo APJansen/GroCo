@@ -18,7 +18,7 @@ class EquivariantPadding(Layer):
      on top of their usual counterparts to maintain equivariance.
     """
     def __init__(self, kernel_size, dimensions: int, strides=1, padding='valid_equiv', allow_non_equivariance=False,
-                 data_format='channels_last', **kwargs):
+                 data_format='channels_last', transpose=False, **kwargs):
         self.padding_option = self.format_padding_option(padding)
         self.built_in_padding_option = padding[:-6] if padding.endswith('_equiv') else padding
 
@@ -29,6 +29,7 @@ class EquivariantPadding(Layer):
         self.kernel_sizes = tf.constant(kernel_size if isinstance(kernel_size, tuple) else
                                         tuple(kernel_size for _ in range(self.dimensions)))
         self.data_format = data_format
+        self.transpose = transpose
         # set during build
         self.equivariant_padding = None
         self.needs_padding = None
@@ -65,17 +66,18 @@ class EquivariantPadding(Layer):
         self.equivariant_padding = self.split_padding(extra_padding)
 
     def compute_equivariant_padding(self, spatial_shape):
-        if self.padding_option in ['SAME', 'SAME_EQUIV']:
-            built_in_padding = self.compute_same_padding(spatial_shape)
-        else:
-            built_in_padding = tf.zeros(shape=self.kernel_sizes.shape, dtype=tf.int32)
-
+        built_in_padding = self.compute_built_in_padding(spatial_shape)
         extra_padding = self.compute_extra_padding(spatial_shape, built_in_padding)
-
         return extra_padding
 
-    def compute_same_padding(self, spatial_shape):
-        return tf.nn.relu(self.kernel_sizes - self.strides + (-spatial_shape % self.strides))
+    def compute_built_in_padding(self, spatial_shape):
+        if self.padding_option in ['SAME', 'SAME_EQUIV']:
+            return tf.nn.relu(self.kernel_sizes - self.strides + (-spatial_shape % self.strides))
+        else:
+            if self.transpose:
+                return tf.nn.relu(self.strides - self.kernel_sizes)
+            else:
+                return tf.zeros(shape=self.kernel_sizes.shape, dtype=tf.int32)
 
     def compute_extra_padding(self, spatial_shape, built_in_padding):
         extra_padding = (-(spatial_shape + built_in_padding - self.kernel_sizes)) % self.strides

@@ -80,7 +80,7 @@ class GroupConv3DTranspose(Conv3DTranspose):
     def __init__(self, group, kernel_size, allow_non_equivariance: bool = False, subgroup=None, **kwargs):
         self.group_transforms = GroupTransforms(
             allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=3,
-            group=group, subgroup=subgroup, **kwargs)
+            group=group, subgroup=subgroup, transpose=True, **kwargs)
         kwargs['padding'] = self.group_transforms.built_in_padding_option
         self.group = self.group_transforms.group
         self.subgroup = self.group_transforms.subgroup
@@ -103,7 +103,7 @@ class GroupConv3DTranspose(Conv3DTranspose):
         reshaped_input = self.group_transforms.build(input_shape)
         self.group_valued_input = self.group_transforms.group_valued_input
         super().build(reshaped_input)
-        self.group_transforms.compute_conv_indices(input_shape, self.kernel, self.bias, transpose=True)
+        self.group_transforms.compute_conv_indices(input_shape, self.kernel, self.bias)
         if self.group_valued_input:
             self.input_spec.axes = {self._get_channel_axis(): input_shape[self.group_transforms.channels_axis]}
             self.input_spec.ndim += 1
