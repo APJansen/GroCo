@@ -1,8 +1,8 @@
-from tensorflow.keras.layers import Conv2D, Conv2DTranspose
+from tensorflow.keras.layers import Conv2D, Conv2DTranspose, SeparableConv2D
 from functools import partial
 from groco.layers import GroupTransforms
 from groco.groups import wallpaper_groups
-from groco.utils import backup_and_restore_attributes
+from groco.utils import backup_and_restore
 
 
 class GroupConv2D(Conv2D):
@@ -31,7 +31,7 @@ class GroupConv2D(Conv2D):
         super().__init__(kernel_size=kernel_size, **kwargs)
         self.group_valued_input = None
 
-    @backup_and_restore_attributes
+    @backup_and_restore(('kernel', 'bias', 'filters'))
     def call(self, inputs):
         inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
         self.kernel = self.group_transforms.transform_kernel(self.kernel)
@@ -91,7 +91,7 @@ class GroupConv2DTranspose(Conv2DTranspose):
         super().__init__(kernel_size=kernel_size, **kwargs)
         self.group_valued_input = None
 
-    @backup_and_restore_attributes
+    @backup_and_restore(('kernel', 'bias', 'filters'))
     def call(self, inputs):
         inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
         self.kernel = self.group_transforms.transform_kernel(self.kernel)
@@ -115,3 +115,4 @@ class GroupConv2DTranspose(Conv2DTranspose):
         config = super().get_config()
         config.update(self.group_transforms.get_config())
         return config
+

@@ -2,7 +2,7 @@ from tensorflow.keras.layers import Conv3D, Conv3DTranspose
 from functools import partial
 from groco.layers import GroupTransforms
 from groco.groups import space_groups
-from groco.utils import backup_and_restore_attributes
+from groco.utils import backup_and_restore
 
 
 class GroupConv3D(Conv3D):
@@ -31,7 +31,7 @@ class GroupConv3D(Conv3D):
         super().__init__(kernel_size=kernel_size, **kwargs)
         self.group_valued_input = None
 
-    @backup_and_restore_attributes
+    @backup_and_restore(('kernel', 'bias', 'filters'))
     def call(self, inputs):
         inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
         self.kernel = self.group_transforms.transform_kernel(self.kernel)
@@ -88,7 +88,7 @@ class GroupConv3DTranspose(Conv3DTranspose):
         super().__init__(kernel_size=kernel_size, **kwargs)
         self.group_valued_input = None
 
-    @backup_and_restore_attributes
+    @backup_and_restore(('kernel', 'bias', 'filters'))
     def call(self, inputs):
         inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
         self.kernel = self.group_transforms.transform_kernel(self.kernel)

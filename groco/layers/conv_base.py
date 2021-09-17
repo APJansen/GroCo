@@ -24,7 +24,8 @@ class GroupTransforms(Layer):
     """
 
     def __init__(self, group, kernel_size, dimensions: int, data_format='channels_last',
-                 allow_non_equivariance: bool = False, subgroup=None, transpose=False, **kwargs):
+                 allow_non_equivariance: bool = False, subgroup=None,
+                 transpose=False, separable=False, **kwargs):
         self.group = group if isinstance(group, Group) else group_dict[group]
         self.subgroup = self.group if subgroup is None else group_dict[subgroup]
         self.dimensions = dimensions
@@ -34,6 +35,7 @@ class GroupTransforms(Layer):
             transpose=transpose, **kwargs)
         self.built_in_padding_option = self.equivariant_padding.built_in_padding_option
         self.transpose = transpose
+        self.separable = separable
 
         super().__init__()
         self.data_format = data_format
@@ -135,7 +137,9 @@ class GroupTransforms(Layer):
         return indices
 
     def _compute_transformed_kernel_indices(self, kernel):
-        """Compute a tensor of indices used to gather from the kernel to produce the group action on it."""
+        """
+        Compute a tensor of indices used to gather from the kernel to produce the group action on it.
+        """
         if self.transpose:
             kernel = self._switch_in_out(kernel)
         indices = self._get_index_tensor(kernel)
