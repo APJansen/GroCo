@@ -23,7 +23,7 @@ def test_equivariance(layer, signal, group_name=None, spatial_axes: tuple = (1, 
     subgroup = group_dict[subgroup_name]
     assert subgroup_name in group.subgroup.keys()
 
-    g_signal = group.action(signal, spatial_axes=spatial_axes, group_axis=group_axis, subgroup=subgroup_name,
+    g_signal = group.action(signal, spatial_axes=spatial_axes, group_axis=group_axis, acting_group=subgroup_name,
                             new_group_axis=0)
     # merge with batch dimension
     g_signal = tf.reshape(g_signal, (g_signal.shape[0] * g_signal.shape[1]) + g_signal.shape[2:])

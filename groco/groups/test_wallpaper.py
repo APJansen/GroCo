@@ -84,6 +84,14 @@ class TestWallpaperGroup(TestCase):
             g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=0)
             self.assertEqual(g_signal.shape, (group.order) + signal.shape)
 
+    def test_action_on_subgroup_shape(self):
+        for group in wallpaper_group_dict.values():
+            for subgroup_name, subgroup_indices in group.subgroup.items():
+                signal = tf.random.normal((28, 28, len(subgroup_indices), 3))
+                g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=0, domain_group=subgroup_name,
+                                        acting_group=group.name)
+                self.assertEqual(g_signal.shape, (group.order, ) + signal.shape)
+
     def test_action_on_signal_composition(self):
         signal = tf.random.normal((28, 28, 3), seed=42)
         new_group_axis = 3

@@ -26,16 +26,18 @@ class GroupTransforms(Layer):
     def __init__(self, group, kernel_size, dimensions: int, data_format='channels_last',
                  allow_non_equivariance: bool = False, subgroup=None,
                  transpose=False, separable=False, **kwargs):
+        self.dimensions = dimensions
+        self.transpose = transpose
+        self.separable = separable
+
         self.group = group if isinstance(group, Group) else group_dict[group]
         self.subgroup = self.group if subgroup is None else group_dict[subgroup]
-        self.dimensions = dimensions
+        self.domain_group, self.acting_group = (self.subgroup, self.group) if transpose else (self.group, self.subgroup)
 
         self.equivariant_padding = EquivariantPadding(
             allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=dimensions,
             transpose=transpose, **kwargs)
         self.built_in_padding_option = self.equivariant_padding.built_in_padding_option
-        self.transpose = transpose
-        self.separable = separable
 
         super().__init__()
         self.data_format = data_format
@@ -58,7 +60,8 @@ class GroupTransforms(Layer):
         If necessary for equivariance, pad input.
 
         Shapes in 2D case (with default data_format='channels_last'):
-        (batch, height, width, group.order, channels) -> (batch, height', width', group.order * channels)
+        (batch, height, width, domain_group.order, channels) ->
+        (batch, height', width', domain_group.order * channels)
         """
         if self.group_valued_input:
             inputs = self._merge_axes(inputs, merged_axis=self.group_axis, target_axis=self.channels_axis)
@@ -74,23 +77,24 @@ class GroupTransforms(Layer):
         Perform the group action on the kernel, as a signal on the group, or on the grid in a lifting convolution.
 
         Shapes in 2D case:
-        (height, width, group.order * channels_in, channels_out) ->
-        (height, width, group.order * channels_in, subgroup.order * channels_out)
+        (height, width, domain_group.order * channels_in, channels_out) ->
+        (height, width, domain_group.order * channels_in, acting_group.order * channels_out)
         """
         return tf.gather(tf.reshape(kernel, [-1]), indices=self._transformed_kernel_indices, axis=0)
 
-    def restore_group_axis(self, outputs, subgroup=True):
+    def restore_group_axis(self, outputs):
         """
         Reshape the output of the convolution, splitting off the group index from the channel axis.
 
         Shapes in 2D case (with default data_format='channels_last'):
-        (batch, height, width, subgroup.order * channels) -> (batch, height, width, subgroup.order, channels)
+        (batch, height, width, acting_group.order * channels) ->
+        (batch, height, width, acting_group.order, channels)
         """
         group_channels_axis = self.channels_axis
         if self.group_valued_input and self.data_format == 'channels_last':
             group_channels_axis -= 1
         group_axis = self.group_axis + (self.data_format == 'channels_first')
-        order = self.subgroup.order if subgroup else self.group.order
+        order = self.acting_group.order
         return self._split_axes(outputs, factor=order, split_axis=group_channels_axis, target_axis=group_axis)
 
     def subgroup_pooling(self, inputs, pool_type: str):
@@ -111,9 +115,9 @@ class GroupTransforms(Layer):
             self.channels_axis += 1
 
         if self.group_valued_input:
-            assert input_shape[self.group_axis] == self.group.order, \
+            assert input_shape[self.group_axis] == self.domain_group.order, \
                 f'Got input shape {input_shape[self.group_axis]} in group axis {self.group_axis},' \
-                f'expected {self.group.order}.'
+                f'expected {self.domain_group.order}.'
 
             reshaped_input = self._merge_shapes(
                 input_shape, merged_axis=self.group_axis, target_axis=self.channels_axis)
@@ -134,7 +138,7 @@ class GroupTransforms(Layer):
     def _compute_repeated_bias_indices(self, bias):
         """Compute a 1D tensor of indices used to gather from the bias in order to repeat it across the group axis."""
         indices = self._get_index_tensor(bias)
-        indices = tf.concat([indices for _ in range(self.subgroup.order)], axis=0)
+        indices = tf.concat([indices for _ in range(self.acting_group.order)], axis=0)
         return indices
 
     def _compute_transformed_kernel_indices(self, kernel):
@@ -145,14 +149,16 @@ class GroupTransforms(Layer):
             kernel = self._switch_in_out(kernel)
         indices = self._get_index_tensor(kernel)
 
-        axes_info = {'new_group_axis': self.dimensions,
-                     'spatial_axes': tuple(d for d in range(self.dimensions))}
+        kwargs = {'new_group_axis': self.dimensions,
+                  'spatial_axes': tuple(d for d in range(self.dimensions)),
+                  'domain_group': self.domain_group.name,
+                  'acting_group': self.acting_group.name}
 
         if not self.group_valued_input:
-            indices = self.group.action(indices, subgroup=self.subgroup.name, **axes_info)
+            indices = self.group.action(indices, **kwargs)
         else:
             indices = self._restore_kernel_group_axis(indices)
-            indices = self.group.action(indices, group_axis=self.dimensions, subgroup=self.subgroup.name, **axes_info)
+            indices = self.group.action(indices, group_axis=self.dimensions, **kwargs)
             indices = self._merge_kernel_group_axis(indices)
 
         indices = self._merge_group_channels_out(indices)
@@ -169,12 +175,12 @@ class GroupTransforms(Layer):
     def _restore_kernel_group_axis(self, kernel):
         """
         Shapes in 2D:
-        (height, width, group.order * in_channels, out_channels) ->
-        (height, width, group.order, in_channels, out_channels)
+        (height, width, domain_group.order * in_channels, out_channels) ->
+        (height, width, domain_group.order, in_channels, out_channels)
         """
         group_channel_axis = self.dimensions
         group_axis = self.dimensions
-        return self._split_axes(kernel, factor=self.group.order, split_axis=group_channel_axis, target_axis=group_axis)
+        return self._split_axes(kernel, factor=self.domain_group.order, split_axis=group_channel_axis, target_axis=group_axis)
 
     def _merge_kernel_group_axis(self, kernel):
         """
@@ -245,6 +251,9 @@ class GroupTransforms(Layer):
         return tf.transpose(tensor, axes)
 
     def get_config(self):
-        config = {'group': self.group.name, 'subgroup': self.subgroup.name}
+        if self.transpose:
+            config = {'group': self.domain_group.name, 'subgroup': self.acting_group.name}
+        else:
+            config = {'group': self.acting_group.name, 'subgroup': self.domain_group.name}
         config.update(self.equivariant_padding.get_config())
         return config

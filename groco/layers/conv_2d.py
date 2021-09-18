@@ -98,8 +98,7 @@ class GroupConv2DTranspose(Conv2DTranspose):
         self.kernel = self.group_transforms.transform_kernel(self.kernel)
         if self.use_bias:
             self.bias = self.group_transforms.repeat_bias(self.bias)
-        self.filters *= self.subgroup.order
-
+        self.filters *= self.group.order
         outputs = super().call(inputs)
 
         return self.group_transforms.restore_group_axis(outputs)
@@ -117,4 +116,3 @@ class GroupConv2DTranspose(Conv2DTranspose):
         config = super().get_config()
         config.update(self.group_transforms.get_config())
         return config
-
