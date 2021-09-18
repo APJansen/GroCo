@@ -1,4 +1,4 @@
-from tensorflow.keras.layers import Conv2D, Conv2DTranspose, SeparableConv2D
+from tensorflow.keras.layers import Conv2D, Conv2DTranspose
 from functools import partial
 from groco.layers import GroupTransforms
 from groco.groups import wallpaper_groups
@@ -35,7 +35,8 @@ class GroupConv2D(Conv2D):
     def call(self, inputs):
         inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
         self.kernel = self.group_transforms.transform_kernel(self.kernel)
-        self.bias = self.group_transforms.repeat_bias(self.bias)
+        if self.use_bias:
+            self.bias = self.group_transforms.repeat_bias(self.bias)
         self.filters *= self.subgroup.order
 
         outputs = super().call(inputs)
@@ -46,7 +47,7 @@ class GroupConv2D(Conv2D):
         reshaped_input = self.group_transforms.build(input_shape)
         self.group_valued_input = self.group_transforms.group_valued_input
         super().build(reshaped_input)
-        self.group_transforms.compute_conv_indices(input_shape, self.kernel, self.bias)
+        self.group_transforms.compute_conv_indices(input_shape, self.kernel, self.bias, self.use_bias)
         if self.group_valued_input:
             self.input_spec.axes = {self._get_channel_axis(): input_shape[self.group_transforms.channels_axis]}
 
@@ -95,7 +96,8 @@ class GroupConv2DTranspose(Conv2DTranspose):
     def call(self, inputs):
         inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
         self.kernel = self.group_transforms.transform_kernel(self.kernel)
-        self.bias = self.group_transforms.repeat_bias(self.bias)
+        if self.use_bias:
+            self.bias = self.group_transforms.repeat_bias(self.bias)
         self.filters *= self.subgroup.order
 
         outputs = super().call(inputs)
@@ -106,7 +108,7 @@ class GroupConv2DTranspose(Conv2DTranspose):
         reshaped_input = self.group_transforms.build(input_shape)
         self.group_valued_input = self.group_transforms.group_valued_input
         super().build(reshaped_input)
-        self.group_transforms.compute_conv_indices(input_shape, self.kernel, self.bias)
+        self.group_transforms.compute_conv_indices(input_shape, self.kernel, self.bias, self.use_bias)
         if self.group_valued_input:
             self.input_spec.axes = {self._get_channel_axis(): input_shape[self.group_transforms.channels_axis]}
             self.input_spec.ndim += 1
