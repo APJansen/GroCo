@@ -2,6 +2,7 @@ import tensorflow as tf
 from groco.layers import EquivariantPadding
 from tensorflow.keras.layers import Layer
 from groco.groups import Group, group_dict
+from groco import utils
 
 
 class GroupTransforms(Layer):
@@ -25,14 +26,16 @@ class GroupTransforms(Layer):
 
     def __init__(self, group, kernel_size, dimensions: int, data_format='channels_last',
                  allow_non_equivariance: bool = False, subgroup=None,
-                 transpose=False, separable=False, **kwargs):
+                 transpose=False, separable=False, pooling=False, **kwargs):
         self.dimensions = dimensions
         self.transpose = transpose
         self.separable = separable
 
         self.group = group if isinstance(group, Group) else group_dict[group]
         self.subgroup = self.group if subgroup is None else group_dict[subgroup]
-        self.domain_group, self.acting_group = (self.subgroup, self.group) if transpose else (self.group, self.subgroup)
+        self.domain_group, self.acting_group = self.group, self.subgroup
+        if transpose:
+            self.domain_group, self.acting_group = self.acting_group, self.domain_group
 
         self.equivariant_padding = EquivariantPadding(
             allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=dimensions,
@@ -64,7 +67,7 @@ class GroupTransforms(Layer):
         (batch, height', width', domain_group.order * channels)
         """
         if self.group_valued_input:
-            inputs = self._merge_axes(inputs, merged_axis=self.group_axis, target_axis=self.channels_axis)
+            inputs = utils.merge_axes(inputs, merged_axis=self.group_axis, target_axis=self.channels_axis)
         inputs = self.equivariant_padding(inputs)
         return inputs
 
@@ -95,7 +98,7 @@ class GroupTransforms(Layer):
             group_channels_axis -= 1
         group_axis = self.group_axis + (self.data_format == 'channels_first')
         order = self.acting_group.order
-        return self._split_axes(outputs, factor=order, split_axis=group_channels_axis, target_axis=group_axis)
+        return utils.split_axes(outputs, factor=order, split_axis=group_channels_axis, target_axis=group_axis)
 
     def subgroup_pooling(self, inputs, pool_type: str):
         """
@@ -119,7 +122,7 @@ class GroupTransforms(Layer):
                 f'Got input shape {input_shape[self.group_axis]} in group axis {self.group_axis},' \
                 f'expected {self.domain_group.order}.'
 
-            reshaped_input = self._merge_shapes(
+            reshaped_input = utils.merge_shapes(
                 input_shape, merged_axis=self.group_axis, target_axis=self.channels_axis)
         else:
             reshaped_input = input_shape
@@ -137,7 +140,7 @@ class GroupTransforms(Layer):
 
     def _compute_repeated_bias_indices(self, bias):
         """Compute a 1D tensor of indices used to gather from the bias in order to repeat it across the group axis."""
-        indices = self._get_index_tensor(bias)
+        indices = utils.get_index_tensor(bias)
         indices = tf.concat([indices for _ in range(self.acting_group.order)], axis=0)
         return indices
 
@@ -147,7 +150,7 @@ class GroupTransforms(Layer):
         """
         if self.transpose:
             kernel = self._switch_in_out(kernel)
-        indices = self._get_index_tensor(kernel)
+        indices = utils.get_index_tensor(kernel)
 
         kwargs = {'new_group_axis': self.dimensions,
                   'spatial_axes': tuple(d for d in range(self.dimensions)),
@@ -180,7 +183,7 @@ class GroupTransforms(Layer):
         """
         group_channel_axis = self.dimensions
         group_axis = self.dimensions
-        return self._split_axes(kernel, factor=self.domain_group.order, split_axis=group_channel_axis, target_axis=group_axis)
+        return utils.split_axes(kernel, factor=self.domain_group.order, split_axis=group_channel_axis, target_axis=group_axis)
 
     def _merge_kernel_group_axis(self, kernel):
         """
@@ -190,7 +193,7 @@ class GroupTransforms(Layer):
         """
         group_axis = self.dimensions + 1  # here and below extra +1 because the subgroup axis is inserted before
         channels_in_axis = self.dimensions + 1 + 1
-        return self._merge_axes(kernel, merged_axis=group_axis, target_axis=channels_in_axis)
+        return utils.merge_axes(kernel, merged_axis=group_axis, target_axis=channels_in_axis)
 
     def _merge_group_channels_out(self, kernel):
         """
@@ -200,55 +203,7 @@ class GroupTransforms(Layer):
         """
         group_axis = self.dimensions
         channels_out_axis = self.dimensions + 2
-        return self._merge_axes(kernel, merged_axis=group_axis, target_axis=channels_out_axis)
-
-    @staticmethod
-    def _get_index_tensor(tensor):
-        """
-        Return a tensor of indices that reproduces the input through
-        `tf.gather(tf.reshape(tensor, -1), indices=indices)`
-        """
-        if isinstance(tensor, tf.TensorShape):
-            return tf.reshape(tf.range(tf.reduce_prod(tensor)), tensor)
-        else:
-            return tf.reshape(tf.range(tf.size(tensor)), tensor.shape)
-
-    def _merge_axes(self, tensor, merged_axis: int, target_axis: int):
-        """Transpose the merge_axis to the left of the target_axis and then merge them."""
-        shape = self._merge_shapes(tensor.shape, merged_axis=merged_axis, target_axis=target_axis)
-        shape = [s if s is not None else -1 for s in shape]
-        transposed_tensor = self._move_axis_to_left_of(tensor, moved_axis=merged_axis, target_axis=target_axis)
-        return tf.reshape(transposed_tensor, shape)
-
-    @staticmethod
-    def _merge_shapes(shape, merged_axis: int, target_axis: int):
-        shape = list(shape)
-        shape[target_axis] *= shape[merged_axis]
-        shape.pop(merged_axis)
-        return shape
-
-    def _split_axes(self, tensor, factor: int, split_axis: int, target_axis: int):
-        """
-        Split split_axis, dividing its size by factor, putting the new axis directly to its left,
-        which is then moved to the target_axis index.
-        """
-        shape = list(tensor.shape)
-        shape[split_axis] //= factor
-        shape = tf.TensorShape(shape[:split_axis] + [factor] + shape[split_axis:])
-        shape = [s if s is not None else -1 for s in shape]
-        tensor_reshaped = tf.reshape(tensor, shape)
-        tensor_transposed = self._move_axis_to_left_of(tensor_reshaped, moved_axis=split_axis, target_axis=target_axis)
-        return tensor_transposed
-
-    @staticmethod
-    def _move_axis_to_left_of(tensor, moved_axis: int, target_axis: int):
-        """Puts the moved_axis to the left of the target_axis, leaving the order of the other axes invariant."""
-        axes = tuple(range(tensor.shape.rank))
-        axes = axes[:moved_axis] + axes[moved_axis + 1:]
-        if moved_axis < target_axis:
-            target_axis -= 1
-        axes = axes[:target_axis] + (moved_axis,) + axes[target_axis:]
-        return tf.transpose(tensor, axes)
+        return utils.merge_axes(kernel, merged_axis=group_axis, target_axis=channels_out_axis)
 
     def get_config(self):
         if self.transpose:

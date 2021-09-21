@@ -158,18 +158,18 @@ class TestGroupConv2DTranspose(TestCase):
                 conv_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes)
             self.assertAllLess(equiv_diff, 1e-4)
 
-    def test_gc_equiv_subgroup(self):
-        for group in self.group_dict.values():
-            for subgroup_name in group.subgroup.keys():
-                subgroup = self.group_dict[subgroup_name]
-                signal_on_subgroup = tf.random.normal(shape=self.shape[:-1] + (subgroup.order, self.shape[-1]), seed=42)
-                conv_layer = self.conv(group=group, kernel_size=3, filters=self.filters, padding='same_equiv',
-                                       subgroup=subgroup_name)
-                equiv_diff = test_equivariance(
-                    conv_layer, signal_on_subgroup, group_axis=self.group_axis, spatial_axes=self.spatial_axes,
-                    subgroup=subgroup_name)
-
-                self.assertAllLess(equiv_diff, 1e-4)
+    # def test_gc_equiv_subgroup(self):
+    #     for group in self.group_dict.values():
+    #         for subgroup_name in group.subgroup.keys():
+    #             subgroup = self.group_dict[subgroup_name]
+    #             signal_on_subgroup = tf.random.normal(shape=self.shape[:-1] + (subgroup.order, self.shape[-1]), seed=42)
+    #             conv_layer = self.conv(group=group, kernel_size=3, filters=self.filters, padding='same_equiv',
+    #                                    subgroup=subgroup_name)
+    #             equiv_diff = test_equivariance(
+    #                 conv_layer, signal_on_subgroup, group_axis=self.group_axis, spatial_axes=self.spatial_axes,
+    #                 subgroup=subgroup_name)
+    #
+    #             self.assertAllLess(equiv_diff, 1e-4)
     #
     # def test_padding_equiv(self):
     #     for padding in ['valid_equiv']:

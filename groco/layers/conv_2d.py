@@ -99,6 +99,7 @@ class GroupConv2DTranspose(Conv2DTranspose):
         if self.use_bias:
             self.bias = self.group_transforms.repeat_bias(self.bias)
         self.filters *= self.group.order
+
         outputs = super().call(inputs)
 
         return self.group_transforms.restore_group_axis(outputs)

@@ -12,7 +12,7 @@ class GroupPooling3D(Layer):
                  **kwargs):
         self.group_transforms = GroupTransforms(
             allow_non_equivariance=allow_non_equivariance, kernel_size=pool_size, dimensions=3,
-            group=group, subgroup=subgroup, **kwargs)
+            group=group, subgroup=subgroup, pooling=True, **kwargs)
         kwargs['padding'] = self.group_transforms.built_in_padding_option
         self.group = self.group_transforms.group
         self.subgroup = self.group_transforms.subgroup
@@ -26,11 +26,10 @@ class GroupPooling3D(Layer):
         self.pooling_indices = None  # created during build
 
     def call(self, inputs):
+        inputs = self.group_transforms.subgroup_pooling(inputs, self.pool_type)
         inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
         outputs = self.pooling(inputs)
-        outputs = self.group_transforms.restore_group_axis(outputs, subgroup=False)
-
-        return self.group_transforms.subgroup_pooling(outputs, self.pool_type)
+        return self.group_transforms.restore_group_axis(outputs)
 
     def build(self, input_shape):
         reshaped_input = self.group_transforms.build(input_shape)

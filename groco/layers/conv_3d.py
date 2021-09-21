@@ -95,7 +95,7 @@ class GroupConv3DTranspose(Conv3DTranspose):
         self.kernel = self.group_transforms.transform_kernel(self.kernel)
         if self.use_bias:
             self.bias = self.group_transforms.repeat_bias(self.bias)
-        self.filters *= self.subgroup.order
+        self.filters *= self.group.order
 
         outputs = super().call(inputs)
 
