@@ -76,7 +76,7 @@ class Group:
         domain_group_order = len(self.subgroup[domain_group])
         # fill in zeroes outside of domain group if necessary
         if domain_group_order < self.order:
-            signal = self._fill_zeroes(signal, group_axis, self.subgroup[domain_group])
+            signal = self.upsample(signal, group_axis, domain_group)
 
         # action on grid
         transformed_signal = self._action_on_grid(
@@ -86,8 +86,7 @@ class Group:
         shape = transformed_signal.shape
         transformed_signal = tf.reshape(
             transformed_signal, shape[:group_axis] + (acting_group_order * self.order) + shape[group_axis + 2:])
-        composition_indices = self._composition_flat_indices(
-            self.subgroup[acting_group], self.subgroup[domain_group])
+        composition_indices = self._composition_flat_indices(acting_group, domain_group)
         transformed_signal = tf.gather(transformed_signal, axis=group_axis, indices=composition_indices)
         transformed_signal = tf.reshape(
             transformed_signal, shape[:group_axis] + (acting_group_order, domain_group_order) + shape[group_axis + 2:])
@@ -100,25 +99,23 @@ class Group:
 
         return transformed_signal
 
-    def _fill_zeroes(self, signal, group_axis, subgroup_indices):
+    def upsample(self, signal, group_axis, domain_group):
+        domain_group_indices = self.subgroup[domain_group]
         zeros = tf.zeros(shape=signal.shape[:group_axis] + (1,) + signal.shape[group_axis + 1:], dtype=signal.dtype)
         filled_signal = []
-        i_sub = 0
+        index_to_subgroup = {val: index for index, val in enumerate(domain_group_indices)}
         for i in range(self.order):
-            if i in subgroup_indices:
-                wtf = tf.gather(signal, axis=group_axis, indices=[i_sub, ])
-                filled_signal.append(wtf)
-                i_sub += 1
+            if i in domain_group_indices:
+                filled_signal.append(tf.gather(signal, axis=group_axis, indices=[index_to_subgroup[i], ]))
             else:
                 filled_signal.append(zeros)
         return tf.concat(filled_signal, axis=group_axis)
 
-    def _composition_flat_indices(self, acting_group_indices, domain_group_indices):
-        acting_inv_indices = [self.inverses[i] for i in acting_group_indices]
+    def _composition_flat_indices(self, acting_group, domain_group):
+        acting_inv_indices = [self.inverses[i] for i in self.subgroup[acting_group]]
         subgroup_composition = tf.gather(self.composition, axis=0, indices=acting_inv_indices)
-        subgroup_composition = tf.gather(subgroup_composition, axis=1, indices=domain_group_indices)
-        order = len(domain_group_indices)
-        group_composition_indices = tf.constant([[i * order + c for c in row] for i, row in
+        subgroup_composition = tf.gather(subgroup_composition, axis=1, indices=self.subgroup[domain_group])
+        group_composition_indices = tf.constant([[i * self.order + c for c in row] for i, row in
                                                  enumerate(subgroup_composition.numpy())])
         return tf.reshape(group_composition_indices, [-1])
 

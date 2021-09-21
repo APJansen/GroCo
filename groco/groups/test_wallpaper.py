@@ -1,6 +1,7 @@
 from tensorflow.test import TestCase
 from groco.groups import wallpaper_group_dict
 import tensorflow as tf
+from groco.utils import test_equivariance
 
 
 class TestWallpaperGroup(TestCase):
@@ -141,6 +142,37 @@ class TestWallpaperGroup(TestCase):
         """Test only if the keys are the same."""
         for group in wallpaper_group_dict.values():
             self.assertAllEqual(set(group.subgroup.keys()), set(group.cosets.keys()))
+
+    def test_upsample_downsample(self):
+        for group in wallpaper_group_dict.values():
+            for subgroup_name, subgroup_indices in group.subgroup.items():
+                subgroup_signal = tf.random.normal((1, 28, 28, len(subgroup_indices), 3))
+                group_signal = group.upsample(subgroup_signal, group_axis=3, domain_group=subgroup_name)
+                subgroup_signal_reconstructed = tf.gather(group_signal, axis=3, indices=group.subgroup[subgroup_name])
+
+                msg = f"Upsampling with zeroes from subgroup {subgroup_name} to {group.name} and back doesn't give the same"
+                self.assertAllEqual(subgroup_signal, subgroup_signal_reconstructed, msg=msg)
+
+    def test_domain_group_action(self):
+        for group in wallpaper_group_dict.values():
+            for subgroup_name, subgroup_indices in group.subgroup.items():
+                subgroup_signal = tf.random.normal((1, 28, 28, len(subgroup_indices), 3))
+                subgroup = wallpaper_group_dict[subgroup_name]
+                action_1 = subgroup.action(subgroup_signal, spatial_axes=(1, 2), group_axis=3, new_group_axis=0)
+                action_2 = group.action(subgroup_signal, spatial_axes=(1, 2), group_axis=3, new_group_axis=0,
+                                        domain_group=subgroup_name, acting_group=subgroup_name)
+                self.assertAllEqual(action_1, action_2)
+
+    def test_upsample_equiv(self):
+        for group in wallpaper_group_dict.values():
+            for subgroup_name, subgroup_indices in group.subgroup.items():
+                subgroup_signal = tf.random.normal((1, 28, 28, len(subgroup_indices), 3))
+                layer = lambda s: group.upsample(s, group_axis=3, domain_group=subgroup_name)
+
+                equiv_diff = test_equivariance(
+                    layer, subgroup_signal, group_axis=3, spatial_axes=(1, 2),
+                    group=group, domain_group=subgroup_name, target_group=group.name, acting_group=subgroup_name)
+                self.assertAllLess(equiv_diff, 1e-4)
 
 
 tf.test.main()

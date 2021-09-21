@@ -1,6 +1,7 @@
 from tensorflow.test import TestCase
 from groco.groups import space_group_dict
 import tensorflow as tf
+from groco.utils import test_equivariance
 
 
 class TestSpaceGroup(TestCase):
@@ -122,6 +123,27 @@ class TestSpaceGroup(TestCase):
         """Test only if the keys are the same."""
         for group in space_group_dict.values():
             self.assertAllEqual(set(group.subgroup.keys()), set(group.cosets.keys()))
+
+    def test_domain_group_action(self):
+        for group in space_group_dict.values():
+            for subgroup_name, subgroup_indices in group.subgroup.items():
+                subgroup_signal = tf.random.normal((1, 28, 28, 28, len(subgroup_indices), 3))
+                subgroup = space_group_dict[subgroup_name]
+                action_1 = subgroup.action(subgroup_signal, spatial_axes=(1, 2, 3), group_axis=4, new_group_axis=0)
+                action_2 = group.action(subgroup_signal, spatial_axes=(1, 2, 3), group_axis=4, new_group_axis=0,
+                                        domain_group=subgroup_name, acting_group=subgroup_name)
+                self.assertAllEqual(action_1, action_2)
+
+    def test_upsample_equiv(self):
+        for group in space_group_dict.values():
+            for subgroup_name, subgroup_indices in group.subgroup.items():
+                subgroup_signal = tf.random.normal((1, 28, 28, 28, len(subgroup_indices), 3))
+                layer = lambda s: group.upsample(s, group_axis=4, domain_group=subgroup_name)
+
+                equiv_diff = test_equivariance(
+                    layer, subgroup_signal, group_axis=4, spatial_axes=(1, 2, 3),
+                    group=group, domain_group=subgroup_name, target_group=group.name, acting_group=subgroup_name)
+                self.assertAllLess(equiv_diff, 1e-4)
 
 
 tf.test.main()
