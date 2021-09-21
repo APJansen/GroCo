@@ -8,7 +8,7 @@ class GroupPooling2D(Layer):
 
     Only meant to be subclassed by GroupMaxPooling2D and GroupAveragePooling2D.
     """
-    def __init__(self, group, pool_type: str, allow_non_equivariance: bool = False, pool_size=(2, 2), subgroup=None,
+    def __init__(self, group, pool_type: str, allow_non_equivariance: bool = False, pool_size=(2, 2), subgroup='',
                  **kwargs):
         self.group_transforms = GroupTransforms(
             allow_non_equivariance=allow_non_equivariance, kernel_size=pool_size, dimensions=2,

@@ -25,15 +25,15 @@ class GroupTransforms(Layer):
     """
 
     def __init__(self, group, kernel_size, dimensions: int, data_format='channels_last',
-                 allow_non_equivariance: bool = False, subgroup=None,
-                 transpose=False, separable=False, pooling=False, **kwargs):
+                 allow_non_equivariance: bool = False, subgroup='',
+                 transpose=False, separable=False, **kwargs):
         self.dimensions = dimensions
         self.transpose = transpose
         self.separable = separable
 
         self.group = group if isinstance(group, Group) else group_dict[group]
-        self.subgroup = self.group if subgroup is None else group_dict[subgroup]
-        self.domain_group, self.acting_group = self.group, self.subgroup
+        self.subgroup = group_dict[self.group.parse_subgroup(subgroup)]
+        self.domain_group, self.acting_group = self.group.name, self.subgroup.name
         if transpose:
             self.domain_group, self.acting_group = self.acting_group, self.domain_group
 
@@ -97,8 +97,8 @@ class GroupTransforms(Layer):
         if self.group_valued_input and self.data_format == 'channels_last':
             group_channels_axis -= 1
         group_axis = self.group_axis + (self.data_format == 'channels_first')
-        order = self.acting_group.order
-        return utils.split_axes(outputs, factor=order, split_axis=group_channels_axis, target_axis=group_axis)
+        factor = len(self.group.subgroup[self.acting_group])
+        return utils.split_axes(outputs, factor=factor, split_axis=group_channels_axis, target_axis=group_axis)
 
     def subgroup_pooling(self, inputs, pool_type: str):
         """
@@ -118,9 +118,10 @@ class GroupTransforms(Layer):
             self.channels_axis += 1
 
         if self.group_valued_input:
-            assert input_shape[self.group_axis] == self.domain_group.order, \
+            order = len(self.group.subgroup[self.domain_group])
+            assert input_shape[self.group_axis] == order, \
                 f'Got input shape {input_shape[self.group_axis]} in group axis {self.group_axis},' \
-                f'expected {self.domain_group.order}.'
+                f'expected {order}.'
 
             reshaped_input = utils.merge_shapes(
                 input_shape, merged_axis=self.group_axis, target_axis=self.channels_axis)
@@ -141,7 +142,8 @@ class GroupTransforms(Layer):
     def _compute_repeated_bias_indices(self, bias):
         """Compute a 1D tensor of indices used to gather from the bias in order to repeat it across the group axis."""
         indices = utils.get_index_tensor(bias)
-        indices = tf.concat([indices for _ in range(self.acting_group.order)], axis=0)
+        order = len(self.group.subgroup[self.acting_group])
+        indices = tf.concat([indices for _ in range(order)], axis=0)
         return indices
 
     def _compute_transformed_kernel_indices(self, kernel):
@@ -154,8 +156,8 @@ class GroupTransforms(Layer):
 
         kwargs = {'new_group_axis': self.dimensions,
                   'spatial_axes': tuple(d for d in range(self.dimensions)),
-                  'domain_group': self.domain_group.name,
-                  'acting_group': self.acting_group.name}
+                  'domain_group': self.domain_group,
+                  'acting_group': self.acting_group}
 
         if not self.group_valued_input:
             indices = self.group.action(indices, **kwargs)
@@ -183,7 +185,8 @@ class GroupTransforms(Layer):
         """
         group_channel_axis = self.dimensions
         group_axis = self.dimensions
-        return utils.split_axes(kernel, factor=self.domain_group.order, split_axis=group_channel_axis, target_axis=group_axis)
+        factor = len(self.group.subgroup[self.domain_group])
+        return utils.split_axes(kernel, factor=factor, split_axis=group_channel_axis, target_axis=group_axis)
 
     def _merge_kernel_group_axis(self, kernel):
         """
@@ -206,9 +209,6 @@ class GroupTransforms(Layer):
         return utils.merge_axes(kernel, merged_axis=group_axis, target_axis=channels_out_axis)
 
     def get_config(self):
-        if self.transpose:
-            config = {'group': self.domain_group.name, 'subgroup': self.acting_group.name}
-        else:
-            config = {'group': self.acting_group.name, 'subgroup': self.domain_group.name}
+        config = {'group': self.group, 'subgroup': self.subgroup.name}
         config.update(self.equivariant_padding.get_config())
         return config

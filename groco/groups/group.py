@@ -176,3 +176,6 @@ class Group:
                    zip(list(self.parent.subgroup[self.name]), list(range(self.order)))}
         return [mapping[i] for i in parent_indices]
 
+    def parse_subgroup(self, subgroup):
+        parser = {None: None, '': self.name}
+        return subgroup if subgroup else parser[subgroup]

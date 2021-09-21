@@ -20,7 +20,7 @@ class GroupConv2D(Conv2D):
     Expected input shape: (batch, height, width, group.order, in_channels),
     with the group.order axis omitted for the first layer (the lifting convolution).
     """
-    def __init__(self, group, kernel_size, allow_non_equivariance: bool = False, subgroup=None, **kwargs):
+    def __init__(self, group, kernel_size, allow_non_equivariance: bool = False, subgroup='', **kwargs):
         self.group_transforms = GroupTransforms(
             allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=2,
             group=group, subgroup=subgroup, **kwargs)
@@ -81,7 +81,7 @@ class GroupConv2DTranspose(Conv2DTranspose):
     Expected input shape: (batch, height, width, group.order, in_channels),
     with the group.order axis omitted for the first layer (the lifting convolution).
     """
-    def __init__(self, group, kernel_size, allow_non_equivariance: bool = False, subgroup=None, **kwargs):
+    def __init__(self, group, kernel_size, allow_non_equivariance: bool = False, subgroup='', **kwargs):
         self.group_transforms = GroupTransforms(
             allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=2,
             group=group, subgroup=subgroup, transpose=True, **kwargs)

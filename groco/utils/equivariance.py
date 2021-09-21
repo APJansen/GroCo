@@ -3,7 +3,7 @@ from groco.groups import group_dict
 
 
 def test_equivariance(layer, signal, group_name=None, spatial_axes: tuple = (1, 2), group_axis=None,
-                      subgroup=None):
+                      subgroup=''):
     """
     Test the equivariance of a layer L under the transformation of a (sub)group G on a signal s,
     by computing max |GL(s) - LG(s)|.
@@ -19,11 +19,9 @@ def test_equivariance(layer, signal, group_name=None, spatial_axes: tuple = (1, 
     """
     group_name = layer.group.name if group_name is None else group_name
     group = group_dict[group_name]
-    subgroup_name = group.name if subgroup is None else subgroup
-    subgroup = group_dict[subgroup_name]
-    assert subgroup_name in group.subgroup.keys()
+    subgroup = group.parse_subgroup(subgroup)
 
-    g_signal = group.action(signal, spatial_axes=spatial_axes, group_axis=group_axis, acting_group=subgroup_name,
+    g_signal = group.action(signal, spatial_axes=spatial_axes, group_axis=group_axis, acting_group=subgroup,
                             new_group_axis=0)
     # merge with batch dimension
     g_signal = tf.reshape(g_signal, (g_signal.shape[0] * g_signal.shape[1]) + g_signal.shape[2:])
@@ -37,6 +35,7 @@ def test_equivariance(layer, signal, group_name=None, spatial_axes: tuple = (1, 
         group_axis = spatial_axes[-1] + 1
     else:
         group_axis = None
+    subgroup = group_dict[subgroup]
     g_layer_signal = subgroup.action(layer_signal, spatial_axes=spatial_axes, group_axis=group_axis, new_group_axis=0)
     g_layer_signal = tf.reshape(g_layer_signal,
                                 (g_layer_signal.shape[0] * g_layer_signal.shape[1]) + g_layer_signal.shape[2:])
