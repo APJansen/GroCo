@@ -48,7 +48,7 @@ class TestGroupPooling2D(TestCase):
                 pool_layer = self.pool(
                     group=group, pool_size=2, strides=2, padding='same_equiv', subgroup=subgroup_name)
                 equiv_diff = test_equivariance(
-                    pool_layer, signal_on_group, group_axis=self.group_axis, subgroup=subgroup_name,
+                    pool_layer, signal_on_group, group_axis=self.group_axis, acting_group=subgroup_name,
                     spatial_axes=self.spatial_axes)
 
                 self.assertAllLess(equiv_diff, 1e-4)
@@ -97,7 +97,7 @@ class TestGroupPooling3D(TestCase):
                 pool_layer = self.pool(
                     group=group, pool_size=2, strides=2, padding='same_equiv', subgroup=subgroup_name)
                 equiv_diff = test_equivariance(
-                    pool_layer, signal_on_group, group_axis=self.group_axis, subgroup=subgroup_name,
+                    pool_layer, signal_on_group, group_axis=self.group_axis, acting_group=subgroup_name,
                     spatial_axes=self.spatial_axes)
 
                 self.assertAllLess(equiv_diff, 1e-4)

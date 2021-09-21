@@ -37,7 +37,7 @@ class Group:
         self._action = self._compute_action(action)
 
     def action(self, signal, spatial_axes: tuple = (1, 2), new_group_axis: int = 0, group_axis=None,
-               acting_group: str = None, domain_group: str = None):
+               acting_group: str = '', domain_group: str = ''):
         """
         The action of the group on a given signal.
 
@@ -49,48 +49,45 @@ class Group:
         :param domain_group: Name of subgroup signal lives on, defaults to None meaning the whole group.
         :return: Tensor of the signal acted on by the group.
         """
-        if group_axis is None:
-            return self._action_on_grid(
-                signal, new_group_axis=new_group_axis, spatial_axes=spatial_axes, acting_group=acting_group)
+        acting_group, domain_group = self.parse_subgroups(acting_group, domain_group)
+        kwargs = {
+            'signal': signal, 'new_group_axis': new_group_axis, 'spatial_axes': spatial_axes,
+            'acting_group': acting_group}
+        if domain_group is None:
+            return self._action_on_grid(**kwargs)
         else:
-            return self._action_on_group(
-                signal, spatial_axes=spatial_axes, group_axis=group_axis, new_group_axis=new_group_axis,
-                acting_group=acting_group, domain_group=domain_group)
+            return self._action_on_group(group_axis=group_axis, domain_group=domain_group, **kwargs)
 
-    def _action_on_grid(self, signal, new_group_axis: int, spatial_axes: tuple, acting_group: str = None):
-        acting_group_name = self.name if acting_group is None else acting_group
-
+    def _action_on_grid(self, signal, new_group_axis: int, spatial_axes: tuple, acting_group: str):
         transformed_signal = self._action(signal, spatial_axes=spatial_axes, new_group_axis=new_group_axis)
-        transformed_signal = tf.gather(transformed_signal, axis=new_group_axis, indices=self.subgroup[acting_group_name])
-
+        transformed_signal = tf.gather(transformed_signal, axis=new_group_axis, indices=self.subgroup[acting_group])
         return transformed_signal
 
-    def _action_on_group(self, signal, group_axis: int, new_group_axis: int, spatial_axes: tuple,
-                         acting_group: str = None, domain_group: str = None):
+    def _action_on_group(
+            self, signal, group_axis: int, new_group_axis: int, spatial_axes: tuple,
+            acting_group: str, domain_group: str):
         """
         Act on a signal on the group.
         If acting_group is set to a subgroup, only act with that subgroup on a signal on the whole group.
         If domain_group is set to a subgroup, act with whole group on a signal on the subgroup,
         where the signal is set to 0 outside of the subgroup.
         """
-        acting_group_name = self.name if acting_group is None else acting_group
-        acting_group_order = len(self.subgroup[acting_group_name])
-        domain_group_name = self.name if domain_group is None else domain_group
-        domain_group_order = len(self.subgroup[domain_group_name])
+        acting_group_order = len(self.subgroup[acting_group])
+        domain_group_order = len(self.subgroup[domain_group])
         # fill in zeroes outside of domain group if necessary
         if domain_group_order < self.order:
-            signal = self._fill_zeroes(signal, group_axis, self.subgroup[domain_group_name])
+            signal = self._fill_zeroes(signal, group_axis, self.subgroup[domain_group])
 
         # action on grid
-        transformed_signal = self._action_on_grid(signal, new_group_axis=group_axis, spatial_axes=spatial_axes)
-        transformed_signal = tf.gather(transformed_signal, axis=group_axis, indices=self.subgroup[acting_group_name])
+        transformed_signal = self._action_on_grid(
+            signal, new_group_axis=group_axis, spatial_axes=spatial_axes, acting_group=acting_group)
 
         # act on point group
         shape = transformed_signal.shape
         transformed_signal = tf.reshape(
             transformed_signal, shape[:group_axis] + (acting_group_order * self.order) + shape[group_axis + 2:])
         composition_indices = self._composition_flat_indices(
-            self.subgroup[acting_group_name], self.subgroup[domain_group_name])
+            self.subgroup[acting_group], self.subgroup[domain_group])
         transformed_signal = tf.gather(transformed_signal, axis=group_axis, indices=composition_indices)
         transformed_signal = tf.reshape(
             transformed_signal, shape[:group_axis] + (acting_group_order, domain_group_order) + shape[group_axis + 2:])
@@ -146,7 +143,7 @@ class Group:
             return action
 
         def subgroup_action(signal, spatial_axes, new_group_axis):
-            group_transformed = self.parent.action(signal, spatial_axes, new_group_axis)
+            group_transformed = self.parent._action(signal, spatial_axes, new_group_axis)
             subgroup_transformed = tf.gather(
                 group_transformed, indices=self.parent.subgroup[self.name], axis=new_group_axis)
             return subgroup_transformed
@@ -179,3 +176,7 @@ class Group:
     def parse_subgroup(self, subgroup):
         parser = {None: None, '': self.name}
         return subgroup if subgroup else parser[subgroup]
+
+    def parse_subgroups(self, *subgroups):
+        parser = {None: None, '': self.name}
+        return tuple(subgroup if subgroup else parser[subgroup] for subgroup in subgroups)

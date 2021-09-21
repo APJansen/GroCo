@@ -114,6 +114,8 @@ class GroupTransforms(Layer):
 
     def build(self, input_shape):
         self.group_valued_input = len(input_shape) == self.dimensions + 3  # this includes the batch dimension
+        if not self.group_valued_input:
+            self.domain_group = None
         if self.data_format == 'channels_last' and self.group_valued_input:
             self.channels_axis += 1
 

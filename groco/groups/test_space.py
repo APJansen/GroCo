@@ -70,20 +70,20 @@ class TestSpaceGroup(TestCase):
     def test_action_shape(self):
         signal = tf.random.normal(self.signal_shape_grid, seed=42)
         for group in space_group_dict.values():
-            g_signal = group.action(signal, spatial_axes=self.spatial_axes, new_group_axis=0)
-            self.assertEqual(g_signal.shape, (group.order) + signal.shape)
+            g_signal = group.action(signal, spatial_axes=self.spatial_axes, new_group_axis=0, domain_group=None)
+            self.assertEqual(g_signal.shape, (group.order,) + signal.shape)
 
     def test_action_on_signal_composition(self):
         signal = tf.random.normal(self.signal_shape_grid, seed=42)
         new_group_axis = 3
         for group in space_group_dict.values():
-            g_signal = group._action_on_grid(signal, new_group_axis=new_group_axis, spatial_axes=self.spatial_axes)
+            g_signal = group.action(signal, new_group_axis=new_group_axis, spatial_axes=self.spatial_axes, domain_group=None)
             for gi in range(group.order):
                 gi_signal = tf.reshape(tf.gather(g_signal, axis=new_group_axis, indices=[gi]), signal.shape)
-                h_gi_signal = group._action_on_grid(gi_signal, new_group_axis=new_group_axis, spatial_axes=self.spatial_axes)
+                h_gi_signal = group.action(gi_signal, new_group_axis=new_group_axis, spatial_axes=self.spatial_axes, domain_group=None)
                 h_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
                 h_gi_at_signal = tf.gather(
-                    group._action_on_grid(signal, new_group_axis=new_group_axis, spatial_axes=self.spatial_axes),
+                    group.action(signal, new_group_axis=new_group_axis, spatial_axes=self.spatial_axes, domain_group=None),
                     axis=new_group_axis, indices=h_gi)
 
                 msg = f'Action of {group.name} not compatible with its composition.'
@@ -109,10 +109,10 @@ class TestSpaceGroup(TestCase):
     def test_subgroup_action_on_grid(self):
         signal = tf.random.normal(self.signal_shape_grid)
         for group in space_group_dict.values():
-            g_signal = group.action(signal, spatial_axes=self.spatial_axes, new_group_axis=0)
+            g_signal = group.action(signal, spatial_axes=self.spatial_axes, new_group_axis=0, domain_group=None)
             for subgroup_name, subgroup_indices in group.subgroup.items():
                 subgroup = space_group_dict[subgroup_name]
-                h_signal = subgroup.action(signal, spatial_axes=self.spatial_axes, new_group_axis=0)
+                h_signal = subgroup.action(signal, spatial_axes=self.spatial_axes, new_group_axis=0, domain_group=None)
                 g_signal_sub = tf.gather(g_signal, axis=0, indices=subgroup_indices)
 
                 msg = f'Action of subgroup {subgroup_name} on signal on grid not the same as corresponding indices in action of full group {group.name}'

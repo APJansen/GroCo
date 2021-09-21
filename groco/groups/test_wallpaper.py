@@ -64,15 +64,15 @@ class TestWallpaperGroup(TestCase):
     def test_action_composition(self):
         signal = tf.random.normal((28, 28, 3), seed=42)
         for group in wallpaper_group_dict.values():
-            g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=2)
+            g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=2, domain_group=None)
             for gi in range(group.order):
                 gi_signal = tf.gather(g_signal, axis=2, indices=[gi])
                 gi_signal = tf.reshape(gi_signal, (28, 28, 3))
 
-                h_gi_signal = group.action(gi_signal, spatial_axes=[0, 1], new_group_axis=2)
+                h_gi_signal = group.action(gi_signal, spatial_axes=[0, 1], new_group_axis=2, domain_group=None)
                 h_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
 
-                h_gi_at_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=2)
+                h_gi_at_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=2, domain_group=None)
                 h_gi_at_signal = tf.gather(h_gi_at_signal, axis=2, indices=h_gi)
 
                 msg = f'Action of {group.name} not compatible with its composition.'
@@ -81,7 +81,7 @@ class TestWallpaperGroup(TestCase):
     def test_action_shape(self):
         signal = tf.random.normal((28, 28, 3), seed=42)
         for group in wallpaper_group_dict.values():
-            g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=0)
+            g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=0, domain_group=None)
             self.assertEqual(g_signal.shape, (group.order) + signal.shape)
 
     def test_action_on_subgroup_shape(self):
@@ -89,20 +89,20 @@ class TestWallpaperGroup(TestCase):
             for subgroup_name, subgroup_indices in group.subgroup.items():
                 signal = tf.random.normal((28, 28, len(subgroup_indices), 3))
                 g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=0, domain_group=subgroup_name,
-                                        acting_group=group.name)
+                                        acting_group=group.name, group_axis=2)
                 self.assertEqual(g_signal.shape, (group.order, ) + signal.shape)
 
     def test_action_on_signal_composition(self):
         signal = tf.random.normal((28, 28, 3), seed=42)
         new_group_axis = 3
         for group in wallpaper_group_dict.values():
-            g_signal = group._action_on_grid(signal, new_group_axis=new_group_axis, spatial_axes=[0, 1])
+            g_signal = group.action(signal, new_group_axis=new_group_axis, spatial_axes=[0, 1], domain_group=None)
             for gi in range(group.order):
                 gi_signal = tf.reshape(tf.gather(g_signal, axis=new_group_axis, indices=[gi]), signal.shape)
-                h_gi_signal = group._action_on_grid(gi_signal, new_group_axis=new_group_axis, spatial_axes=[0, 1])
+                h_gi_signal = group.action(gi_signal, new_group_axis=new_group_axis, spatial_axes=[0, 1], domain_group=None)
                 h_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
                 h_gi_at_signal = tf.gather(
-                    group._action_on_grid(signal, new_group_axis=new_group_axis, spatial_axes=[0, 1]),
+                    group.action(signal, new_group_axis=new_group_axis, spatial_axes=[0, 1], domain_group=None),
                     axis=new_group_axis, indices=h_gi)
 
                 msg = f'Action of {group.name} not compatible with its composition.'
@@ -128,10 +128,10 @@ class TestWallpaperGroup(TestCase):
     def test_subgroup_action_on_grid(self):
         signal = tf.random.normal((28, 28, 3))
         for group in wallpaper_group_dict.values():
-            g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=0)
+            g_signal = group.action(signal, spatial_axes=[0, 1], new_group_axis=0, domain_group=None)
             for subgroup_name, subgroup_indices in group.subgroup.items():
                 subgroup = wallpaper_group_dict[subgroup_name]
-                h_signal = subgroup.action(signal, spatial_axes=[0, 1], new_group_axis=0)
+                h_signal = subgroup.action(signal, spatial_axes=[0, 1], new_group_axis=0, domain_group=None)
                 g_signal_sub = tf.gather(g_signal, axis=0, indices=subgroup_indices)
 
                 msg = f'Action of subgroup {subgroup_name} on signal on grid not the same as corresponding indices in action of full group {group.name}'
