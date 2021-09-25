@@ -78,9 +78,9 @@ The largest wallpaper group on a square lattice, p4m, and all its subgroups have
 | ------------- | ------------- |
 | Group Interpretation  | A transpose convolution can be seen as an upsampling to a larger group, of which the starting group is a subgroup (I don't think there's a group theoretic word for this but let's call it a supergroup). The signal is filled in to be zero on the part of the supergroup outside of the current group.   |
 | Generalization  | Similarly we can upsample to a supergroup of the wallpaper group, which may just be going to a finer grid and keeping the point group, but may also go to a supergroup of the point group.  |
-| Implementation | `GroupConv2D(group='point_group_name', super_group='super_group_name)` |
+| Implementation | `GroupConv2D(group='point_group_name', subgroup='subgroup_name')` |
 | Resulting differences | Spatial dimensions behave as usual, the group dimension potentially increases to a supergroup.|
-| comments | Still to be tested further (may need modified padding). |
+| comments | It's working with stride 1 or with stride equal to kernel_size and valid padding, in other cases padding issues destroy equivariance. |
 
 
 # Implemented groups
