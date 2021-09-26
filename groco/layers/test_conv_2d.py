@@ -173,16 +173,16 @@ class TestGroupConv2DTranspose(TestCase):
                     domain_group=subgroup_name, target_group=group.name, acting_group=subgroup_name)
 
                 self.assertAllLess(equiv_diff, 1e-4)
-    #
-    # def test_padding_equiv(self):
-    #     for padding in ['valid_equiv']:
-    #         for strides in [3, 5]:
-    #             group = self.example_group
-    #             signal_on_group = tf.random.normal(shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42)
-    #             conv_layer = self.conv(group=group, kernel_size=3, strides=strides, filters=self.filters, padding=padding)
-    #             equiv_diff = test_equivariance(
-    #                 conv_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes)
-    #             self.assertAllLess(equiv_diff, 1e-4)
+
+    def test_padding_equiv_valid(self):
+        padding = 'valid_equiv'
+        for strides in [3, 5, 7]:
+            group = self.example_group
+            signal_on_group = tf.random.normal(shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42)
+            conv_layer = self.conv(group=group, kernel_size=strides, strides=strides, filters=self.filters, padding=padding)
+            equiv_diff = test_equivariance(
+                conv_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes)
+            self.assertAllLess(equiv_diff, 1e-4)
 
 
 tf.test.main()
