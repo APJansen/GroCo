@@ -62,4 +62,5 @@ class TestEquivariantPadding(TestCase):
         self.assertAllEqual(outputs.shape[2:], output_shape)
 
 
-tf.test.main()
+if __name__ == "__main__":
+    tf.test.main()

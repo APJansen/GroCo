@@ -184,5 +184,5 @@ class TestGroupConv3DTranspose(TestCase):
     #                 conv_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes)
     #             self.assertAllLess(equiv_diff, 1e-4)
 
-
-tf.test.main()
+if __name__ == "__main__":
+    tf.test.main()
