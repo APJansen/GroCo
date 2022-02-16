@@ -3,3 +3,7 @@ __pycache__/
 notes/
 venv/
 .idea/
+.vscode/
+
+# sphinx documentation
+docs/_build/
