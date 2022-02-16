@@ -103,4 +103,5 @@ class TestGroupPooling3D(TestCase):
                 self.assertAllLess(equiv_diff, 1e-4)
 
 
-tf.test.main()
+if __name__ == "__main__":
+    tf.test.main()
