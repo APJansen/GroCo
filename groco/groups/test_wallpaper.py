@@ -1,7 +1,7 @@
 from tensorflow.test import TestCase
 from groco.groups import wallpaper_group_dict
 import tensorflow as tf
-from groco.utils import test_equivariance
+from groco.utils import check_equivariance
 
 
 class TestWallpaperGroup(TestCase):
@@ -169,7 +169,7 @@ class TestWallpaperGroup(TestCase):
                 subgroup_signal = tf.random.normal((1, 28, 28, len(subgroup_indices), 3))
                 layer = lambda s: group.upsample(s, group_axis=3, domain_group=subgroup_name)
 
-                equiv_diff = test_equivariance(
+                equiv_diff = check_equivariance(
                     layer, subgroup_signal, group_axis=3, spatial_axes=(1, 2),
                     group=group, domain_group=subgroup_name, target_group=group.name, acting_group=subgroup_name)
                 self.assertAllLess(equiv_diff, 1e-4)

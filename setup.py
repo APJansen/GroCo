@@ -28,6 +28,7 @@ setup(name='groco',
       packages=find_packages(),
       install_requires=[
         'tensorflow',
+        'pytest'
         ],
     #   extras_require={'irods': ['python-irodsclient']},
     #   entry_points={'console_scripts':
