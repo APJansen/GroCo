@@ -1,7 +1,7 @@
 from tensorflow.test import TestCase
 from groco.groups import wallpaper_group_dict, space_group_dict
 from groco.layers import GroupMaxPooling2D, GroupMaxPooling3D
-from groco.utils import test_equivariance
+from groco.utils import check_equivariance
 import tensorflow as tf
 
 
@@ -36,7 +36,7 @@ class TestGroupPooling2D(TestCase):
         for group in self.group_dict.values():
             signal_on_group = tf.random.normal(shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42)
             pool_layer = self.pool(group=group, pool_size=2, strides=2, padding='same_equiv')
-            equiv_diff = test_equivariance(
+            equiv_diff = check_equivariance(
                 pool_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes)
 
             self.assertAllLess(equiv_diff, 1e-4)
@@ -47,7 +47,7 @@ class TestGroupPooling2D(TestCase):
                 signal_on_group = tf.random.normal(shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42)
                 pool_layer = self.pool(
                     group=group, pool_size=2, strides=2, padding='same_equiv', subgroup=subgroup_name)
-                equiv_diff = test_equivariance(
+                equiv_diff = check_equivariance(
                     pool_layer, signal_on_group, group_axis=self.group_axis, acting_group=subgroup_name,
                     spatial_axes=self.spatial_axes, target_group=subgroup_name)
 
@@ -85,7 +85,7 @@ class TestGroupPooling3D(TestCase):
         for group in self.group_dict.values():
             signal_on_group = tf.random.normal(shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42)
             pool_layer = self.pool(group=group, pool_size=2, strides=2, padding='same_equiv')
-            equiv_diff = test_equivariance(
+            equiv_diff = check_equivariance(
                 pool_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes)
 
             self.assertAllLess(equiv_diff, 1e-4)
@@ -96,7 +96,7 @@ class TestGroupPooling3D(TestCase):
                 signal_on_group = tf.random.normal(shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42)
                 pool_layer = self.pool(
                     group=group, pool_size=2, strides=2, padding='same_equiv', subgroup=subgroup_name)
-                equiv_diff = test_equivariance(
+                equiv_diff = check_equivariance(
                     pool_layer, signal_on_group, group_axis=self.group_axis, acting_group=subgroup_name,
                     spatial_axes=self.spatial_axes, target_group=subgroup_name)
 
