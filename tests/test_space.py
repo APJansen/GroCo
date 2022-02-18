@@ -1,4 +1,3 @@
-from tabnanny import check
 from tensorflow.test import TestCase
 from groco.groups import space_group_dict
 import tensorflow as tf
@@ -141,7 +140,7 @@ class TestSpaceGroup(TestCase):
                 subgroup_signal = tf.random.normal((1, 28, 28, 28, len(subgroup_indices), 3))
                 layer = lambda s: group.upsample(s, group_axis=4, domain_group=subgroup_name)
 
-                equiv_diff = check(
+                equiv_diff = check_equivariance(
                     layer, subgroup_signal, group_axis=4, spatial_axes=(1, 2, 3),
                     group=group, domain_group=subgroup_name, target_group=group.name, acting_group=subgroup_name)
                 self.assertAllLess(equiv_diff, 1e-4)
