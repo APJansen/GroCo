@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-def test_equivariance(
+def check_equivariance(
         layer, signal, group=None, spatial_axes: tuple = (1, 2), group_axis=None,
         acting_group='', domain_group='', target_group=''):
     """
