@@ -1,6 +1,7 @@
 # Group Convolutions in Keras with GroCo
 
-[Documentation](https://groco.readthedocs.io/en/latest/)
+[![Documentation Status](https://readthedocs.org/projects/groco/badge/?version=latest)](https://groco.readthedocs.io/en/latest/?badge=latest)
+[![workflow scc badge](https://sonarcloud.io/api/project_badges/measure?project=APJansen_GroCo&metric=coverage)](https://sonarcloud.io/dashboard?id=APJansen_GroCo)
 
 The aim of GroCo is to generalize the convolutional layers and all related functionality in Keras to group convolutions, following [the original paper on group convolutions by Taco Cohen and Max Welling](http://proceedings.mlr.press/v48/cohenc16.html), and to keep the interface as close as possible to the standard layers.
 
