@@ -3,6 +3,8 @@
 [![Documentation Status](https://readthedocs.org/projects/groco/badge/?version=latest)](https://groco.readthedocs.io/en/latest/?badge=latest)
 [![workflow scc badge](https://sonarcloud.io/api/project_badges/measure?project=APJansen_GroCo&metric=coverage)](https://sonarcloud.io/dashboard?id=APJansen_GroCo)
 
+
+
 The aim of GroCo is to generalize the convolutional layers and all related functionality in Keras to group convolutions, following [the original paper on group convolutions by Taco Cohen and Max Welling](http://proceedings.mlr.press/v48/cohenc16.html), and to keep the interface as close as possible to the standard layers.
 
 It was inspired by the book, lectures and notebooks on the geometric deep learning by Michael Bronstein, Joan Bruna, Taco Cohen and Petar Veličković, found [here](https://geometricdeeplearning.com), which I highly recommend.
@@ -11,8 +13,17 @@ The implementation by the authors themselves is in Chainer/Tensorflow 1, [GrouPy
 There is also another Keras implementation [keras-gcnn](https://github.com/basveeling/keras-gcnn) that I came across while developing this.
 Here we expand the functionality, to 3D convolutions, transpose convolutions, and hopefully eventually all of Keras's convolutional and related layers.
 
-I started this to learn, both about group convolutions and geometric deep learning more generally, but also about tensorflow and Keras, 
-so any feedback is highly appreciated, you can reach me on twitter @aron_jansen.
+# Installation
+
+## Using `poetry` (recommended)
+
+1. Clone repo: `git clone https://github.com/APJansen/GroCo.git`
+2. Navigate to the project folder: `cd groco`
+3. If necessary install poetry: `pip install poetry`
+4. Run `poetry install`
+
+Your working environment can be activated via `poetry shell`, or to use it in a single command, prefix it with `poetry run`.
+More information on poetry available [here](https://python-poetry.org/).
 
 # Introduction to group convolutions
 
