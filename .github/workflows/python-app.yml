@@ -43,3 +43,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    - name: Build sphinx documentation
+      run: |
+        poetry run sphinx-build -b html docs/source/ docs/_build/
