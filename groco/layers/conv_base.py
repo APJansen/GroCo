@@ -3,7 +3,7 @@ from tensorflow.keras.layers import Layer
 
 from groco import utils
 from groco.groups import Group, group_dict
-from groco.layers import EquivariantPadding
+from groco.layers.padding import EquivariantPadding
 
 
 class GroupTransforms(Layer):
