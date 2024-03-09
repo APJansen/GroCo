@@ -7,5 +7,7 @@ venv/
 
 # sphinx documentation
 docs/_build/
+# auto generated
+docs/source/api/
 
 poetry.lock

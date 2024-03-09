@@ -10,8 +10,7 @@ Welcome to Groco's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   feature-a.rst
-   feature-b.rst
+   api/modules
 
 
 Indices and tables
