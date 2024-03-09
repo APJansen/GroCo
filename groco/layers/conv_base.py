@@ -151,7 +151,7 @@ class GroupTransforms(Layer):
             )
         else:
             reshaped_input = input_shape
-        return reshaped_input
+        self.reshaped_input = reshaped_input
 
     def compute_conv_indices(self, input_shape, kernel, bias, use_bias):
         if use_bias:

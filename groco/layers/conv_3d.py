@@ -32,7 +32,7 @@ class GroupConv3D(Conv3D):
             dimensions=3,
             group=group,
             subgroup=subgroup,
-            **kwargs
+            **kwargs,
         )
         kwargs["padding"] = self.group_transforms.built_in_padding_option
         self.group = self.group_transforms.group
@@ -54,16 +54,18 @@ class GroupConv3D(Conv3D):
         return self.group_transforms.restore_group_axis(outputs)
 
     def build(self, input_shape):
-        reshaped_input = self.group_transforms.build(input_shape)
+        self.group_transforms.build(input_shape)
         self.group_valued_input = self.group_transforms.group_valued_input
-        super().build(reshaped_input)
+        super().build(self.group_transforms.reshaped_input)
         self.group_transforms.compute_conv_indices(
             input_shape, self.kernel, self.bias, self.use_bias
         )
         if self.group_valued_input:
-            self.input_spec.axes = {
-                self._get_channel_axis(): input_shape[self.group_transforms.channels_axis]
-            }
+            if self.data_format == "channels_first":
+                channel_axis = -1 - self.rank
+            else:
+                channel_axis = -1
+            self.input_spec.axes = {channel_axis: input_shape[self.group_transforms.channels_axis]}
 
     def get_config(self):
         config = super().get_config()
@@ -103,7 +105,7 @@ class GroupConv3DTranspose(Conv3DTranspose):
             group=group,
             subgroup=subgroup,
             transpose=True,
-            **kwargs
+            **kwargs,
         )
         kwargs["padding"] = self.group_transforms.built_in_padding_option
         self.group = self.group_transforms.group
@@ -125,17 +127,21 @@ class GroupConv3DTranspose(Conv3DTranspose):
         return self.group_transforms.restore_group_axis(outputs)
 
     def build(self, input_shape):
-        reshaped_input = self.group_transforms.build(input_shape)
+        self.group_transforms.build(input_shape)
         self.group_valued_input = self.group_transforms.group_valued_input
-        super().build(reshaped_input)
+        print(f"reshaped input in conv_3d.py: {self.group_transforms.reshaped_input}")
+        super().build(self.group_transforms.reshaped_input)
         self.group_transforms.compute_conv_indices(
             input_shape, self.kernel, self.bias, self.use_bias
         )
         if self.group_valued_input:
-            self.input_spec.axes = {
-                self._get_channel_axis(): input_shape[self.group_transforms.channels_axis]
-            }
-            self.input_spec.ndim += 1
+            if self.data_format == "channels_first":
+                channel_axis = -1 - self.rank
+            else:
+                channel_axis = -1
+            self.input_spec.axes = {channel_axis: input_shape[self.group_transforms.channels_axis]}
+            print(self.input_spec)
+            self.input_spec.min_ndim += 1
 
     def get_config(self):
         config = super().get_config()
