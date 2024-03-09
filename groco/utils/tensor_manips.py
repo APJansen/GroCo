@@ -27,8 +27,10 @@ def move_axis_to_left_of(tensor: tf.Tensor, moved_axis: int, target_axis: int) -
     :return: The tensor with its axes moved.
     """
     axes = tuple(range(tensor.shape.rank))
-    axes = axes[:moved_axis] + axes[moved_axis + 1:]
-    if moved_axis < target_axis:  # in this case after removing moved_axis, target_axis shifts left by one
+    axes = axes[:moved_axis] + axes[moved_axis + 1 :]
+    if (
+        moved_axis < target_axis
+    ):  # in this case after removing moved_axis, target_axis shifts left by one
         target_axis -= 1
     axes = axes[:target_axis] + (moved_axis,) + axes[target_axis:]
     return tf.transpose(tensor, axes)
@@ -48,7 +50,9 @@ def split_axes(tensor: tf.Tensor, factor: int, split_axis: int, target_axis: int
     new_shape = split_shapes(tensor.shape, factor, split_axis)
     new_shape = format_batch_dim(new_shape)
     tensor_reshaped = tf.reshape(tensor, new_shape)
-    tensor_transposed = move_axis_to_left_of(tensor_reshaped, moved_axis=split_axis, target_axis=target_axis)
+    tensor_transposed = move_axis_to_left_of(
+        tensor_reshaped, moved_axis=split_axis, target_axis=target_axis
+    )
     return tensor_transposed
 
 
@@ -79,7 +83,9 @@ def merge_axes(tensor: tf.Tensor, merged_axis: int, target_axis: int) -> tf.Tens
     """
     shape = merge_shapes(tensor.shape, merged_axis=merged_axis, target_axis=target_axis)
     shape = format_batch_dim(shape)
-    transposed_tensor = move_axis_to_left_of(tensor, moved_axis=merged_axis, target_axis=target_axis)
+    transposed_tensor = move_axis_to_left_of(
+        tensor, moved_axis=merged_axis, target_axis=target_axis
+    )
     return tf.reshape(transposed_tensor, shape)
 
 

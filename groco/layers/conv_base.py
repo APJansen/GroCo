@@ -1,8 +1,9 @@
 import tensorflow as tf
-from groco.layers import EquivariantPadding
 from tensorflow.keras.layers import Layer
-from groco.groups import Group, group_dict
+
 from groco import utils
+from groco.groups import Group, group_dict
+from groco.layers import EquivariantPadding
 
 
 class GroupTransforms(Layer):
@@ -24,9 +25,18 @@ class GroupTransforms(Layer):
         compute_pooling_indices
     """
 
-    def __init__(self, group, kernel_size, dimensions: int, data_format='channels_last',
-                 allow_non_equivariance: bool = False, subgroup='',
-                 transpose=False, separable=False, **kwargs):
+    def __init__(
+        self,
+        group,
+        kernel_size,
+        dimensions: int,
+        data_format="channels_last",
+        allow_non_equivariance: bool = False,
+        subgroup="",
+        transpose=False,
+        separable=False,
+        **kwargs,
+    ):
         self.dimensions = dimensions
         self.transpose = transpose
         self.separable = separable
@@ -38,15 +48,19 @@ class GroupTransforms(Layer):
             self.domain_group, self.acting_group = self.acting_group, self.domain_group
 
         self.equivariant_padding = EquivariantPadding(
-            allow_non_equivariance=allow_non_equivariance, kernel_size=kernel_size, dimensions=dimensions,
-            transpose=transpose, **kwargs)
+            allow_non_equivariance=allow_non_equivariance,
+            kernel_size=kernel_size,
+            dimensions=dimensions,
+            transpose=transpose,
+            **kwargs,
+        )
         self.built_in_padding_option = self.equivariant_padding.built_in_padding_option
 
         super().__init__()
         self.data_format = data_format
         # axes refer to input
-        self.channels_axis = 1 if self.data_format == 'channels_first' else self.dimensions + 1
-        self.group_axis = self.dimensions + 1 + (self.data_format == 'channels_first')
+        self.channels_axis = 1 if self.data_format == "channels_first" else self.dimensions + 1
+        self.group_axis = self.dimensions + 1 + (self.data_format == "channels_first")
 
         # set during build
         self.group_valued_input = None
@@ -67,7 +81,9 @@ class GroupTransforms(Layer):
         (batch, height', width', domain_group.order * channels)
         """
         if self.group_valued_input:
-            inputs = utils.merge_axes(inputs, merged_axis=self.group_axis, target_axis=self.channels_axis)
+            inputs = utils.merge_axes(
+                inputs, merged_axis=self.group_axis, target_axis=self.channels_axis
+            )
         inputs = self.equivariant_padding(inputs)
         return inputs
 
@@ -94,11 +110,13 @@ class GroupTransforms(Layer):
         (batch, height, width, acting_group.order, channels)
         """
         group_channels_axis = self.channels_axis
-        if self.group_valued_input and self.data_format == 'channels_last':
+        if self.group_valued_input and self.data_format == "channels_last":
             group_channels_axis -= 1
-        group_axis = self.group_axis + (self.data_format == 'channels_first')
+        group_axis = self.group_axis + (self.data_format == "channels_first")
         factor = len(self.group.subgroup[self.acting_group])
-        return utils.split_axes(outputs, factor=factor, split_axis=group_channels_axis, target_axis=group_axis)
+        return utils.split_axes(
+            outputs, factor=factor, split_axis=group_channels_axis, target_axis=group_axis
+        )
 
     def subgroup_pooling(self, inputs, pool_type: str):
         """
@@ -108,25 +126,29 @@ class GroupTransforms(Layer):
         (batch, height, width, group.order, channels) -> (batch, height, width, subgroup.order, channels)
         """
         outputs = tf.gather(inputs, axis=self.group_axis, indices=self._pooling_indices)
-        pooling = tf.reduce_max if pool_type == 'max' else tf.reduce_mean
+        pooling = tf.reduce_max if pool_type == "max" else tf.reduce_mean
         outputs = pooling(outputs, axis=self.group_axis + 1)
         return outputs
 
     def build(self, input_shape):
-        self.group_valued_input = len(input_shape) == self.dimensions + 3  # this includes the batch dimension
+        self.group_valued_input = (
+            len(input_shape) == self.dimensions + 3
+        )  # this includes the batch dimension
         if not self.group_valued_input:
             self.domain_group = None
-        if self.data_format == 'channels_last' and self.group_valued_input:
+        if self.data_format == "channels_last" and self.group_valued_input:
             self.channels_axis += 1
 
         if self.group_valued_input:
             order = len(self.group.subgroup[self.domain_group])
-            assert input_shape[self.group_axis] == order, \
-                f'Got input shape {input_shape[self.group_axis]} in group axis {self.group_axis},' \
-                f'expected {order}.'
+            assert input_shape[self.group_axis] == order, (
+                f"Got input shape {input_shape[self.group_axis]} in group axis {self.group_axis},"
+                f"expected {order}."
+            )
 
             reshaped_input = utils.merge_shapes(
-                input_shape, merged_axis=self.group_axis, target_axis=self.channels_axis)
+                input_shape, merged_axis=self.group_axis, target_axis=self.channels_axis
+            )
         else:
             reshaped_input = input_shape
         return reshaped_input
@@ -137,7 +159,9 @@ class GroupTransforms(Layer):
         self._transformed_kernel_indices = self._compute_transformed_kernel_indices(kernel)
 
     def compute_pooling_indices(self):
-        indices = tf.gather(self.group.composition, axis=1, indices=self.group.cosets[self.subgroup.name])
+        indices = tf.gather(
+            self.group.composition, axis=1, indices=self.group.cosets[self.subgroup.name]
+        )
         subgroup_indices = self.group.subgroup[self.subgroup.name]
         self._pooling_indices = tf.gather(indices, axis=0, indices=subgroup_indices)
 
@@ -156,10 +180,12 @@ class GroupTransforms(Layer):
             kernel = self._switch_in_out(kernel)
         indices = utils.get_index_tensor(kernel)
 
-        kwargs = {'new_group_axis': self.dimensions,
-                  'spatial_axes': tuple(d for d in range(self.dimensions)),
-                  'domain_group': self.domain_group,
-                  'acting_group': self.acting_group}
+        kwargs = {
+            "new_group_axis": self.dimensions,
+            "spatial_axes": tuple(d for d in range(self.dimensions)),
+            "domain_group": self.domain_group,
+            "acting_group": self.acting_group,
+        }
 
         if not self.group_valued_input:
             indices = self.group.action(indices, **kwargs)
@@ -188,7 +214,9 @@ class GroupTransforms(Layer):
         group_channel_axis = self.dimensions
         group_axis = self.dimensions
         factor = len(self.group.subgroup[self.domain_group])
-        return utils.split_axes(kernel, factor=factor, split_axis=group_channel_axis, target_axis=group_axis)
+        return utils.split_axes(
+            kernel, factor=factor, split_axis=group_channel_axis, target_axis=group_axis
+        )
 
     def _merge_kernel_group_axis(self, kernel):
         """
@@ -196,7 +224,9 @@ class GroupTransforms(Layer):
         (height, width, subgroup.order, group.order, in_channels, out_channels) ->
         (height, width, subgroup.order, group.order * in_channels, out_channels)
         """
-        group_axis = self.dimensions + 1  # here and below extra +1 because the subgroup axis is inserted before
+        group_axis = (
+            self.dimensions + 1
+        )  # here and below extra +1 because the subgroup axis is inserted before
         channels_in_axis = self.dimensions + 1 + 1
         return utils.merge_axes(kernel, merged_axis=group_axis, target_axis=channels_in_axis)
 
@@ -211,6 +241,6 @@ class GroupTransforms(Layer):
         return utils.merge_axes(kernel, merged_axis=group_axis, target_axis=channels_out_axis)
 
     def get_config(self):
-        config = {'group': self.group, 'subgroup': self.subgroup.name}
+        config = {"group": self.group, "subgroup": self.subgroup.name}
         config.update(self.equivariant_padding.get_config())
         return config

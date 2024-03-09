@@ -17,17 +17,33 @@ class EquivariantPadding(Layer):
      The options `valid_equiv` and `same_equiv` for the padding argument will do the minimal amount of extra padding
      on top of their usual counterparts to maintain equivariance.
     """
-    def __init__(self, kernel_size, dimensions: int, strides=1, padding='valid_equiv', allow_non_equivariance=False,
-                 data_format='channels_last', transpose=False, **kwargs):
+
+    def __init__(
+        self,
+        kernel_size,
+        dimensions: int,
+        strides=1,
+        padding="valid_equiv",
+        allow_non_equivariance=False,
+        data_format="channels_last",
+        transpose=False,
+        **kwargs,
+    ):
         self.padding_option = self.format_padding_option(padding)
-        self.built_in_padding_option = padding[:-6] if padding.endswith('_equiv') else padding
+        self.built_in_padding_option = padding[:-6] if padding.endswith("_equiv") else padding
 
         self.allow_non_equivariance = allow_non_equivariance
         self.dimensions = dimensions
-        self.strides = tf.constant(strides if isinstance(strides, tuple) else
-                                   tuple(strides for _ in range(self.dimensions)))
-        self.kernel_sizes = tf.constant(kernel_size if isinstance(kernel_size, tuple) else
-                                        tuple(kernel_size for _ in range(self.dimensions)))
+        self.strides = tf.constant(
+            strides
+            if isinstance(strides, tuple)
+            else tuple(strides for _ in range(self.dimensions))
+        )
+        self.kernel_sizes = tf.constant(
+            kernel_size
+            if isinstance(kernel_size, tuple)
+            else tuple(kernel_size for _ in range(self.dimensions))
+        )
         self.data_format = data_format
         self.transpose = transpose
         # set during build
@@ -43,12 +59,12 @@ class EquivariantPadding(Layer):
             return inputs
 
     def build(self, input_shape):
-        if self.padding_option in ['SAME', 'VALID'] and self.allow_non_equivariance:
+        if self.padding_option in ["SAME", "VALID"] and self.allow_non_equivariance:
             self.needs_padding = False
             return
 
-        if self.data_format == 'channels_last':
-            spatial_shape = tf.constant(input_shape[1:1 + self.dimensions])
+        if self.data_format == "channels_last":
+            spatial_shape = tf.constant(input_shape[1 : 1 + self.dimensions])
         else:
             spatial_shape = tf.constant(input_shape[2:])
         extra_padding, total_padding = self.compute_equivariant_padding(spatial_shape)
@@ -56,7 +72,7 @@ class EquivariantPadding(Layer):
         self.needs_padding = tf.math.reduce_any(extra_padding != 0).numpy()
         if not self.needs_padding:
             return
-        elif self.padding_option in ['SAME', 'VALID']:
+        elif self.padding_option in ["SAME", "VALID"]:
             raise self.non_equivariant_error(spatial_shape)
 
         # if the stride is even the padding can still be odd, no padding will maintain equivariance
@@ -71,7 +87,7 @@ class EquivariantPadding(Layer):
         return extra_padding
 
     def compute_built_in_padding(self, spatial_shape):
-        if self.padding_option in ['SAME', 'SAME_EQUIV']:
+        if self.padding_option in ["SAME", "SAME_EQUIV"]:
             return tf.nn.relu(self.kernel_sizes - self.strides + (-spatial_shape % self.strides))
         else:
             if self.transpose:
@@ -89,7 +105,7 @@ class EquivariantPadding(Layer):
 
     def split_padding(self, paddings):
         # add 0 at both ends, not to pad the batch and channel axes
-        if self.data_format == 'channels_last':
+        if self.data_format == "channels_last":
             paddings = tf.pad(paddings, [[1, 1]])
         else:
             paddings = tf.pad(paddings, [[2, 0]])
@@ -99,49 +115,56 @@ class EquivariantPadding(Layer):
         pads_after = paddings // 2
         pads_before = paddings - pads_after
 
-        return tf.concat([
-            tf.expand_dims(pads_before, axis=1),
-            tf.expand_dims(pads_after, axis=1)], axis=1)
+        return tf.concat(
+            [tf.expand_dims(pads_before, axis=1), tf.expand_dims(pads_after, axis=1)], axis=1
+        )
 
     def get_config(self):
         return {
-            'kernel_size': self.kernel_size,
-            'strides': self.strides,
-            'padding': self.padding,
-            'allow_non_equivariance': self.allow_non_equivariance,
-            'dimensions': self.dimensions}
+            "kernel_size": self.kernel_size,
+            "strides": self.strides,
+            "padding": self.padding,
+            "allow_non_equivariance": self.allow_non_equivariance,
+            "dimensions": self.dimensions,
+        }
 
     @staticmethod
     def format_padding_option(padding_option):
         if not isinstance(padding_option, str):
-            raise TypeError(f'padding option should be a string, received {padding_option}.')
+            raise TypeError(f"padding option should be a string, received {padding_option}.")
         capitalized = padding_option.upper()
-        if capitalized not in ['SAME', 'VALID', 'SAME_EQUIV', 'VALID_EQUIV']:
+        if capitalized not in ["SAME", "VALID", "SAME_EQUIV", "VALID_EQUIV"]:
             raise TypeError(
-                f"padding option should be one of ['same', 'valid', 'same_equiv', 'valid_equiv'], received {padding_option}.")
+                f"padding option should be one of ['same', 'valid', 'same_equiv', 'valid_equiv'], received {padding_option}."
+            )
         return capitalized
 
     def padding_parity_error(self, spatial_shape):
-        message = ("Unable to find padding that maintains equivariance.\n"
-                   "Constraints (input_shape + padding - kernel_size) % stride == 0 and "
-                   "padding being even not compatible.\n" +
-                   "Values found: \n")
+        message = (
+            "Unable to find padding that maintains equivariance.\n"
+            "Constraints (input_shape + padding - kernel_size) % stride == 0 and "
+            "padding being even not compatible.\n" + "Values found: \n"
+        )
         message += self.configuration_string(spatial_shape)
         return ValueError(message)
 
     def non_equivariant_error(self, spatial_shape):
-        message = ("Current configuration will spoil equivariance.\n"
-                   "Changing to `padding='valid_equiv'` or `padding='same_equiv'` "
-                   "will add the minimal amount of extra padding to restore equivariance.\n"
-                   "If you insist on using the current padding, use `allow_non_equivariance=True`.\n")
+        message = (
+            "Current configuration will spoil equivariance.\n"
+            "Changing to `padding='valid_equiv'` or `padding='same_equiv'` "
+            "will add the minimal amount of extra padding to restore equivariance.\n"
+            "If you insist on using the current padding, use `allow_non_equivariance=True`.\n"
+        )
         message += self.configuration_string(spatial_shape)
         return ValueError(message)
 
     def configuration_string(self, spatial_shape):
-        message = (f"input_shape (spatial): {tuple(spatial_shape.numpy())},\n"
-                   f"kernel/pool size: {tuple(self.kernel_sizes.numpy())},\n"
-                   f"strides: {tuple(self.strides.numpy())},\n")
-        if self.padding_option == 'SAME_EQUIV':
+        message = (
+            f"input_shape (spatial): {tuple(spatial_shape.numpy())},\n"
+            f"kernel/pool size: {tuple(self.kernel_sizes.numpy())},\n"
+            f"strides: {tuple(self.strides.numpy())},\n"
+        )
+        if self.padding_option == "SAME_EQUIV":
             same_padding = self.compute_same_padding(spatial_shape)
             message += f"built-in same padding: {tuple(same_padding.numpy())}"
         return message

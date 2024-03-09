@@ -4,6 +4,7 @@ def backup_and_restore(attribute_names):
 
     :param attribute_names: Tuple of strings specifying class attributes to back up.
     """
+
     def decorator(function):
         def wrapper(self, inputs):
             backup = {name: getattr(self, name) for name in attribute_names}
@@ -11,5 +12,7 @@ def backup_and_restore(attribute_names):
             for name in attribute_names:
                 setattr(self, name, backup[name])
             return result
+
         return wrapper
+
     return decorator
