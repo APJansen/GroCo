@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.9"
 tensorflow = "^2.16.1"
 keras = "^3.0.5"
+pytest-cov = "^4.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
