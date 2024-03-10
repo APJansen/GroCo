@@ -24,7 +24,7 @@ class TestSpaceGroup(TestCase):
                 ops.stack([group.composition[r][c] for r, c in enumerate(group.inverses)], axis=0),
                 (group.order,),
             )
-            self.assertAllEqual(identities, np.zeros(group.order, dtype=np.int32))
+            self.assertAllEqual(identities, ops.zeros(group.order, dtype="int32"))
 
     def test_subgroups(self):
         """
