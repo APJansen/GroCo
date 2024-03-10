@@ -1,3 +1,4 @@
+from keras import ops
 import tensorflow as tf
 
 
@@ -89,7 +90,7 @@ def _check_shape(signal, group_axis, group, subgroup, signal_string, group_strin
 def _act_on_batched_transform(layer, g_signal):
     shape = g_signal.shape
     g_order, batch_size = shape[:2]
-    signal_merged = tf.reshape(g_signal, (g_order * batch_size,) + shape[2:])
+    signal_merged = ops.reshape(g_signal, (g_order * batch_size,) + shape[2:])
     layer_signal = layer(signal_merged)
-    layer_signal = tf.reshape(layer_signal, (g_order, batch_size) + layer_signal.shape[1:])
+    layer_signal = ops.reshape(layer_signal, (g_order, batch_size) + layer_signal.shape[1:])
     return layer_signal

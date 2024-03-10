@@ -13,7 +13,7 @@ class TestWallpaperGroup(TestCase):
         so for the inverse to be correct the diagonal needs to be the identity.
         """
         for group in wallpaper_group_dict.values():
-            identities = tf.reshape(
+            identities = ops.reshape(
                 tf.stack([group.composition[r][c] for r, c in enumerate(group.inverses)], axis=0),
                 (group.order,),
             )
@@ -30,7 +30,7 @@ class TestWallpaperGroup(TestCase):
                 subgroup_composition = ops.take(
                     subgroup_composition, axis=1, indices=subgroup_indices
                 )
-                elements, _ = tf.unique(tf.reshape(subgroup_composition, [-1]))
+                elements, _ = tf.unique(ops.reshape(subgroup_composition, [-1]))
                 elements = tf.sort(elements)
 
                 msg = f"Subgroup {subgroup_name} not closed in group {group.name}"
@@ -62,7 +62,7 @@ class TestWallpaperGroup(TestCase):
                 products = ops.take(group.composition, axis=1, indices=coset)
                 subgroup_inverses = ops.take(group.inverses, axis=0, indices=subgroup_indices)
                 products = ops.take(products, axis=0, indices=subgroup_inverses)
-                products = tf.sort(tf.reshape(products, [-1]))
+                products = tf.sort(ops.reshape(products, [-1]))
 
                 msg = f"Subgroup {coset_name} multiplied with its cosets does not recover full group {group.name}."
                 self.assertAllEqual(tf.range(group.order), products, msg=msg)
@@ -75,12 +75,12 @@ class TestWallpaperGroup(TestCase):
             )
             for gi in range(group.order):
                 gi_signal = ops.take(g_signal, axis=2, indices=[gi])
-                gi_signal = tf.reshape(gi_signal, (28, 28, 3))
+                gi_signal = ops.reshape(gi_signal, (28, 28, 3))
 
                 h_gi_signal = group.action(
                     gi_signal, spatial_axes=[0, 1], new_group_axis=2, domain_group=None
                 )
-                h_gi = tf.reshape(ops.take(group.composition, axis=1, indices=[gi]), (group.order))
+                h_gi = ops.reshape(ops.take(group.composition, axis=1, indices=[gi]), (group.order))
 
                 h_gi_at_signal = group.action(
                     signal, spatial_axes=[0, 1], new_group_axis=2, domain_group=None
@@ -120,13 +120,13 @@ class TestWallpaperGroup(TestCase):
                 signal, new_group_axis=new_group_axis, spatial_axes=[0, 1], domain_group=None
             )
             for gi in range(group.order):
-                gi_signal = tf.reshape(
+                gi_signal = ops.reshape(
                     ops.take(g_signal, axis=new_group_axis, indices=[gi]), signal.shape
                 )
                 h_gi_signal = group.action(
                     gi_signal, new_group_axis=new_group_axis, spatial_axes=[0, 1], domain_group=None
                 )
-                h_gi = tf.reshape(ops.take(group.composition, axis=1, indices=[gi]), (group.order))
+                h_gi = ops.reshape(ops.take(group.composition, axis=1, indices=[gi]), (group.order))
                 h_gi_at_signal = ops.take(
                     group.action(
                         signal,
@@ -149,13 +149,13 @@ class TestWallpaperGroup(TestCase):
                 signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis
             )
             for gi in range(group.order):
-                gi_signal = tf.reshape(
+                gi_signal = ops.reshape(
                     ops.take(g_signal, axis=new_group_axis, indices=[gi]), signal.shape
                 )
                 h_gi_signal = group.action(
                     gi_signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis
                 )
-                h_gi = tf.reshape(ops.take(group.composition, axis=1, indices=[gi]), (group.order))
+                h_gi = ops.reshape(ops.take(group.composition, axis=1, indices=[gi]), (group.order))
                 h_gi_at_signal = ops.take(
                     group.action(
                         signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis

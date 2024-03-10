@@ -12,7 +12,7 @@ class GroupTransforms(Layer):
     Helper layer meant only for use within other layers involving group operations.
     Takes care of all group related transformations.
 
-    All public methods involve at most a single ops.take and tf.reshape call, using precomputed indices.
+    All public methods involve at most a single ops.take and ops.reshape call, using precomputed indices.
 
     Methods:
         merge_group_axis_and_pad
@@ -100,7 +100,7 @@ class GroupTransforms(Layer):
         (height, width, domain_group.order * channels_in, channels_out) ->
         (height, width, domain_group.order * channels_in, acting_group.order * channels_out)
         """
-        return ops.take(tf.reshape(kernel, [-1]), indices=self._transformed_kernel_indices, axis=0)
+        return ops.take(ops.reshape(kernel, [-1]), indices=self._transformed_kernel_indices, axis=0)
 
     def restore_group_axis(self, outputs):
         """

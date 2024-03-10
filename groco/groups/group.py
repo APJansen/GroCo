@@ -122,7 +122,7 @@ class Group:
 
         # act on point group
         shape = transformed_signal.shape
-        transformed_signal = tf.reshape(
+        transformed_signal = ops.reshape(
             transformed_signal,
             shape[:group_axis] + (acting_group_order * self.order) + shape[group_axis + 2 :],
         )
@@ -130,7 +130,7 @@ class Group:
         transformed_signal = ops.take(
             transformed_signal, axis=group_axis, indices=composition_indices
         )
-        transformed_signal = tf.reshape(
+        transformed_signal = ops.reshape(
             transformed_signal,
             shape[:group_axis] + (acting_group_order, domain_group_order) + shape[group_axis + 2 :],
         )
@@ -180,7 +180,7 @@ class Group:
                 for i, row in enumerate(subgroup_composition.numpy())
             ]
         )
-        return tf.reshape(group_composition_indices, [-1])
+        return ops.reshape(group_composition_indices, [-1])
 
     def _compute_inverses(self, inverses):
         if inverses is not None:

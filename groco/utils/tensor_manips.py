@@ -7,7 +7,7 @@ def get_index_tensor(tensor) -> tf.Tensor:
     Return a tensor of indices `index_tensor` that, when given an `input_tensor` of the same
     shape as the input `tensor` to this function, satisfies the identity:
 
-        `input_tensor == ops.take(tf.reshape(input_tensor, -1), indices=index_tensor)`
+        `input_tensor == ops.take(ops.reshape(input_tensor, -1), indices=index_tensor)`
 
     Args:
         tensor: Either a tf.Tensor or a tf.TensorShape.
@@ -17,7 +17,7 @@ def get_index_tensor(tensor) -> tf.Tensor:
     """
     shape = tensor if isinstance(tensor, tf.TensorShape) else tensor.shape
     num_elements = tf.reduce_prod(shape)
-    index_tensor = tf.reshape(tf.range(num_elements), shape)
+    index_tensor = ops.reshape(tf.range(num_elements), shape)
     return index_tensor
 
 
@@ -60,7 +60,7 @@ def split_axes(tensor: tf.Tensor, factor: int, split_axis: int, target_axis: int
     """
     new_shape = split_shapes(tensor.shape, factor, split_axis)
     new_shape = format_batch_dim(new_shape)
-    tensor_reshaped = tf.reshape(tensor, new_shape)
+    tensor_reshaped = ops.reshape(tensor, new_shape)
     tensor_transposed = move_axis_to_left_of(
         tensor_reshaped, moved_axis=split_axis, target_axis=target_axis
     )
@@ -103,7 +103,7 @@ def merge_axes(tensor: tf.Tensor, merged_axis: int, target_axis: int) -> tf.Tens
     transposed_tensor = move_axis_to_left_of(
         tensor, moved_axis=merged_axis, target_axis=target_axis
     )
-    return tf.reshape(transposed_tensor, shape)
+    return ops.reshape(transposed_tensor, shape)
 
 
 def merge_shapes(shape, merged_axis: int, target_axis: int) -> list:
@@ -129,7 +129,7 @@ def format_batch_dim(shape: list) -> list:
     """
     Turn any None entry in a shape, which represents an unknown batch size, by a -1,
     which represents all remaining elements.
-    Need to do this because None is not supported by tf.reshape.
+    Need to do this because None is not supported by ops.reshape.
 
     Args:
         shape: A list representing a shape with potentially a None for the batch dimension.
