@@ -10,7 +10,7 @@ Welcome to Groco's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   api/modules
+   api
 
 
 Indices and tables

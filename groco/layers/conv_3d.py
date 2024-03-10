@@ -11,7 +11,7 @@ class GroupConv3D(Conv3D):
     """
     Group convolution layer built on Keras's Conv3D layer.
 
-    Additional args:
+    Args:
         group: one of the space groups, string name or the object itself.
         subgroup: name of subgroup to act with (analog of a stride in the group direction).
             Defaults to None, meaning full group is acted with.
@@ -19,6 +19,7 @@ class GroupConv3D(Conv3D):
             extra amount to maintain equivariance.
         allow_non_equivariance: set to true along with setting padding to either `valid` or `same`
             to insist using non-equivariant padding.
+        all Conv3D args.
 
     Input shape:
     - If `data_format="channels_last"`:
@@ -98,7 +99,7 @@ class GroupConv3DTranspose(Conv3DTranspose):
     """
     Group transpose convolution layer built on Keras's Conv2DTranspose layer.
 
-    Additional args:
+    Args:
         group: one of the wallpaper groups, string name or the object itself.
         subgroup: name of subgroup to act with (analog of a stride in the group direction).
             Defaults to None, meaning full group is acted with.
@@ -106,6 +107,7 @@ class GroupConv3DTranspose(Conv3DTranspose):
             extra amount to maintain equivariance.
         allow_non_equivariance: set to true along with setting padding to either `valid` or `same`
             to insist using non-equivariant padding.
+        all Conv3DTranspose args.
 
     Input shape:
     - If `data_format="channels_last"`:

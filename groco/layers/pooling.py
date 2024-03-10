@@ -136,7 +136,7 @@ class GroupMaxPooling1D(GroupPooling):
     Allows for pooling on the grid as usual, but also on subgroups of the point group.
     Checks and restores equivariance in the same way as GroupConv1D.
 
-    Additional args:
+    Args:
         group: one of the wallpaper groups, string name or the object itself.
         padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal
             extra amount to maintain equivariance.
@@ -145,6 +145,7 @@ class GroupMaxPooling1D(GroupPooling):
         subgroup: defaults to '' meaning no pooling over the point group. Can be set to the name
             of a subgroup, which will pool over the cosets of that subgroup,
             maintaining equivariance only to the subgroup.
+        all MaxPooling1D args.
     """
 
     def __init__(self, **kwargs):
@@ -158,7 +159,7 @@ class GroupAveragePooling1D(GroupPooling):
     Allows for pooling on the grid as usual, but also on subgroups of the point group.
     Checks and restores equivariance in the same way as GroupConv1D.
 
-    Additional args:
+    Args:
         group: one of the wallpaper groups, string name or the object itself.
         padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal
             extra amount to maintain equivariance.
@@ -167,6 +168,7 @@ class GroupAveragePooling1D(GroupPooling):
         subgroup: defaults to '' meaning no pooling over the point group. Can be set to the name
             of a subgroup, which will pool over the cosets of that subgroup,
             maintaining equivariance only to the subgroup.
+        all AveragePooling1D args.
     """
 
     def __init__(self, **kwargs):
@@ -180,7 +182,7 @@ class GroupMaxPooling2D(GroupPooling):
     Allows for pooling on the grid as usual, but also on subgroups of the point group.
     Checks and restores equivariance in the same way as GroupConv2D.
 
-    Additional args:
+    Args:
         group: one of the wallpaper groups, string name or the object itself.
         padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal
             extra amount to maintain equivariance.
@@ -189,6 +191,7 @@ class GroupMaxPooling2D(GroupPooling):
         subgroup: defaults to '' meaning no pooling over the point group. Can be set to the name
             of a subgroup, which will pool over the cosets of that subgroup,
             maintaining equivariance only to the subgroup.
+        all MaxPooling2D args.
     """
 
     def __init__(self, **kwargs):
@@ -202,7 +205,7 @@ class GroupAveragePooling2D(GroupPooling):
     Allows for pooling on the grid as usual, but also on subgroups of the point group.
     Checks and restores equivariance in the same way as GroupConv2D.
 
-    Additional args:
+    Args:
         group: one of the wallpaper groups, string name or the object itself.
         padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal
             extra amount to maintain equivariance.
@@ -211,6 +214,7 @@ class GroupAveragePooling2D(GroupPooling):
         subgroup: defaults to '' meaning no pooling over the point group. Can be set to the name
             of a subgroup, which will pool over the cosets of that subgroup,
             maintaining equivariance only to the subgroup.
+        all AveragePooling2D args.
     """
 
     def __init__(self, **kwargs):
@@ -224,7 +228,7 @@ class GroupMaxPooling3D(GroupPooling):
     Allows for pooling on the grid as usual, but also on subgroups of the point group.
     Checks and restores equivariance in the same way as GroupConv3D.
 
-    Additional args:
+    Args:
         group: one of the wallpaper groups, string name or the object itself.
         padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal
             extra amount to maintain equivariance.
@@ -233,6 +237,7 @@ class GroupMaxPooling3D(GroupPooling):
         subgroup: defaults to '' meaning no pooling over the point group. Can be set to the name
             of a subgroup, which will pool over the cosets of that subgroup,
             maintaining equivariance only to the subgroup.
+        all MaxPooling3D args.
     """
 
     def __init__(self, **kwargs):
@@ -246,7 +251,7 @@ class GroupAveragePooling3D(GroupPooling):
     Allows for pooling on the grid as usual, but also on subgroups of the point group.
     Checks and restores equivariance in the same way as GroupConv3D.
 
-    Additional args:
+    Args:
         group: one of the wallpaper groups, string name or the object itself.
         padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal
             extra amount to maintain equivariance.
@@ -255,6 +260,7 @@ class GroupAveragePooling3D(GroupPooling):
         subgroup: defaults to '' meaning no pooling over the point group. Can be set to the name
             of a subgroup, which will pool over the cosets of that subgroup,
             maintaining equivariance only to the subgroup.
+        all AveragePooling3D args.
     """
 
     def __init__(self, **kwargs):
