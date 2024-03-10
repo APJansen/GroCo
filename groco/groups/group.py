@@ -1,6 +1,5 @@
 from keras import ops
 import numpy as np
-import tensorflow as tf
 
 
 class Group:
@@ -148,7 +147,7 @@ class Group:
 
     def upsample(self, signal, group_axis, domain_group):
         domain_group_indices = self.subgroup[domain_group]
-        zeros = tf.zeros(
+        zeros = ops.zeros(
             shape=signal.shape[:group_axis] + (1,) + signal.shape[group_axis + 1 :],
             dtype=signal.dtype,
         )
