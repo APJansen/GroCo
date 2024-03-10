@@ -74,7 +74,6 @@ class GroupConv3DTranspose(Conv3DTranspose):
     def build(self, input_shape):
         self.group_transforms.build(input_shape)
         self.group_valued_input = self.group_transforms.group_valued_input
-        print(f"reshaped input in conv_3d.py: {self.group_transforms.reshaped_input}")
         super().build(self.group_transforms.reshaped_input)
         self.group_transforms.compute_conv_indices(
             input_shape, self.kernel, self.bias, self.use_bias
@@ -85,8 +84,6 @@ class GroupConv3DTranspose(Conv3DTranspose):
             else:
                 channel_axis = -1
             self.input_spec.axes = {channel_axis: input_shape[self.group_transforms.channels_axis]}
-            print(self.input_spec)
-            self.input_spec.min_ndim += 1
 
     def get_config(self):
         config = super().get_config()

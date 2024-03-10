@@ -78,7 +78,6 @@ class GroupConv2DTranspose(Conv2DTranspose):
             else:
                 channel_axis = -1
             self.input_spec.axes = {channel_axis: input_shape[self.group_transforms.channels_axis]}
-            self.input_spec.min_ndim += 1
 
     def get_config(self):
         config = super().get_config()
