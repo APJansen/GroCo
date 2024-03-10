@@ -12,7 +12,7 @@ class GroupTransforms(Layer):
     Helper layer meant only for use within other layers involving group operations.
     Takes care of all group related transformations.
 
-    All public methods involve at most a single tf.gather and tf.reshape call, using precomputed indices.
+    All public methods involve at most a single ops.take and tf.reshape call, using precomputed indices.
 
     Methods:
         merge_group_axis_and_pad
@@ -90,7 +90,7 @@ class GroupTransforms(Layer):
 
     def repeat_bias(self, bias):
         """Transform the bias to subgroup.order repeated copies of itself."""
-        return tf.gather(bias, indices=self._repeated_bias_indices, axis=0)
+        return ops.take(bias, indices=self._repeated_bias_indices, axis=0)
 
     def transform_kernel(self, kernel):
         """
@@ -100,7 +100,7 @@ class GroupTransforms(Layer):
         (height, width, domain_group.order * channels_in, channels_out) ->
         (height, width, domain_group.order * channels_in, acting_group.order * channels_out)
         """
-        return tf.gather(tf.reshape(kernel, [-1]), indices=self._transformed_kernel_indices, axis=0)
+        return ops.take(tf.reshape(kernel, [-1]), indices=self._transformed_kernel_indices, axis=0)
 
     def restore_group_axis(self, outputs):
         """
@@ -126,7 +126,7 @@ class GroupTransforms(Layer):
         Shapes in 2D case (with default data_format='channels_last'):
         (batch, height, width, group.order, channels) -> (batch, height, width, subgroup.order, channels)
         """
-        outputs = tf.gather(inputs, axis=self.group_axis, indices=self._pooling_indices)
+        outputs = ops.take(inputs, axis=self.group_axis, indices=self._pooling_indices)
         pooling = tf.reduce_max if pool_type == "max" else tf.reduce_mean
         outputs = pooling(outputs, axis=self.group_axis + 1)
         return outputs
@@ -160,11 +160,11 @@ class GroupTransforms(Layer):
         self._transformed_kernel_indices = self._compute_transformed_kernel_indices(kernel)
 
     def compute_pooling_indices(self):
-        indices = tf.gather(
+        indices = ops.take(
             self.group.composition, axis=1, indices=self.group.cosets[self.subgroup.name]
         )
         subgroup_indices = self.group.subgroup[self.subgroup.name]
-        self._pooling_indices = tf.gather(indices, axis=0, indices=subgroup_indices)
+        self._pooling_indices = ops.take(indices, axis=0, indices=subgroup_indices)
 
     def _compute_repeated_bias_indices(self, bias):
         """Compute a 1D tensor of indices used to gather from the bias in order to repeat it across the group axis."""

@@ -1,3 +1,4 @@
+from keras import ops
 import tensorflow as tf
 from tensorflow.test import TestCase
 
@@ -25,8 +26,8 @@ class TestWallpaperGroup(TestCase):
         for group in wallpaper_group_dict.values():
             for subgroup_name, subgroup_indices in group.subgroup.items():
                 subgroup_invs = [group.inverses[i] for i in subgroup_indices]
-                subgroup_composition = tf.gather(group.composition, axis=0, indices=subgroup_invs)
-                subgroup_composition = tf.gather(
+                subgroup_composition = ops.take(group.composition, axis=0, indices=subgroup_invs)
+                subgroup_composition = ops.take(
                     subgroup_composition, axis=1, indices=subgroup_indices
                 )
                 elements, _ = tf.unique(tf.reshape(subgroup_composition, [-1]))
@@ -58,9 +59,9 @@ class TestWallpaperGroup(TestCase):
         for group in wallpaper_group_dict.values():
             for coset_name, coset in group.cosets.items():
                 subgroup_indices = group.subgroup[coset_name]
-                products = tf.gather(group.composition, axis=1, indices=coset)
-                subgroup_inverses = tf.gather(group.inverses, axis=0, indices=subgroup_indices)
-                products = tf.gather(products, axis=0, indices=subgroup_inverses)
+                products = ops.take(group.composition, axis=1, indices=coset)
+                subgroup_inverses = ops.take(group.inverses, axis=0, indices=subgroup_indices)
+                products = ops.take(products, axis=0, indices=subgroup_inverses)
                 products = tf.sort(tf.reshape(products, [-1]))
 
                 msg = f"Subgroup {coset_name} multiplied with its cosets does not recover full group {group.name}."
@@ -73,18 +74,18 @@ class TestWallpaperGroup(TestCase):
                 signal, spatial_axes=[0, 1], new_group_axis=2, domain_group=None
             )
             for gi in range(group.order):
-                gi_signal = tf.gather(g_signal, axis=2, indices=[gi])
+                gi_signal = ops.take(g_signal, axis=2, indices=[gi])
                 gi_signal = tf.reshape(gi_signal, (28, 28, 3))
 
                 h_gi_signal = group.action(
                     gi_signal, spatial_axes=[0, 1], new_group_axis=2, domain_group=None
                 )
-                h_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
+                h_gi = tf.reshape(ops.take(group.composition, axis=1, indices=[gi]), (group.order))
 
                 h_gi_at_signal = group.action(
                     signal, spatial_axes=[0, 1], new_group_axis=2, domain_group=None
                 )
-                h_gi_at_signal = tf.gather(h_gi_at_signal, axis=2, indices=h_gi)
+                h_gi_at_signal = ops.take(h_gi_at_signal, axis=2, indices=h_gi)
 
                 msg = f"Action of {group.name} not compatible with its composition."
                 self.assertAllEqual(h_gi_signal, h_gi_at_signal, msg=msg)
@@ -120,13 +121,13 @@ class TestWallpaperGroup(TestCase):
             )
             for gi in range(group.order):
                 gi_signal = tf.reshape(
-                    tf.gather(g_signal, axis=new_group_axis, indices=[gi]), signal.shape
+                    ops.take(g_signal, axis=new_group_axis, indices=[gi]), signal.shape
                 )
                 h_gi_signal = group.action(
                     gi_signal, new_group_axis=new_group_axis, spatial_axes=[0, 1], domain_group=None
                 )
-                h_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
-                h_gi_at_signal = tf.gather(
+                h_gi = tf.reshape(ops.take(group.composition, axis=1, indices=[gi]), (group.order))
+                h_gi_at_signal = ops.take(
                     group.action(
                         signal,
                         new_group_axis=new_group_axis,
@@ -149,13 +150,13 @@ class TestWallpaperGroup(TestCase):
             )
             for gi in range(group.order):
                 gi_signal = tf.reshape(
-                    tf.gather(g_signal, axis=new_group_axis, indices=[gi]), signal.shape
+                    ops.take(g_signal, axis=new_group_axis, indices=[gi]), signal.shape
                 )
                 h_gi_signal = group.action(
                     gi_signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis
                 )
-                h_gi = tf.reshape(tf.gather(group.composition, axis=1, indices=[gi]), (group.order))
-                h_gi_at_signal = tf.gather(
+                h_gi = tf.reshape(ops.take(group.composition, axis=1, indices=[gi]), (group.order))
+                h_gi_at_signal = ops.take(
                     group.action(
                         signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis
                     ),
@@ -177,7 +178,7 @@ class TestWallpaperGroup(TestCase):
                 h_signal = subgroup.action(
                     signal, spatial_axes=[0, 1], new_group_axis=0, domain_group=None
                 )
-                g_signal_sub = tf.gather(g_signal, axis=0, indices=subgroup_indices)
+                g_signal_sub = ops.take(g_signal, axis=0, indices=subgroup_indices)
 
                 msg = f"Action of subgroup {subgroup_name} on signal on grid not the same as corresponding indices in action of full group {group.name}"
                 self.assertAllEqual(h_signal, g_signal_sub, msg=msg)
@@ -194,7 +195,7 @@ class TestWallpaperGroup(TestCase):
                 group_signal = group.upsample(
                     subgroup_signal, group_axis=3, domain_group=subgroup_name
                 )
-                subgroup_signal_reconstructed = tf.gather(
+                subgroup_signal_reconstructed = ops.take(
                     group_signal, axis=3, indices=group.subgroup[subgroup_name]
                 )
 

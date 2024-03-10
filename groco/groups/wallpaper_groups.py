@@ -18,7 +18,7 @@ def P4M_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     axes[height_axis], axes[width_axis] = axes[width_axis], axes[height_axis]
     signal = ops.concatenate([signal, ops.transpose(signal, axes)], axis=new_group_axis)
     # this line is to make the order (e, R, R^2, R^3, F, R F, R^2 F, R^3 F)
-    signal = tf.gather(signal, axis=new_group_axis, indices=(0, 5, 3, 6, 1, 4, 2, 7))
+    signal = ops.take(signal, axis=new_group_axis, indices=(0, 5, 3, 6, 1, 4, 2, 7))
 
     return signal
 
@@ -39,7 +39,7 @@ def P4_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     signal = ops.concatenate(
         [signal, tf.reverse(ops.transpose(signal, axes), axis=[height_axis])], axis=new_group_axis
     )
-    signal = tf.gather(signal, axis=new_group_axis, indices=[0, 2, 1, 3])
+    signal = ops.take(signal, axis=new_group_axis, indices=[0, 2, 1, 3])
     return signal
 
 

@@ -87,7 +87,7 @@ class Group:
         transformed_signal = self._action(
             signal, spatial_axes=spatial_axes, new_group_axis=new_group_axis
         )
-        transformed_signal = tf.gather(
+        transformed_signal = ops.take(
             transformed_signal, axis=new_group_axis, indices=self.subgroup[acting_group]
         )
         return transformed_signal
@@ -127,7 +127,7 @@ class Group:
             shape[:group_axis] + (acting_group_order * self.order) + shape[group_axis + 2 :],
         )
         composition_indices = self._composition_flat_indices(acting_group, domain_group)
-        transformed_signal = tf.gather(
+        transformed_signal = ops.take(
             transformed_signal, axis=group_axis, indices=composition_indices
         )
         transformed_signal = tf.reshape(
@@ -156,7 +156,7 @@ class Group:
         for i in range(self.order):
             if i in domain_group_indices:
                 filled_signal.append(
-                    tf.gather(
+                    ops.take(
                         signal,
                         axis=group_axis,
                         indices=[
@@ -170,8 +170,8 @@ class Group:
 
     def _composition_flat_indices(self, acting_group, domain_group):
         acting_inv_indices = [self.inverses[i] for i in self.subgroup[acting_group]]
-        subgroup_composition = tf.gather(self.composition, axis=0, indices=acting_inv_indices)
-        subgroup_composition = tf.gather(
+        subgroup_composition = ops.take(self.composition, axis=0, indices=acting_inv_indices)
+        subgroup_composition = ops.take(
             subgroup_composition, axis=1, indices=self.subgroup[domain_group]
         )
         group_composition_indices = tf.constant(
@@ -196,8 +196,8 @@ class Group:
             return tf.constant(composition)
 
         parent_indices = self.parent.subgroup[self.name]
-        composition = tf.gather(self.parent.composition, indices=parent_indices, axis=0)
-        composition = tf.gather(composition, indices=parent_indices, axis=1)
+        composition = ops.take(self.parent.composition, indices=parent_indices, axis=0)
+        composition = ops.take(composition, indices=parent_indices, axis=1)
         composition = [
             self._convert_parent_indices(composition[r].numpy()) for r in range(self.order)
         ]
@@ -209,7 +209,7 @@ class Group:
 
         def subgroup_action(signal, spatial_axes, new_group_axis):
             group_transformed = self.parent._action(signal, spatial_axes, new_group_axis)
-            subgroup_transformed = tf.gather(
+            subgroup_transformed = ops.take(
                 group_transformed, indices=self.parent.subgroup[self.name], axis=new_group_axis
             )
             return subgroup_transformed

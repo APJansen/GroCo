@@ -7,7 +7,7 @@ def get_index_tensor(tensor) -> tf.Tensor:
     Return a tensor of indices `index_tensor` that, when given an `input_tensor` of the same
     shape as the input `tensor` to this function, satisfies the identity:
 
-        `input_tensor == tf.gather(tf.reshape(input_tensor, -1), indices=index_tensor)`
+        `input_tensor == ops.take(tf.reshape(input_tensor, -1), indices=index_tensor)`
 
     Args:
         tensor: Either a tf.Tensor or a tf.TensorShape.
