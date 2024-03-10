@@ -204,7 +204,7 @@ class GroupTransforms(Layer):
     def _switch_in_out(kernel):
         axes = list(range(kernel.shape.rank))
         axes[-1], axes[-2] = axes[-2], axes[-1]
-        return tf.transpose(kernel, tuple(axes))
+        return ops.transpose(kernel, tuple(axes))
 
     def _restore_kernel_group_axis(self, kernel):
         """

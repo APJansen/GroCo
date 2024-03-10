@@ -1,3 +1,4 @@
+from keras import ops
 import tensorflow as tf
 
 
@@ -40,7 +41,7 @@ def move_axis_to_left_of(tensor: tf.Tensor, moved_axis: int, target_axis: int) -
     ):  # in this case after removing moved_axis, target_axis shifts left by one
         target_axis -= 1
     axes = axes[:target_axis] + (moved_axis,) + axes[target_axis:]
-    return tf.transpose(tensor, axes)
+    return ops.transpose(tensor, axes)
 
 
 def split_axes(tensor: tf.Tensor, factor: int, split_axis: int, target_axis: int) -> tf.Tensor:

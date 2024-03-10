@@ -19,7 +19,7 @@ def Oh_action(signal, spatial_axes=(0, 1, 2), new_group_axis=3):
         for (perm, flip) in Oh_parameters
     ]
     transformed_signals = [
-        tf.expand_dims(tf.transpose(tf.reverse(signal, axis=flip), perm), axis=new_group_axis)
+        tf.expand_dims(ops.transpose(tf.reverse(signal, axis=flip), perm), axis=new_group_axis)
         for perm, flip in Oh_params
     ]
     transformed_signals = ops.concatenate(transformed_signals, axis=new_group_axis)

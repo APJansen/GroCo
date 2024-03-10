@@ -141,7 +141,7 @@ class Group:
         permuted_axes = (
             permuted_axes[:new_group_axis] + [group_axis] + permuted_axes[new_group_axis:]
         )
-        transformed_signal = tf.transpose(transformed_signal, permuted_axes)
+        transformed_signal = ops.transpose(transformed_signal, permuted_axes)
 
         return transformed_signal
 
