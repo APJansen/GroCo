@@ -17,19 +17,11 @@ Group
 Layers
 --------
 
-.. autoclass:: groco.layers.conv_1d.GroupConv1D
-   :members:
-   :show-inheritance:
-
 .. autoclass:: groco.layers.conv_2d.GroupConv2D
    :members:
    :show-inheritance:
 
 .. autoclass:: groco.layers.conv_3d.GroupConv3D
-   :members:
-   :show-inheritance:
-
-.. autoclass:: groco.layers.conv_1d.GroupConv1DTranspose
    :members:
    :show-inheritance:
 
