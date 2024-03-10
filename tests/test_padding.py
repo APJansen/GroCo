@@ -1,6 +1,5 @@
 import keras
 from keras import ops
-import tensorflow as tf
 from tensorflow.test import TestCase
 
 from groco.layers import EquivariantPadding
@@ -68,7 +67,3 @@ class TestEquivariantPadding(TestCase):
         outputs = layer(inputs)
         output_shape = tuple(s + p for s, p in zip(inputs.shape[2:], (2, 4)))
         self.assertAllEqual(outputs.shape[2:], output_shape)
-
-
-if __name__ == "__main__":
-    tf.test.main()

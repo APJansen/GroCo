@@ -1,7 +1,6 @@
 import keras
 from keras import ops
 import numpy as np
-import tensorflow as tf
 from tensorflow.test import TestCase
 
 from groco.groups import wallpaper_group_dict
@@ -239,7 +238,3 @@ class TestWallpaperGroup(TestCase):
                     acting_group=subgroup_name,
                 )
                 self.assertAllLess(equiv_diff, 1e-4)
-
-
-if __name__ == "__main__":
-    tf.test.main()

@@ -1,6 +1,5 @@
 import keras
 from keras import ops
-import tensorflow as tf
 from tensorflow.test import TestCase
 
 from groco.groups import space_group_dict
@@ -298,7 +297,3 @@ class TestGroupConv3DTranspose(TestCase):
     #             equiv_diff = check_equivariance(
     #                 conv_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes)
     #             self.assertAllLess(equiv_diff, 1e-4)
-
-
-if __name__ == "__main__":
-    tf.test.main()

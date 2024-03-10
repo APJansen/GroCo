@@ -1,7 +1,6 @@
 import keras
 from keras import ops
-import tensorflow as tf
-from tensorflow.test import TestCase
+from pytest.unittest import TestCase
 
 from groco.groups import space_group_dict, wallpaper_group_dict
 from groco.layers import GroupMaxPooling2D, GroupMaxPooling3D
@@ -166,7 +165,3 @@ class TestGroupPooling3D(TestCase):
                 )
 
                 self.assertAllLess(equiv_diff, 1e-4)
-
-
-if __name__ == "__main__":
-    tf.test.main()

@@ -1,6 +1,5 @@
 import keras
 from keras import ops
-import tensorflow as tf
 from tensorflow.test import TestCase
 
 from groco.groups import wallpaper_group_dict
@@ -309,7 +308,3 @@ class TestGroupConv2DTranspose(TestCase):
                 spatial_axes=self.spatial_axes,
             )
             self.assertAllLess(equiv_diff, 1e-4)
-
-
-if __name__ == "__main__":
-    tf.test.main()
