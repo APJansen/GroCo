@@ -37,10 +37,10 @@ class TestSpaceGroup(TestCase):
                     subgroup_composition, axis=1, indices=subgroup_indices
                 )
                 elements, _ = tf.unique(ops.reshape(subgroup_composition, [-1]))
-                elements = tf.sort(elements)
+                elements = ops.sort(elements)
 
                 msg = f"Subgroup {subgroup_name} not closed in group {group.name}"
-                self.assertAllEqual(elements, tf.sort(subgroup_indices), msg=msg)
+                self.assertAllEqual(elements, ops.sort(subgroup_indices), msg=msg)
 
     def test_cosets_identity(self):
         """Cosets contain identity."""
@@ -68,7 +68,7 @@ class TestSpaceGroup(TestCase):
                 products = ops.take(group.composition, axis=1, indices=coset)
                 subgroup_inverses = ops.take(group.inverses, axis=0, indices=subgroup_indices)
                 products = ops.take(products, axis=0, indices=subgroup_inverses)
-                products = tf.sort(ops.reshape(products, [-1]))
+                products = ops.sort(ops.reshape(products, [-1]))
 
                 msg = f"Subgroup {coset_name} multiplied with its cosets does not recover full group {group.name}."
                 self.assertAllEqual(tf.range(group.order), products, msg=msg)
