@@ -3,7 +3,7 @@ from functools import partial
 from tensorflow.keras.layers import Conv3D
 
 from groco.groups import space_groups
-from groco.layers.conv_base import GroupTransforms
+from groco.layers.group_transforms import GroupTransforms
 from groco.utils import backup_and_restore
 
 

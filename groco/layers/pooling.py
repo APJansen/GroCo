@@ -15,7 +15,7 @@ from tensorflow.keras.layers import (
     MaxPooling3D,
 )
 
-from groco.layers.conv_base import GroupTransforms
+from groco.layers.group_transforms import GroupTransforms
 
 
 class GroupPooling(Layer):

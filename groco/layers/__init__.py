@@ -2,7 +2,7 @@ from .conv2d import *
 from .conv2d_transpose import *
 from .conv3d import *
 from .conv3d_transpose import *
-from .conv_base import *
+from .group_transforms import *
 from .padding import *
 from .pooling import (
     GlobalGroupAveragePooling1D,
