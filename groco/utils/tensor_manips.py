@@ -1,8 +1,7 @@
-from keras import ops
-import tensorflow as tf
+from keras import KerasTensor, ops
 
 
-def get_index_tensor(tensor) -> tf.Tensor:
+def get_index_tensor(tensor) -> KerasTensor:
     """
     Return a tensor of indices `index_tensor` that, when given an `input_tensor` of the same
     shape as the input `tensor` to this function, satisfies the identity:
@@ -10,18 +9,18 @@ def get_index_tensor(tensor) -> tf.Tensor:
         `input_tensor == ops.take(ops.reshape(input_tensor, -1), indices=index_tensor)`
 
     Args:
-        tensor: Either a tf.Tensor or a tf.TensorShape.
+        tensor: KerasTensor.
 
     Returns:
-        A tf.Tensor of indices.
+        A KerasTensor of indices.
     """
-    shape = tensor if isinstance(tensor, tf.TensorShape) else tensor.shape
+    shape = tensor.shape
     num_elements = ops.prod(shape)
     index_tensor = ops.reshape(ops.arange(num_elements), shape)
     return index_tensor
 
 
-def move_axis_to_left_of(tensor: tf.Tensor, moved_axis: int, target_axis: int) -> tf.Tensor:
+def move_axis_to_left_of(tensor: KerasTensor, moved_axis: int, target_axis: int) -> KerasTensor:
     """
     Put the `moved_axis` to the left of the `target_axis`, leaving the order of the other
     axes invariant.
@@ -44,7 +43,7 @@ def move_axis_to_left_of(tensor: tf.Tensor, moved_axis: int, target_axis: int) -
     return ops.transpose(tensor, axes)
 
 
-def split_axes(tensor: tf.Tensor, factor: int, split_axis: int, target_axis: int) -> tf.Tensor:
+def split_axes(tensor: KerasTensor, factor: int, split_axis: int, target_axis: int) -> KerasTensor:
     """
     Split `split_axis`, dividing its size by factor, putting the new axis directly to its left,
     which is then moved to the `target_axis` index.
@@ -73,7 +72,7 @@ def split_shapes(shape, factor: int, split_axis: int) -> list:
     `split_axis` and dividing the `split_axis` itself by the same `factor`.
 
     Args:
-        shape: The full shape, tuple or tf.TensorShape.
+        shape: The full shape.TensorShape.
         factor: The number of elements to split off.
         split_axis: The index of the axis to be split.
 
@@ -82,11 +81,11 @@ def split_shapes(shape, factor: int, split_axis: int) -> list:
     """
     shape = list(shape)
     shape[split_axis] //= factor
-    shape = tf.TensorShape(shape[:split_axis] + [factor] + shape[split_axis:])
+    shape = shape[:split_axis] + [factor] + shape[split_axis:]
     return shape
 
 
-def merge_axes(tensor: tf.Tensor, merged_axis: int, target_axis: int) -> tf.Tensor:
+def merge_axes(tensor: KerasTensor, merged_axis: int, target_axis: int) -> KerasTensor:
     """
     Transpose the `merged_axis` to the left of the `target_axis` and then merge them.
 
@@ -112,7 +111,7 @@ def merge_shapes(shape, merged_axis: int, target_axis: int) -> list:
     of the `target_axis` by the size of the `merged_axis`.
 
     Args:
-        shape: The full shape, tuple or tf.TensorShape.
+        shape: The full shape.
         merged_axis: The index of the axis to remove.
         target_axis: The index of the axis to add to.
 
