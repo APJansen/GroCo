@@ -42,12 +42,15 @@ class GroupConv3D(Conv3D):
     def __init__(
         self, group, kernel_size, allow_non_equivariance: bool = False, subgroup="", **kwargs
     ):
+        dimensions = 3
+        transpose = False
         self.group_transforms = GroupTransforms(
             allow_non_equivariance=allow_non_equivariance,
             kernel_size=kernel_size,
-            dimensions=3,
+            dimensions=dimensions,
             group=group,
             subgroup=subgroup,
+            transpose=transpose,
             **kwargs,
         )
         kwargs["padding"] = self.group_transforms.built_in_padding_option
@@ -56,7 +59,7 @@ class GroupConv3D(Conv3D):
 
         super().__init__(kernel_size=kernel_size, **kwargs)
         self.group_valued_input = None
-        self.group_order = self.subgroup.order
+        self.group_order = self.group.order if transpose else self.subgroup.order
 
     @backup_and_restore(("kernel", "bias", "filters"))
     def call(self, inputs):
