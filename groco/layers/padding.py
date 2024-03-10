@@ -4,18 +4,29 @@ from tensorflow.keras.layers import Layer
 
 class EquivariantPadding(Layer):
     """
-    Pad the input by the minimal extra amount to maintain translation equivariance.
-    This is meant to be used internally by GroupConv and GroupPooling layers, the padding done here is in
-    addition to any potential padding done in those layers.
+    Base padding layer.
 
-    Specifically what it imposes is that the origin of the output grid coincides with the origin of the input grid.
+    This is meant to be used internally by GroupConv and GroupPooling layers.
+    The padding done here is in addition to any potential padding done in those layers.
+
+    Specifically what it imposes is that the origin of the output grid coincides with the
+    origin of the input grid.
     For this to be true, two conditions need to be met:
     - the total padding should be even, so it can be applied evenly on both sides
     - the sampling shouldn't stop before the end of the image, resulting in the condition:
      (input_size + padding - kernel_size) % stride == 0
 
-     The options `valid_equiv` and `same_equiv` for the padding argument will do the minimal amount of extra padding
-     on top of their usual counterparts to maintain equivariance.
+    The options `valid_equiv` and `same_equiv` for the padding argument will do the minimal
+    amount of extra padding on top of their usual counterparts to maintain equivariance.
+
+    Args:
+        kernel_size: int or tuple of int, the size of the kernel.
+        dimensions: int, the number of spatial dimensions.
+        strides: int or tuple of int, the stride of the convolution.
+        padding: string, one of 'valid_equiv', 'same_equiv', 'valid', 'same'.
+        allow_non_equivariance: bool, whether to allow non-equivariant padding.
+        data_format: string, one of 'channels_last', 'channels_first'.
+        transpose: bool, whether the layer is a transposed convolution.
     """
 
     def __init__(

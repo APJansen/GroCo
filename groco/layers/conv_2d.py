@@ -10,17 +10,32 @@ from groco.utils import backup_and_restore
 class GroupConv2D(Conv2D):
     """
     Group convolution layer built on Keras's Conv2D layer.
-    Additional arguments:
-    - group: one of the wallpaper groups, string name or the object itself, see groups.group_dict for implemented groups
-    - subgroup: name of subgroup to act with (analog of a stride in the group direction), defaults to None,
-                meaning full group is acted with
-    - padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal extra amount
-               to maintain equivariance
-    - allow_non_equivariance: set to true along with setting padding to either `valid` or `same` to insist using
-                              non-equivariant padding
 
-    Expected input shape: (batch, height, width, group.order, in_channels),
-    with the group.order axis omitted for the first layer (the lifting convolution).
+    Additional args:
+        group: one of the wallpaper groups, string name or the object itself.
+        subgroup: name of subgroup to act with (analog of a stride in the group direction).
+            Defaults to None, meaning full group is acted with.
+        padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal
+            extra amount to maintain equivariance.
+        allow_non_equivariance: set to true along with setting padding to either `valid` or `same`
+            to insist using non-equivariant padding.
+
+    Input shape:
+    - If `data_format="channels_last"`:
+        A 5D (4D) tensor with shape: `(batch_size, height, width, group.order, channels)`
+        with the group.order axis omitted for the first layer (the lifting convolution).
+    - If `data_format="channels_first"`:
+        A 5D (4D) tensor with shape: `(batch_size, channels, height, width, group.order)`
+        with the group.order axis omitted for the first layer (the lifting convolution).
+
+    Output shape:
+    - If `data_format="channels_last"`:
+        A 5D (4D) tensor with shape: `(batch_size, new_height, new_width, subgroup.order, filters)`
+    - If `data_format="channels_first"`:
+        A 5D (4D) tensor with shape: `(batch_size, filters, new_height, new_width, subgroup.order)`
+
+    Returns:
+        A 5D tensor representing `activation(conv2d(inputs, kernel) + bias)`.
     """
 
     def __init__(
@@ -85,17 +100,33 @@ P1Conv2D = partial(GroupConv2D, group=wallpaper_groups.P1)
 class GroupConv2DTranspose(Conv2DTranspose):
     """
     Group transpose convolution layer built on Keras's Conv2DTranspose layer.
-    Additional arguments:
-    - group: one of the wallpaper groups, string name or the object itself, see groups.group_dict for implemented groups
-    - subgroup: name of subgroup to act with (analog of a stride in the group direction), defaults to None,
-                meaning full group is acted with
-    - padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal extra amount
-               to maintain equivariance
-    - allow_non_equivariance: set to true along with setting padding to either `valid` or `same` to insist using
-                              non-equivariant padding
 
-    Expected input shape: (batch, height, width, group.order, in_channels),
-    with the group.order axis omitted for the first layer (the lifting convolution).
+    Additional args:
+        group: one of the wallpaper groups, string name or the object itself.
+        subgroup: name of subgroup to act with (analog of a stride in the group direction).
+            Defaults to None, meaning full group is acted with.
+        padding: takes two additional values `valid_equiv` and `same_equiv`, that pad the minimal
+            extra amount to maintain equivariance.
+        allow_non_equivariance: set to true along with setting padding to either `valid` or `same`
+            to insist using non-equivariant padding.
+
+    Input shape:
+    - If `data_format="channels_last"`:
+        A 5D (4D) tensor with shape: `(batch_size, height, width, group.order, channels)`
+        with the group.order axis omitted for the first layer (the lifting convolution).
+    - If `data_format="channels_first"`:
+        A 5D (4D) tensor with shape: `(batch_size, channels, height, width, group.order)`
+        with the group.order axis omitted for the first layer (the lifting convolution).
+
+    Output shape:
+    - If `data_format="channels_last"`:
+        A 5D (4D) tensor with shape: `(batch_size, new_height, new_width, subgroup.order, filters)`
+    - If `data_format="channels_first"`:
+        A 5D (4D) tensor with shape: `(batch_size, filters, new_height, new_width, subgroup.order)`
+
+    Returns:
+        A 5D tensor representing
+        `activation(conv2d_transpose(inputs, kernel) + bias)`.
     """
 
     def __init__(

@@ -1,8 +1,6 @@
 def backup_and_restore(attribute_names):
     """
     Decorator that backs up given attributes, runs the function, and then restores the backed up values.
-
-    :param attribute_names: Tuple of strings specifying class attributes to back up.
     """
 
     def decorator(function):

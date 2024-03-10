@@ -5,18 +5,22 @@ class Group:
     """
     Class representing a group along with its actions on a grid.
 
-    Attributes:
-        order: the number of elements.
+    Args:
+        name: string, name of the group.
+        order: int, the number of elements in the group.
         inverses: 1d tensor indicating the inverse of element i at position i.
-        composition: 2d tensor with entry composition[r][c] the index of the group element obtained by composing
-        the inverse of the rth element with the cth element
-        subgroup: dictionary from subgroup strings to indices representing the elements in the subgroup.
-        cosets: dictionary from subgroup strings to indices representing the elementary coset representatives of the
-        corresponding subgroup
-        name: string name of the group.
+        composition: 2d tensor with entry composition[r][c] the index of the group element
+            obtained by composing the inverse of the rth element with the cth element.
+        subgroup: dictionary from subgroup strings to indices representing the elements in
+            the subgroup.
+        cosets: dictionary from subgroup strings to indices representing the elementary coset
+            representatives of the corresponding subgroup.
+        action: callable, the action of the group on a signal on the grid.
+        parent: Group, the parent group of the group.
 
     Methods:
-        action: performs the action of the whole group on a signal on the grid or on the group itself.
+        action: performs the action of the whole group on a signal on the grid
+            or on the group itself.
     """
 
     def __init__(
@@ -51,13 +55,20 @@ class Group:
         """
         The action of the group on a given signal.
 
-        :param signal: The tensor to act on.
-        :param spatial_axes: Tuple indicating which are the spatial axes, defaults to (1, 2).
-        :param new_group_axis: Which axis in the output to concatenate the group elements' actions on, defaults to 0.
-        :param group_axis: The group axis of the input, defaults to None, meaning a signal only on the grid.
-        :param acting_group: Name of subgroup with which to act, defaults to None meaning the whole group.
-        :param domain_group: Name of subgroup signal lives on, defaults to None meaning the whole group.
-        :return: Tensor of the signal acted on by the group.
+        Args:
+            signal: The tensor to act on.
+            spatial_axes: Tuple indicating which are the spatial axes, defaults to (1, 2).
+            new_group_axis: Which axis in the output to concatenate the group elements' actions
+                on, defaults to 0.
+            group_axis: The group axis of the input, defaults to None, meaning a signal only
+                on the grid.
+            acting_group: Name of subgroup with which to act, defaults to None meaning
+                the whole group.
+            domain_group: Name of subgroup signal lives on, defaults to None meaning
+                the whole group.
+
+        Returns:
+            Tensor of the signal acted on by the group.
         """
         acting_group, domain_group = self.parse_subgroups(acting_group, domain_group)
         kwargs = {
@@ -91,7 +102,9 @@ class Group:
     ):
         """
         Act on a signal on the group.
-        If acting_group is set to a subgroup, only act with that subgroup on a signal on the whole group.
+
+        If acting_group is set to a subgroup, only act with that subgroup on a signal on
+        the whole group.
         If domain_group is set to a subgroup, act with whole group on a signal on the subgroup,
         where the signal is set to 0 outside of the subgroup.
         """

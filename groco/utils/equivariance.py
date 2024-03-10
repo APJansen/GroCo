@@ -12,23 +12,25 @@ def check_equivariance(
     target_group="",
 ):
     """
-    Test the equivariance of a `layer` L under the transformation of an `acting_group` G on a `signal` s,
-    by computing max |GL(s) - LG(s)|.
-    The layer L takes signal on the `domain_group` to signals on the `target_group`
+    Test the equivariance of a `layer` L under the transformation of an `acting_group` G on a `signal` s, by computing max |GL(s) - LG(s)|.
 
+    The layer L takes signal on the `domain_group` to signals on the `target_group`
     All of `acting_group`, `domain_group` and `target_group` should be strings representing subgroups of `group`.
     `group` itself will be read off from the layer if not set.
 
-    :param layer: The layer to test, any callable, but it must treat the first dimension as a batch dimension
-    and conform to the input and output groups specified.
-    :param signal: The input signal on `domain_group` to test on.
-    :param group:the group, defaults to None in which case layer.group will be used.
-    :param spatial_axes: tuple of integers indicating the spatial axes.
-    :param group_axis: axis indexing group elements, the layer should keep them in this axis.
-    :param acting_group: defaults to '', in which case the full group will be used
-    :param domain_group: defaults to '', in which case the full group will be used
-    :param target_group: defaults to '', in which case the full group will be used
-    :return: maximal absolute difference between first transforming vs first applying layer.
+    Args:
+        layer: The layer to test, any callable, but it must treat the first dimension as a
+            batch dimension and conform to the input and output groups specified.
+        signal: The input signal on `domain_group` to test on.
+        group: The group, defaults to None in which case layer.group will be used.
+        spatial_axes: tuple of integers indicating the spatial axes.
+        group_axis: axis indexing group elements, the layer should keep them in this axis.
+        acting_group: defaults to '', in which case the full group will be used.
+        domain_group: defaults to '', in which case the full group will be used.
+        target_group: defaults to '', in which case the full group will be used.
+
+    Returns:
+        maximal absolute difference between first transforming vs first applying layer.
     """
     group = layer.group if group is None else group
     acting_group, domain_group, target_group = group.parse_subgroups(
