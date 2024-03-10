@@ -1,6 +1,5 @@
 from keras import ops
 from keras.layers import Layer
-import tensorflow as tf
 
 
 class EquivariantPadding(Layer):
@@ -51,11 +50,12 @@ class EquivariantPadding(Layer):
             if isinstance(strides, tuple)
             else tuple(strides for _ in range(self.dimensions))
         )
-        self.kernel_sizes = tf.constant(
+        kernel_size_tuple = (
             kernel_size
             if isinstance(kernel_size, tuple)
             else tuple(kernel_size for _ in range(self.dimensions))
         )
+        self.kernel_sizes = ops.cast(kernel_size_tuple, "int32")
         self.data_format = data_format
         self.transpose = transpose
         # set during build
@@ -76,9 +76,9 @@ class EquivariantPadding(Layer):
             return
 
         if self.data_format == "channels_last":
-            spatial_shape = tf.constant(input_shape[1 : 1 + self.dimensions])
+            spatial_shape = ops.cast(input_shape[1 : 1 + self.dimensions], "int32")
         else:
-            spatial_shape = tf.constant(input_shape[2:])
+            spatial_shape = ops.cast(input_shape[2:], "int32")
         extra_padding, total_padding = self.compute_equivariant_padding(spatial_shape)
 
         self.needs_padding = ops.any(extra_padding != 0).numpy()
