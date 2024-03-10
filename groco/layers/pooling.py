@@ -1,3 +1,4 @@
+from keras import ops
 from keras.layers import (
     AveragePooling1D,
     AveragePooling2D,
@@ -13,7 +14,6 @@ from keras.layers import (
     MaxPooling2D,
     MaxPooling3D,
 )
-import tensorflow as tf
 
 from groco.layers.group_transforms import GroupTransforms
 
@@ -109,9 +109,9 @@ class GlobalGroupPooling(Layer):
 
     def pool_group(self, inputs):
         if self.pool_type == "max":
-            return tf.reduce_max(inputs, axis=self.group_axis)
+            return ops.max(inputs, axis=self.group_axis)
         else:
-            return tf.reduce_mean(inputs, axis=self.group_axis)
+            return ops.mean(inputs, axis=self.group_axis)
 
     def restore_group_axis(self, outputs):
         if self.pooling.keepdims:

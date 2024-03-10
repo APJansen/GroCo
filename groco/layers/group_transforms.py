@@ -1,6 +1,5 @@
 from keras import ops
 from keras.layers import Layer
-import tensorflow as tf
 
 from groco import utils
 from groco.groups import Group, group_dict
@@ -127,7 +126,7 @@ class GroupTransforms(Layer):
         (batch, height, width, group.order, channels) -> (batch, height, width, subgroup.order, channels)
         """
         outputs = ops.take(inputs, axis=self.group_axis, indices=self._pooling_indices)
-        pooling = tf.reduce_max if pool_type == "max" else tf.reduce_mean
+        pooling = ops.max if pool_type == "max" else ops.mean
         outputs = pooling(outputs, axis=self.group_axis + 1)
         return outputs
 
