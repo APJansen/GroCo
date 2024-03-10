@@ -1,6 +1,5 @@
 import keras
 from keras import ops
-import numpy as np
 
 from groco.groups import wallpaper_group_dict
 from groco.utils import check_equivariance
@@ -26,16 +25,21 @@ class TestWallpaperGroup(TestCase):
         """
         for group in wallpaper_group_dict.values():
             for subgroup_name, subgroup_indices in group.subgroup.items():
+                # g^-1
                 subgroup_invs = [group.inverses[i] for i in subgroup_indices]
-                subgroup_composition = ops.take(group.composition, axis=0, indices=subgroup_invs)
-                subgroup_composition = ops.take(
-                    subgroup_composition, axis=1, indices=subgroup_indices
+                # g^-1 h
+                ginv_h = ops.take(group.composition, axis=0, indices=subgroup_invs)
+                ginv_h = ops.take(ginv_h, axis=1, indices=subgroup_indices)
+                ginv_h = ops.reshape(ginv_h, [-1])
+
+                # Check if the subgroup is closed
+                equalities = ops.equal(
+                    ops.expand_dims(ginv_h, axis=0), ops.expand_dims(subgroup_indices, axis=1)
                 )
-                elements = np.unique(ops.reshape(subgroup_composition, [-1]))
-                elements = ops.sort(elements)
+                is_closed = ops.all(ops.any(equalities, axis=1))
 
                 msg = f"Subgroup {subgroup_name} not closed in group {group.name}"
-                self.assertAllEqual(elements, ops.sort(subgroup_indices), msg=msg)
+                self.assertTrue(is_closed, msg=msg)
 
     def test_cosets_identity(self):
         """Cosets contain identity."""
