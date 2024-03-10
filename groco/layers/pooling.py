@@ -115,7 +115,7 @@ class GlobalGroupPooling(Layer):
 
     def restore_group_axis(self, outputs):
         if self.pooling.keepdims:
-            return tf.expand_dims(outputs, axis=self.group_axis)
+            return ops.expand_dims(outputs, axis=self.group_axis)
         else:
             return outputs
 

@@ -128,7 +128,7 @@ class EquivariantPadding(Layer):
         pads_before = paddings - pads_after
 
         return ops.concatenate(
-            [tf.expand_dims(pads_before, axis=1), tf.expand_dims(pads_after, axis=1)], axis=1
+            [ops.expand_dims(pads_before, axis=1), ops.expand_dims(pads_after, axis=1)], axis=1
         )
 
     def get_config(self):

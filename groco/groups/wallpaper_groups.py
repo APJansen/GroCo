@@ -6,7 +6,7 @@ from groco.groups.group import Group
 
 def P4M_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     height_axis, width_axis = spatial_axes
-    signal = tf.expand_dims(signal, axis=new_group_axis)
+    signal = ops.expand_dims(signal, axis=new_group_axis)
     if new_group_axis <= height_axis:
         height_axis += 1
     if new_group_axis <= width_axis:
@@ -25,7 +25,7 @@ def P4M_action(signal, spatial_axes=(0, 1), new_group_axis=2):
 
 def P4_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     height_axis, width_axis = spatial_axes
-    signal = tf.expand_dims(signal, axis=new_group_axis)
+    signal = ops.expand_dims(signal, axis=new_group_axis)
     if new_group_axis <= height_axis:
         height_axis += 1
     if new_group_axis <= width_axis:
@@ -45,7 +45,7 @@ def P4_action(signal, spatial_axes=(0, 1), new_group_axis=2):
 
 def P2MM_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     height_axis, width_axis = spatial_axes
-    signal = tf.expand_dims(signal, axis=new_group_axis)
+    signal = ops.expand_dims(signal, axis=new_group_axis)
     if new_group_axis <= height_axis:
         height_axis += 1
     if new_group_axis <= width_axis:
@@ -59,7 +59,7 @@ def P2MM_action(signal, spatial_axes=(0, 1), new_group_axis=2):
 
 def PMh_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     height_axis, width_axis = spatial_axes
-    signal = tf.expand_dims(signal, axis=new_group_axis)
+    signal = ops.expand_dims(signal, axis=new_group_axis)
     if new_group_axis <= height_axis:
         height_axis += 1
     if new_group_axis <= width_axis:
@@ -72,7 +72,7 @@ def PMh_action(signal, spatial_axes=(0, 1), new_group_axis=2):
 
 def PMw_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     height_axis, width_axis = spatial_axes
-    signal = tf.expand_dims(signal, axis=new_group_axis)
+    signal = ops.expand_dims(signal, axis=new_group_axis)
     if new_group_axis <= height_axis:
         height_axis += 1
     if new_group_axis <= width_axis:
@@ -85,7 +85,7 @@ def PMw_action(signal, spatial_axes=(0, 1), new_group_axis=2):
 
 def P2_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     height_axis, width_axis = spatial_axes
-    signal = tf.expand_dims(signal, axis=new_group_axis)
+    signal = ops.expand_dims(signal, axis=new_group_axis)
     if new_group_axis <= height_axis:
         height_axis += 1
     if new_group_axis <= width_axis:
@@ -97,7 +97,7 @@ def P2_action(signal, spatial_axes=(0, 1), new_group_axis=2):
 
 
 def P1_action(signal, spatial_axes=(0, 1), new_group_axis=2):
-    signal = tf.expand_dims(signal, axis=new_group_axis)
+    signal = ops.expand_dims(signal, axis=new_group_axis)
     return signal
 
 
