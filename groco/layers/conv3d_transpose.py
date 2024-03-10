@@ -1,4 +1,4 @@
-from tensorflow.keras.layers import Conv3DTranspose
+from keras.layers import Conv3DTranspose
 
 from groco.layers.group_transforms import GroupTransforms
 from groco.utils import backup_and_restore

@@ -1,5 +1,4 @@
-import tensorflow as tf
-from tensorflow.keras.layers import (
+from keras.layers import (
     AveragePooling1D,
     AveragePooling2D,
     AveragePooling3D,
@@ -14,6 +13,7 @@ from tensorflow.keras.layers import (
     MaxPooling2D,
     MaxPooling3D,
 )
+import tensorflow as tf
 
 from groco.layers.group_transforms import GroupTransforms
 

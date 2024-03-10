@@ -1,6 +1,6 @@
 from functools import partial
 
-from tensorflow.keras.layers import Conv2D
+from keras.layers import Conv2D
 
 from groco.groups import wallpaper_groups
 from groco.layers.group_transforms import GroupTransforms

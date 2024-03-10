@@ -1,5 +1,5 @@
+from keras.layers import Layer
 import tensorflow as tf
-from tensorflow.keras.layers import Layer
 
 from groco import utils
 from groco.groups import Group, group_dict

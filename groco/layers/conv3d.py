@@ -1,6 +1,6 @@
 from functools import partial
 
-from tensorflow.keras.layers import Conv3D
+from keras.layers import Conv3D
 
 from groco.groups import space_groups
 from groco.layers.group_transforms import GroupTransforms
