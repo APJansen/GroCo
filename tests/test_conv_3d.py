@@ -1,3 +1,4 @@
+import keras
 from keras import ops
 import tensorflow as tf
 from tensorflow.test import TestCase
@@ -19,7 +20,7 @@ class TestGroupConv3D(TestCase):
         self.example_group = self.group_dict["D4"]
 
     def test_lift_shape(self):
-        signal_on_grid = tf.random.normal(shape=self.shape, seed=42)
+        signal_on_grid = keras.random.normal(shape=self.shape, seed=42)
         for group in self.group_dict.values():
             conv_layer = self.conv(
                 group=group, kernel_size=3, filters=self.filters, padding="same_equiv"
@@ -28,7 +29,7 @@ class TestGroupConv3D(TestCase):
             self.assertEqual(signal_on_group.shape, self.shape[:-1] + (group.order, self.filters))
 
     def test_lift_shape_subgroup(self):
-        signal_on_grid = tf.random.normal(shape=self.shape, seed=42)
+        signal_on_grid = keras.random.normal(shape=self.shape, seed=42)
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
                 subgroup = self.group_dict[subgroup_name]
@@ -47,7 +48,7 @@ class TestGroupConv3D(TestCase):
 
     def test_gc_shape(self):
         for group in self.group_dict.values():
-            signal_on_group = tf.random.normal(
+            signal_on_group = keras.random.normal(
                 shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
             )
             conv_layer = self.conv(
@@ -58,7 +59,7 @@ class TestGroupConv3D(TestCase):
 
     def test_gc_shape_subgroup(self):
         for group in self.group_dict.values():
-            signal_on_group = tf.random.normal(
+            signal_on_group = keras.random.normal(
                 shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
             )
             for subgroup_name in group.subgroup.keys():
@@ -75,13 +76,13 @@ class TestGroupConv3D(TestCase):
                 self.assertEqual(new_signal.shape, self.shape[:-1] + (subgroup.order, self.filters))
 
     def test_lift_equiv(self):
-        signal_on_grid = tf.random.normal(shape=self.shape, seed=42)
+        signal_on_grid = keras.random.normal(shape=self.shape, seed=42)
         for group in self.group_dict.values():
             conv_layer = self.conv(
                 group=group, kernel_size=3, filters=self.filters, padding="same_equiv"
             )
             conv_layer(signal_on_grid)
-            conv_layer.bias = 1 + tf.random.normal(shape=conv_layer.bias.shape)
+            conv_layer.bias = 1 + keras.random.normal(shape=conv_layer.bias.shape)
             equiv_diff = check_equivariance(
                 conv_layer,
                 signal_on_grid,
@@ -92,7 +93,7 @@ class TestGroupConv3D(TestCase):
             self.assertAllLess(equiv_diff, 1e-4)
 
     def test_lift_equiv_subgroup(self):
-        signal_on_grid = tf.random.normal(shape=self.shape, seed=42)
+        signal_on_grid = keras.random.normal(shape=self.shape, seed=42)
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
                 conv_layer = self.conv(
@@ -103,7 +104,7 @@ class TestGroupConv3D(TestCase):
                     subgroup=subgroup_name,
                 )
                 conv_layer(signal_on_grid)
-                conv_layer.bias = 1 + tf.random.normal(shape=conv_layer.bias.shape)
+                conv_layer.bias = 1 + keras.random.normal(shape=conv_layer.bias.shape)
                 equiv_diff = check_equivariance(
                     conv_layer,
                     signal_on_grid,
@@ -117,7 +118,7 @@ class TestGroupConv3D(TestCase):
 
     def test_gc_equiv(self):
         for group in self.group_dict.values():
-            signal_on_group = tf.random.normal(
+            signal_on_group = keras.random.normal(
                 shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
             )
             conv_layer = self.conv(
@@ -134,7 +135,7 @@ class TestGroupConv3D(TestCase):
     def test_gc_equiv_subgroup(self):
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
-                signal_on_group = tf.random.normal(
+                signal_on_group = keras.random.normal(
                     shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
                 )
                 conv_layer = self.conv(
@@ -159,7 +160,7 @@ class TestGroupConv3D(TestCase):
         for padding in ["same_equiv", "valid_equiv"]:
             for strides in [3, 5]:
                 group = self.example_group
-                signal_on_group = tf.random.normal(
+                signal_on_group = keras.random.normal(
                     shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
                 )
                 conv_layer = self.conv(
@@ -190,7 +191,7 @@ class TestGroupConv3DTranspose(TestCase):
         self.example_group = self.group_dict["D4"]
 
     def test_lift_shape(self):
-        signal_on_grid = tf.random.normal(shape=self.shape, seed=42)
+        signal_on_grid = keras.random.normal(shape=self.shape, seed=42)
         for group in self.group_dict.values():
             conv_layer = self.conv(
                 group=group, kernel_size=3, filters=self.filters, padding="same_equiv"
@@ -200,7 +201,7 @@ class TestGroupConv3DTranspose(TestCase):
 
     def test_gc_shape(self):
         for group in self.group_dict.values():
-            signal_on_group = tf.random.normal(
+            signal_on_group = keras.random.normal(
                 shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
             )
             conv_layer = self.conv(
@@ -210,13 +211,13 @@ class TestGroupConv3DTranspose(TestCase):
             self.assertEqual(new_signal.shape, signal_on_group.shape[:-1] + (self.filters,))
 
     def test_lift_equiv(self):
-        signal_on_grid = tf.random.normal(shape=self.shape, seed=42)
+        signal_on_grid = keras.random.normal(shape=self.shape, seed=42)
         for group in self.group_dict.values():
             conv_layer = self.conv(
                 group=group, kernel_size=3, filters=self.filters, padding="same_equiv"
             )
             conv_layer(signal_on_grid)
-            conv_layer.bias = 1 + tf.random.normal(shape=conv_layer.bias.shape)
+            conv_layer.bias = 1 + keras.random.normal(shape=conv_layer.bias.shape)
             equiv_diff = check_equivariance(
                 conv_layer,
                 signal_on_grid,
@@ -230,7 +231,7 @@ class TestGroupConv3DTranspose(TestCase):
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
                 subgroup_order = len(group.subgroup[subgroup_name])
-                signal_on_subgroup = tf.random.normal(
+                signal_on_subgroup = keras.random.normal(
                     shape=self.shape[:-1] + (subgroup_order, self.shape[-1]), seed=42
                 )
                 conv_layer = self.conv(
@@ -247,7 +248,7 @@ class TestGroupConv3DTranspose(TestCase):
 
     def test_gc_equiv(self):
         for group in self.group_dict.values():
-            signal_on_group = tf.random.normal(
+            signal_on_group = keras.random.normal(
                 shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
             )
             conv_layer = self.conv(
@@ -265,7 +266,7 @@ class TestGroupConv3DTranspose(TestCase):
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
                 subgroup = self.group_dict[subgroup_name]
-                signal_on_subgroup = tf.random.normal(
+                signal_on_subgroup = keras.random.normal(
                     shape=self.shape[:-1] + (subgroup.order, self.shape[-1]), seed=42
                 )
                 conv_layer = self.conv(
@@ -292,7 +293,7 @@ class TestGroupConv3DTranspose(TestCase):
     #     for padding in ['valid_equiv']:
     #         for strides in [3, 5]:
     #             group = self.example_group
-    #             signal_on_group = tf.random.normal(shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42)
+    #             signal_on_group = keras.random.normal(shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42)
     #             conv_layer = self.conv(group=group, kernel_size=3, strides=strides, filters=self.filters, padding=padding)
     #             equiv_diff = check_equivariance(
     #                 conv_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes)

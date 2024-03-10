@@ -1,3 +1,4 @@
+import keras
 from keras import ops
 import tensorflow as tf
 from tensorflow.test import TestCase
@@ -68,7 +69,7 @@ class TestWallpaperGroup(TestCase):
                 self.assertAllEqual(ops.arange(group.order), products, msg=msg)
 
     def test_action_composition(self):
-        signal = tf.random.normal((28, 28, 3), seed=42)
+        signal = keras.random.normal((28, 28, 3), seed=42)
         for group in wallpaper_group_dict.values():
             g_signal = group.action(
                 signal, spatial_axes=[0, 1], new_group_axis=2, domain_group=None
@@ -91,7 +92,7 @@ class TestWallpaperGroup(TestCase):
                 self.assertAllEqual(h_gi_signal, h_gi_at_signal, msg=msg)
 
     def test_action_shape(self):
-        signal = tf.random.normal((28, 28, 3), seed=42)
+        signal = keras.random.normal((28, 28, 3), seed=42)
         for group in wallpaper_group_dict.values():
             g_signal = group.action(
                 signal, spatial_axes=[0, 1], new_group_axis=0, domain_group=None
@@ -101,7 +102,7 @@ class TestWallpaperGroup(TestCase):
     def test_action_on_subgroup_shape(self):
         for group in wallpaper_group_dict.values():
             for subgroup_name, subgroup_indices in group.subgroup.items():
-                signal = tf.random.normal((28, 28, len(subgroup_indices), 3))
+                signal = keras.random.normal((28, 28, len(subgroup_indices), 3))
                 g_signal = group.action(
                     signal,
                     spatial_axes=[0, 1],
@@ -113,7 +114,7 @@ class TestWallpaperGroup(TestCase):
                 self.assertEqual(g_signal.shape, (group.order,) + signal.shape)
 
     def test_action_on_signal_composition(self):
-        signal = tf.random.normal((28, 28, 3), seed=42)
+        signal = keras.random.normal((28, 28, 3), seed=42)
         new_group_axis = 3
         for group in wallpaper_group_dict.values():
             g_signal = group.action(
@@ -144,7 +145,7 @@ class TestWallpaperGroup(TestCase):
     def test_action_on_group_composition(self):
         new_group_axis = 3
         for group in wallpaper_group_dict.values():
-            signal = tf.random.normal((28, 28, group.order, 3), seed=42)
+            signal = keras.random.normal((28, 28, group.order, 3), seed=42)
             g_signal = group.action(
                 signal, spatial_axes=[0, 1], group_axis=2, new_group_axis=new_group_axis
             )
@@ -168,7 +169,7 @@ class TestWallpaperGroup(TestCase):
                 self.assertAllEqual(h_gi_signal, h_gi_at_signal, msg=msg)
 
     def test_subgroup_action_on_grid(self):
-        signal = tf.random.normal((28, 28, 3))
+        signal = keras.random.normal((28, 28, 3))
         for group in wallpaper_group_dict.values():
             g_signal = group.action(
                 signal, spatial_axes=[0, 1], new_group_axis=0, domain_group=None
@@ -191,7 +192,7 @@ class TestWallpaperGroup(TestCase):
     def test_upsample_downsample(self):
         for group in wallpaper_group_dict.values():
             for subgroup_name, subgroup_indices in group.subgroup.items():
-                subgroup_signal = tf.random.normal((1, 28, 28, len(subgroup_indices), 3))
+                subgroup_signal = keras.random.normal((1, 28, 28, len(subgroup_indices), 3))
                 group_signal = group.upsample(
                     subgroup_signal, group_axis=3, domain_group=subgroup_name
                 )
@@ -205,7 +206,7 @@ class TestWallpaperGroup(TestCase):
     def test_domain_group_action(self):
         for group in wallpaper_group_dict.values():
             for subgroup_name, subgroup_indices in group.subgroup.items():
-                subgroup_signal = tf.random.normal((1, 28, 28, len(subgroup_indices), 3))
+                subgroup_signal = keras.random.normal((1, 28, 28, len(subgroup_indices), 3))
                 subgroup = wallpaper_group_dict[subgroup_name]
                 action_1 = subgroup.action(
                     subgroup_signal, spatial_axes=(1, 2), group_axis=3, new_group_axis=0
@@ -223,7 +224,7 @@ class TestWallpaperGroup(TestCase):
     def test_upsample_equiv(self):
         for group in wallpaper_group_dict.values():
             for subgroup_name, subgroup_indices in group.subgroup.items():
-                subgroup_signal = tf.random.normal((1, 28, 28, len(subgroup_indices), 3))
+                subgroup_signal = keras.random.normal((1, 28, 28, len(subgroup_indices), 3))
                 layer = lambda s: group.upsample(s, group_axis=3, domain_group=subgroup_name)
 
                 equiv_diff = check_equivariance(

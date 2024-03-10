@@ -1,3 +1,4 @@
+import keras
 from keras import ops
 import tensorflow as tf
 from tensorflow.test import TestCase
@@ -74,7 +75,7 @@ class TestSpaceGroup(TestCase):
                 self.assertAllEqual(ops.arange(group.order), products, msg=msg)
 
     def test_action_shape(self):
-        signal = tf.random.normal(self.signal_shape_grid, seed=42)
+        signal = keras.random.normal(self.signal_shape_grid, seed=42)
         for group in space_group_dict.values():
             g_signal = group.action(
                 signal, spatial_axes=self.spatial_axes, new_group_axis=0, domain_group=None
@@ -82,7 +83,7 @@ class TestSpaceGroup(TestCase):
             self.assertEqual(g_signal.shape, (group.order,) + signal.shape)
 
     def test_action_on_signal_composition(self):
-        signal = tf.random.normal(self.signal_shape_grid, seed=42)
+        signal = keras.random.normal(self.signal_shape_grid, seed=42)
         new_group_axis = 3
         for group in space_group_dict.values():
             g_signal = group.action(
@@ -119,7 +120,7 @@ class TestSpaceGroup(TestCase):
     def test_action_on_group_composition(self):
         new_group_axis = 3
         for group in space_group_dict.values():
-            signal = tf.random.normal(
+            signal = keras.random.normal(
                 self.signal_shape_grid[:-1] + (group.order, self.signal_shape_grid[-1]), seed=42
             )
             g_signal = group.action(
@@ -154,7 +155,7 @@ class TestSpaceGroup(TestCase):
                 self.assertAllEqual(h_gi_signal, h_gi_at_signal, msg=msg)
 
     def test_subgroup_action_on_grid(self):
-        signal = tf.random.normal(self.signal_shape_grid)
+        signal = keras.random.normal(self.signal_shape_grid)
         for group in space_group_dict.values():
             g_signal = group.action(
                 signal, spatial_axes=self.spatial_axes, new_group_axis=0, domain_group=None
@@ -177,7 +178,7 @@ class TestSpaceGroup(TestCase):
     def test_domain_group_action(self):
         for group in space_group_dict.values():
             for subgroup_name, subgroup_indices in group.subgroup.items():
-                subgroup_signal = tf.random.normal((1, 28, 28, 28, len(subgroup_indices), 3))
+                subgroup_signal = keras.random.normal((1, 28, 28, 28, len(subgroup_indices), 3))
                 subgroup = space_group_dict[subgroup_name]
                 action_1 = subgroup.action(
                     subgroup_signal, spatial_axes=(1, 2, 3), group_axis=4, new_group_axis=0
@@ -195,7 +196,7 @@ class TestSpaceGroup(TestCase):
     def test_upsample_equiv(self):
         for group in space_group_dict.values():
             for subgroup_name, subgroup_indices in group.subgroup.items():
-                subgroup_signal = tf.random.normal((1, 28, 28, 28, len(subgroup_indices), 3))
+                subgroup_signal = keras.random.normal((1, 28, 28, 28, len(subgroup_indices), 3))
                 layer = lambda s: group.upsample(s, group_axis=4, domain_group=subgroup_name)
 
                 equiv_diff = check_equivariance(

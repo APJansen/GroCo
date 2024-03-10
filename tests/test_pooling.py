@@ -1,3 +1,4 @@
+import keras
 from keras import ops
 import tensorflow as tf
 from tensorflow.test import TestCase
@@ -19,7 +20,7 @@ class TestGroupPooling2D(TestCase):
 
     def test_pool_shape(self):
         for group in self.group_dict.values():
-            signal_on_group = tf.random.normal(
+            signal_on_group = keras.random.normal(
                 shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
             )
             pool_layer = self.pool(group=group, pool_size=2, strides=2, padding="same_equiv")
@@ -30,7 +31,7 @@ class TestGroupPooling2D(TestCase):
 
     def test_pool_shape_subgroup(self):
         for group in self.group_dict.values():
-            signal_on_group = tf.random.normal(
+            signal_on_group = keras.random.normal(
                 shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
             )
             for subgroup_name in group.subgroup.keys():
@@ -49,7 +50,7 @@ class TestGroupPooling2D(TestCase):
 
     def test_pool_equiv(self):
         for group in self.group_dict.values():
-            signal_on_group = tf.random.normal(
+            signal_on_group = keras.random.normal(
                 shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
             )
             pool_layer = self.pool(group=group, pool_size=2, strides=2, padding="same_equiv")
@@ -65,7 +66,7 @@ class TestGroupPooling2D(TestCase):
     def test_pool_equiv_subgroup(self):
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
-                signal_on_group = tf.random.normal(
+                signal_on_group = keras.random.normal(
                     shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
                 )
                 pool_layer = self.pool(
@@ -99,7 +100,7 @@ class TestGroupPooling3D(TestCase):
 
     def test_pool_shape(self):
         for group in self.group_dict.values():
-            signal_on_group = tf.random.normal(
+            signal_on_group = keras.random.normal(
                 shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
             )
             pool_layer = self.pool(group=group, pool_size=2, strides=2, padding="same_equiv")
@@ -112,7 +113,7 @@ class TestGroupPooling3D(TestCase):
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
                 subgroup = self.group_dict[subgroup_name]
-                signal_on_group = tf.random.normal(
+                signal_on_group = keras.random.normal(
                     shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
                 )
                 pool_layer = self.pool(
@@ -129,7 +130,7 @@ class TestGroupPooling3D(TestCase):
 
     def test_pool_equiv(self):
         for group in self.group_dict.values():
-            signal_on_group = tf.random.normal(
+            signal_on_group = keras.random.normal(
                 shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
             )
             pool_layer = self.pool(group=group, pool_size=2, strides=2, padding="same_equiv")
@@ -145,7 +146,7 @@ class TestGroupPooling3D(TestCase):
     def test_pool_equiv_subgroup(self):
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
-                signal_on_group = tf.random.normal(
+                signal_on_group = keras.random.normal(
                     shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
                 )
                 pool_layer = self.pool(
