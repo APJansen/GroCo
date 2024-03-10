@@ -1,7 +1,6 @@
 import itertools
 
 from keras import ops
-import tensorflow as tf
 
 from groco.groups import Group
 
@@ -18,10 +17,15 @@ def Oh_action(signal, spatial_axes=(0, 1, 2), new_group_axis=3):
         (prefix + tuple(p + offset for p in perm) + suffix, [f + offset for f in flip])
         for (perm, flip) in Oh_parameters
     ]
-    transformed_signals = [
-        ops.expand_dims(ops.transpose(tf.reverse(signal, axis=flip), perm), axis=new_group_axis)
-        for perm, flip in Oh_params
-    ]
+    transformed_signals = []
+    for perm, flip in Oh_params:
+        transformed_signal = signal
+        for f in flip:
+            transformed_signal = ops.flip(transformed_signal, axis=f)
+        transformed_signal = ops.expand_dims(
+            ops.transpose(transformed_signal, perm), axis=new_group_axis
+        )
+        transformed_signals.append(transformed_signal)
     transformed_signals = ops.concatenate(transformed_signals, axis=new_group_axis)
     return transformed_signals
 

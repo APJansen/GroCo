@@ -1,5 +1,4 @@
 from keras import ops
-import tensorflow as tf
 
 from groco.groups.group import Group
 
@@ -12,8 +11,8 @@ def P4M_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     if new_group_axis <= width_axis:
         width_axis += 1
 
-    signal = ops.concatenate([signal, tf.reverse(signal, axis=[width_axis])], axis=new_group_axis)
-    signal = ops.concatenate([signal, tf.reverse(signal, axis=[height_axis])], axis=new_group_axis)
+    signal = ops.concatenate([signal, ops.flip(signal, axis=width_axis)], axis=new_group_axis)
+    signal = ops.concatenate([signal, ops.flip(signal, axis=height_axis)], axis=new_group_axis)
     axes = list(range(signal.shape.rank))
     axes[height_axis], axes[width_axis] = axes[width_axis], axes[height_axis]
     signal = ops.concatenate([signal, ops.transpose(signal, axes)], axis=new_group_axis)
@@ -32,12 +31,12 @@ def P4_action(signal, spatial_axes=(0, 1), new_group_axis=2):
         width_axis += 1
 
     signal = ops.concatenate(
-        [signal, tf.reverse(signal, axis=[width_axis, height_axis])], axis=new_group_axis
+        [signal, ops.flip(ops.flip(signal, axis=width_axis), axis=height_axis)], axis=new_group_axis
     )
     axes = list(range(signal.shape.rank))
     axes[height_axis], axes[width_axis] = axes[width_axis], axes[height_axis]
     signal = ops.concatenate(
-        [signal, tf.reverse(ops.transpose(signal, axes), axis=[height_axis])], axis=new_group_axis
+        [signal, ops.flip(ops.transpose(signal, axes), axis=height_axis)], axis=new_group_axis
     )
     signal = ops.take(signal, axis=new_group_axis, indices=[0, 2, 1, 3])
     return signal
@@ -51,8 +50,8 @@ def P2MM_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     if new_group_axis <= width_axis:
         width_axis += 1
 
-    signal = ops.concatenate([signal, tf.reverse(signal, axis=[width_axis])], axis=new_group_axis)
-    signal = ops.concatenate([signal, tf.reverse(signal, axis=[height_axis])], axis=new_group_axis)
+    signal = ops.concatenate([signal, ops.flip(signal, axis=width_axis)], axis=new_group_axis)
+    signal = ops.concatenate([signal, ops.flip(signal, axis=height_axis)], axis=new_group_axis)
 
     return signal
 
@@ -65,7 +64,7 @@ def PMh_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     if new_group_axis <= width_axis:
         width_axis += 1
 
-    flipped_kernel = tf.reverse(signal, axis=[height_axis])
+    flipped_kernel = ops.flip(signal, axis=height_axis)
     signal = ops.concatenate([signal, flipped_kernel], axis=new_group_axis)
     return signal
 
@@ -78,7 +77,7 @@ def PMw_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     if new_group_axis <= width_axis:
         width_axis += 1
 
-    flipped_kernel = tf.reverse(signal, axis=[width_axis])
+    flipped_kernel = ops.flip(signal, axis=width_axis)
     signal = ops.concatenate([signal, flipped_kernel], axis=new_group_axis)
     return signal
 
@@ -91,7 +90,7 @@ def P2_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     if new_group_axis <= width_axis:
         width_axis += 1
 
-    rotated_kernel = tf.reverse(signal, axis=[width_axis, height_axis])
+    rotated_kernel = ops.flip(ops.flip(signal, axis=width_axis), axis=height_axis)
     signal = ops.concatenate([signal, rotated_kernel], axis=new_group_axis)
     return signal
 
