@@ -100,10 +100,10 @@ class EquivariantPadding(Layer):
 
     def compute_built_in_padding(self, spatial_shape):
         if self.padding_option in ["SAME", "SAME_EQUIV"]:
-            return tf.nn.relu(self.kernel_sizes - self.strides + (-spatial_shape % self.strides))
+            return ops.relu(self.kernel_sizes - self.strides + (-spatial_shape % self.strides))
         else:
             if self.transpose:
-                return tf.nn.relu(self.strides - self.kernel_sizes)
+                return ops.relu(self.strides - self.kernel_sizes)
             else:
                 return tf.zeros(shape=self.kernel_sizes.shape, dtype=tf.int32)
 
