@@ -32,7 +32,7 @@ class TestWallpaperGroup(TestCase):
                 subgroup_composition = ops.take(
                     subgroup_composition, axis=1, indices=subgroup_indices
                 )
-                elements, _ = tf.unique(ops.reshape(subgroup_composition, [-1]))
+                elements = np.unique(ops.reshape(subgroup_composition, [-1]))
                 elements = ops.sort(elements)
 
                 msg = f"Subgroup {subgroup_name} not closed in group {group.name}"
