@@ -1,10 +1,10 @@
 import keras
 from keras import ops
 import numpy as np
-from tensorflow.test import TestCase
 
 from groco.groups import space_group_dict
 from groco.utils import check_equivariance
+from tests.custom_testcase import KerasTestCase as TestCase
 
 
 class TestSpaceGroup(TestCase):
@@ -173,7 +173,7 @@ class TestSpaceGroup(TestCase):
     def test_subgroups_cosets(self):
         """Test only if the keys are the same."""
         for group in space_group_dict.values():
-            self.assertAllEqual(set(group.subgroup.keys()), set(group.cosets.keys()))
+            self.assertEqual(set(group.subgroup.keys()), set(group.cosets.keys()))
 
     def test_domain_group_action(self):
         for group in space_group_dict.values():

@@ -1,8 +1,8 @@
 import keras
 from keras import ops
-from tensorflow.test import TestCase
 
 from groco.layers import EquivariantPadding
+from tests.custom_testcase import KerasTestCase as TestCase
 
 
 class TestEquivariantPadding(TestCase):

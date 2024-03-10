@@ -1,10 +1,10 @@
 import keras
 from keras import ops
-from pytest.unittest import TestCase
 
 from groco.groups import space_group_dict, wallpaper_group_dict
 from groco.layers import GroupMaxPooling2D, GroupMaxPooling3D
 from groco.utils import check_equivariance
+from tests.custom_testcase import KerasTestCase as TestCase
 
 
 class TestGroupPooling2D(TestCase):

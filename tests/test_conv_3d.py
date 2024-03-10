@@ -1,10 +1,10 @@
 import keras
 from keras import ops
-from tensorflow.test import TestCase
 
 from groco.groups import space_group_dict
 from groco.layers import GroupConv3D, GroupConv3DTranspose
 from groco.utils import check_equivariance
+from tests.custom_testcase import KerasTestCase as TestCase
 
 
 class TestGroupConv3D(TestCase):
