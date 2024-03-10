@@ -1,5 +1,6 @@
 import itertools
 
+from keras import ops
 import tensorflow as tf
 
 from groco.groups import Group
@@ -21,7 +22,7 @@ def Oh_action(signal, spatial_axes=(0, 1, 2), new_group_axis=3):
         tf.expand_dims(tf.transpose(tf.reverse(signal, axis=flip), perm), axis=new_group_axis)
         for perm, flip in Oh_params
     ]
-    transformed_signals = tf.concat(transformed_signals, axis=new_group_axis)
+    transformed_signals = ops.concatenate(transformed_signals, axis=new_group_axis)
     return transformed_signals
 
 

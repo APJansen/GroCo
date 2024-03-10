@@ -1,3 +1,4 @@
+from keras import ops
 import tensorflow as tf
 
 
@@ -165,7 +166,7 @@ class Group:
                 )
             else:
                 filled_signal.append(zeros)
-        return tf.concat(filled_signal, axis=group_axis)
+        return ops.concatenate(filled_signal, axis=group_axis)
 
     def _composition_flat_indices(self, acting_group, domain_group):
         acting_inv_indices = [self.inverses[i] for i in self.subgroup[acting_group]]

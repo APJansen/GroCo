@@ -1,3 +1,4 @@
+from keras import ops
 from keras.layers import Layer
 import tensorflow as tf
 
@@ -169,7 +170,7 @@ class GroupTransforms(Layer):
         """Compute a 1D tensor of indices used to gather from the bias in order to repeat it across the group axis."""
         indices = utils.get_index_tensor(bias)
         order = len(self.group.subgroup[self.acting_group])
-        indices = tf.concat([indices for _ in range(order)], axis=0)
+        indices = ops.concatenate([indices for _ in range(order)], axis=0)
         return indices
 
     def _compute_transformed_kernel_indices(self, kernel):

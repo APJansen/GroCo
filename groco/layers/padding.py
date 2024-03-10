@@ -1,3 +1,4 @@
+from keras import ops
 from keras.layers import Layer
 import tensorflow as tf
 
@@ -126,7 +127,7 @@ class EquivariantPadding(Layer):
         pads_after = paddings // 2
         pads_before = paddings - pads_after
 
-        return tf.concat(
+        return ops.concatenate(
             [tf.expand_dims(pads_before, axis=1), tf.expand_dims(pads_after, axis=1)], axis=1
         )
 
