@@ -1,5 +1,4 @@
 from keras import ops
-import numpy as np
 
 
 class Group:
@@ -174,17 +173,18 @@ class Group:
         subgroup_composition = ops.take(
             subgroup_composition, axis=1, indices=self.subgroup[domain_group]
         )
-        group_composition_indices = np.array(
+        group_composition_indices = ops.cast(
             [
                 [i * self.order + c for c in row]
                 for i, row in enumerate(subgroup_composition.numpy())
-            ]
+            ],
+            dtype="int32",
         )
         return ops.reshape(group_composition_indices, [-1])
 
     def _compute_inverses(self, inverses):
         if inverses is not None:
-            return np.array(inverses)
+            return ops.cast(inverses, dtype="int32")
         return [
             [c for c in range(self.order) if self.composition[r][c] == 0][0]
             for r in range(self.order)
@@ -193,7 +193,7 @@ class Group:
     def _compute_composition(self, composition):
         """Compute the composition induced by the parent group."""
         if composition is not None:
-            return np.array(composition)
+            return ops.cast(composition, dtype="int32")
 
         parent_indices = self.parent.subgroup[self.name]
         composition = ops.take(self.parent.composition, indices=parent_indices, axis=0)
@@ -201,7 +201,7 @@ class Group:
         composition = [
             self._convert_parent_indices(composition[r].numpy()) for r in range(self.order)
         ]
-        return np.array(composition)
+        return ops.cast(composition, dtype="int32")
 
     def _compute_action(self, action):
         if action is not None:
