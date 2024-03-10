@@ -81,14 +81,14 @@ class EquivariantPadding(Layer):
             spatial_shape = tf.constant(input_shape[2:])
         extra_padding, total_padding = self.compute_equivariant_padding(spatial_shape)
 
-        self.needs_padding = tf.math.reduce_any(extra_padding != 0).numpy()
+        self.needs_padding = ops.any(extra_padding != 0).numpy()
         if not self.needs_padding:
             return
         elif self.padding_option in ["SAME", "VALID"]:
             raise self.non_equivariant_error(spatial_shape)
 
         # if the stride is even the padding can still be odd, no padding will maintain equivariance
-        if tf.math.reduce_any(total_padding % 2 != 0).numpy():
+        if ops.any(total_padding % 2 != 0).numpy():
             raise self.padding_parity_error(spatial_shape)
 
         self.equivariant_padding = self.split_padding(extra_padding)
