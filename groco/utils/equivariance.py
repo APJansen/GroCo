@@ -70,7 +70,7 @@ def check_equivariance(
     )
 
     diffs = layer_g_signal - g_layer_signal
-    maxdiff = tf.reduce_max(tf.abs(diffs))
+    maxdiff = tf.reduce_max(ops.absolute(diffs))
     return maxdiff
 
 
