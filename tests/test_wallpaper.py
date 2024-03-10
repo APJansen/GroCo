@@ -65,7 +65,7 @@ class TestWallpaperGroup(TestCase):
                 products = ops.sort(ops.reshape(products, [-1]))
 
                 msg = f"Subgroup {coset_name} multiplied with its cosets does not recover full group {group.name}."
-                self.assertAllEqual(tf.range(group.order), products, msg=msg)
+                self.assertAllEqual(ops.arange(group.order), products, msg=msg)
 
     def test_action_composition(self):
         signal = tf.random.normal((28, 28, 3), seed=42)

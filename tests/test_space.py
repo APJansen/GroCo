@@ -71,7 +71,7 @@ class TestSpaceGroup(TestCase):
                 products = ops.sort(ops.reshape(products, [-1]))
 
                 msg = f"Subgroup {coset_name} multiplied with its cosets does not recover full group {group.name}."
-                self.assertAllEqual(tf.range(group.order), products, msg=msg)
+                self.assertAllEqual(ops.arange(group.order), products, msg=msg)
 
     def test_action_shape(self):
         signal = tf.random.normal(self.signal_shape_grid, seed=42)

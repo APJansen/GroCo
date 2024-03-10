@@ -17,7 +17,7 @@ def get_index_tensor(tensor) -> tf.Tensor:
     """
     shape = tensor if isinstance(tensor, tf.TensorShape) else tensor.shape
     num_elements = ops.prod(shape)
-    index_tensor = ops.reshape(tf.range(num_elements), shape)
+    index_tensor = ops.reshape(ops.arange(num_elements), shape)
     return index_tensor
 
 
