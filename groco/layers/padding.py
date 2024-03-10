@@ -66,7 +66,7 @@ class EquivariantPadding(Layer):
 
     def call(self, inputs):
         if self.needs_padding:
-            return tf.pad(inputs, self.equivariant_padding)
+            return ops.pad(inputs, self.equivariant_padding)
         else:
             return inputs
 
@@ -118,9 +118,9 @@ class EquivariantPadding(Layer):
     def split_padding(self, paddings):
         # add 0 at both ends, not to pad the batch and channel axes
         if self.data_format == "channels_last":
-            paddings = tf.pad(paddings, [[1, 1]])
+            paddings = ops.pad(paddings, [[1, 1]])
         else:
-            paddings = tf.pad(paddings, [[2, 0]])
+            paddings = ops.pad(paddings, [[2, 0]])
 
         # paddings may be odd if the 'same' paddings are too, must make sure to do this opposite to 'same' padding
         # to make the total padding the same on both sides
