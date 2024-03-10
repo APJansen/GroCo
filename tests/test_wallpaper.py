@@ -1,5 +1,6 @@
 import keras
 from keras import ops
+import numpy as np
 import tensorflow as tf
 from tensorflow.test import TestCase
 
@@ -18,7 +19,7 @@ class TestWallpaperGroup(TestCase):
                 ops.stack([group.composition[r][c] for r, c in enumerate(group.inverses)], axis=0),
                 (group.order,),
             )
-            self.assertAllEqual(identities, tf.zeros(group.order, dtype=tf.int32))
+            self.assertAllEqual(identities, np.zeros(group.order, dtype=np.int32))
 
     def test_subgroups(self):
         """
