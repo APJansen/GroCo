@@ -244,3 +244,11 @@ class GroupTransforms(Layer):
         config = {"group": self.group, "subgroup": self.subgroup.name}
         config.update(self.equivariant_padding.get_config())
         return config
+
+    def prepare_call(self, kernel, bias, filters, inputs, use_bias, group_order):
+        inputs = self.merge_group_axis_and_pad(inputs)
+        kernel = self.transform_kernel(kernel)
+        if use_bias:
+            bias = self.repeat_bias(bias)
+        filters *= group_order
+        return kernel, bias, filters, inputs

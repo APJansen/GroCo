@@ -56,17 +56,14 @@ class GroupConv2D(Conv2D):
 
         super().__init__(kernel_size=kernel_size, **kwargs)
         self.group_valued_input = None
+        self.group_order = self.subgroup.order
 
     @backup_and_restore(("kernel", "bias", "filters"))
     def call(self, inputs):
-        inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
-        self.kernel = self.group_transforms.transform_kernel(self.kernel)
-        if self.use_bias:
-            self.bias = self.group_transforms.repeat_bias(self.bias)
-        self.filters *= self.subgroup.order
-
+        self.kernel, self.bias, self.filters, inputs = self.group_transforms.prepare_call(
+            self.kernel, self.bias, self.filters, inputs, self.use_bias, self.group_order
+        )
         outputs = super().call(inputs)
-
         return self.group_transforms.restore_group_axis(outputs)
 
     def build(self, input_shape):
@@ -149,17 +146,14 @@ class GroupConv2DTranspose(Conv2DTranspose):
 
         super().__init__(kernel_size=kernel_size, **kwargs)
         self.group_valued_input = None
+        self.group_order = self.group.order
 
     @backup_and_restore(("kernel", "bias", "filters"))
     def call(self, inputs):
-        inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
-        self.kernel = self.group_transforms.transform_kernel(self.kernel)
-        if self.use_bias:
-            self.bias = self.group_transforms.repeat_bias(self.bias)
-        self.filters *= self.group.order
-
+        self.kernel, self.bias, self.filters, inputs = self.group_transforms.prepare_call(
+            self.kernel, self.bias, self.filters, inputs, self.use_bias, self.group_order
+        )
         outputs = super().call(inputs)
-
         return self.group_transforms.restore_group_axis(outputs)
 
     def build(self, input_shape):
