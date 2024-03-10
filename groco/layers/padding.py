@@ -46,7 +46,7 @@ class EquivariantPadding(Layer):
 
         self.allow_non_equivariance = allow_non_equivariance
         self.dimensions = dimensions
-        self.strides = tf.constant(
+        self.strides = (
             strides
             if isinstance(strides, tuple)
             else tuple(strides for _ in range(self.dimensions))
