@@ -20,7 +20,7 @@ class TestSpaceGroup(TestCase):
         """
         for group in space_group_dict.values():
             identities = ops.reshape(
-                tf.stack([group.composition[r][c] for r, c in enumerate(group.inverses)], axis=0),
+                ops.stack([group.composition[r][c] for r, c in enumerate(group.inverses)], axis=0),
                 (group.order,),
             )
             self.assertAllEqual(identities, tf.zeros(group.order, dtype=tf.int32))
