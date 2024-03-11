@@ -81,14 +81,14 @@ class EquivariantPadding(Layer):
             spatial_shape = ops.cast(input_shape[2:], "int32")
         extra_padding, total_padding = self.compute_equivariant_padding(spatial_shape)
 
-        self.needs_padding = ops.any(extra_padding != 0).numpy()
+        self.needs_padding = ops.any(extra_padding != 0)
         if not self.needs_padding:
             return
         elif self.padding_option in ["SAME", "VALID"]:
             raise self.non_equivariant_error(spatial_shape)
 
         # if the stride is even the padding can still be odd, no padding will maintain equivariance
-        if ops.any(total_padding % 2 != 0).numpy():
+        if ops.any(total_padding % 2 != 0):
             raise self.padding_parity_error(spatial_shape)
 
         self.equivariant_padding = self.split_padding(extra_padding)
@@ -172,11 +172,11 @@ class EquivariantPadding(Layer):
 
     def configuration_string(self, spatial_shape):
         message = (
-            f"input_shape (spatial): {tuple(spatial_shape.numpy())},\n"
-            f"kernel/pool size: {tuple(self.kernel_sizes.numpy())},\n"
-            f"strides: {tuple(self.strides.numpy())},\n"
+            f"input_shape (spatial): {tuple(spatial_shape)},\n"
+            f"kernel/pool size: {tuple(self.kernel_sizes)},\n"
+            f"strides: {tuple(self.strides)},\n"
         )
         if self.padding_option == "SAME_EQUIV":
             same_padding = self.compute_same_padding(spatial_shape)
-            message += f"built-in same padding: {tuple(same_padding.numpy())}"
+            message += f"built-in same padding: {tuple(same_padding)}"
         return message

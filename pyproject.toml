@@ -8,9 +8,12 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-tensorflow = "^2.16.1"
-keras = "^3.0.5"
 pytest-cov = "^4.1.0"
+keras = "^3.0.5"
+tensorflow = "^2.16.1"
+jax = "^0.4.25"
+torch = "^2.2.1"
+jaxlib = "^0.4.25"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"

@@ -174,10 +174,7 @@ class Group:
             subgroup_composition, axis=1, indices=self.subgroup[domain_group]
         )
         group_composition_indices = ops.cast(
-            [
-                [i * self.order + c for c in row]
-                for i, row in enumerate(subgroup_composition.numpy())
-            ],
+            [[i * self.order + c for c in row] for i, row in enumerate(subgroup_composition)],
             dtype="int32",
         )
         return ops.reshape(group_composition_indices, [-1])
