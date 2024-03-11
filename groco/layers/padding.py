@@ -45,17 +45,18 @@ class EquivariantPadding(Layer):
 
         self.allow_non_equivariance = allow_non_equivariance
         self.dimensions = dimensions
-        self.strides = (
+        self.strides = ops.cast(
             strides
             if isinstance(strides, tuple)
-            else tuple(strides for _ in range(self.dimensions))
+            else tuple(strides for _ in range(self.dimensions)),
+            "int32",
         )
-        kernel_size_tuple = (
+        self.kernel_sizes = ops.cast(
             kernel_size
             if isinstance(kernel_size, tuple)
-            else tuple(kernel_size for _ in range(self.dimensions))
+            else tuple(kernel_size for _ in range(self.dimensions)),
+            "int32",
         )
-        self.kernel_sizes = ops.cast(kernel_size_tuple, "int32")
         self.data_format = data_format
         self.transpose = transpose
         # set during build

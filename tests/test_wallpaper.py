@@ -101,7 +101,7 @@ class TestWallpaperGroup(TestCase):
             g_signal = group.action(
                 signal, spatial_axes=[0, 1], new_group_axis=0, domain_group=None
             )
-            self.assertEqual(g_signal.shape, (group.order) + signal.shape)
+            self.assertEqual(g_signal.shape, (group.order,) + signal.shape)
 
     def test_action_on_subgroup_shape(self):
         for group in wallpaper_group_dict.values():
