@@ -6,7 +6,7 @@ from groco.groups import Group, group_dict
 from groco.layers.padding import EquivariantPadding
 
 
-class GroupTransforms(Layer):
+class GroupTransforms:
     """
     Helper layer meant only for use within other layers involving group operations.
     Takes care of all group related transformations.
@@ -37,6 +37,8 @@ class GroupTransforms(Layer):
         separable=False,
         **kwargs,
     ):
+        super().__init__()
+
         self.dimensions = dimensions
         self.transpose = transpose
         self.separable = separable
@@ -56,7 +58,6 @@ class GroupTransforms(Layer):
         )
         self.built_in_padding_option = self.equivariant_padding.built_in_padding_option
 
-        super().__init__()
         self.data_format = data_format
         # axes refer to input
         self.channels_axis = 1 if self.data_format == "channels_first" else self.dimensions + 1

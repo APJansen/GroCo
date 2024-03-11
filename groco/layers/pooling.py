@@ -33,6 +33,8 @@ class GroupPooling(Layer):
         pool_size=2,
         **kwargs
     ):
+        super().__init__()
+
         self.dimensions = dimensions
         self.group_transforms = GroupTransforms(
             allow_non_equivariance=allow_non_equivariance,
@@ -55,8 +57,6 @@ class GroupPooling(Layer):
         else:
             pool_layer = MaxPooling3D if self.pool_type == "max" else AveragePooling3D
         self.pooling = pool_layer(pool_size=pool_size, **kwargs)
-
-        super().__init__()
 
         self.pooling_indices = None  # created during build
 
@@ -83,6 +83,7 @@ class GlobalGroupPooling(Layer):
     """
 
     def __init__(self, dimensions: int, pool_type: str, **kwargs):
+        super().__init__()
         self.dimensions = dimensions
         self.pool_type = pool_type
         if self.dimensions == 1:
@@ -97,8 +98,6 @@ class GlobalGroupPooling(Layer):
             self.group_axis = self.dimensions + 2
         else:
             self.group_axis = self.dimensions + 1
-
-        super().__init__()
 
         self.pooling_indices = None  # created during build
 

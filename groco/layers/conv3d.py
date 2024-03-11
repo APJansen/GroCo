@@ -54,10 +54,11 @@ class GroupConv3D(Conv3D):
             **kwargs,
         )
         kwargs["padding"] = self.group_transforms.built_in_padding_option
+        super().__init__(kernel_size=kernel_size, **kwargs)
+
         self.group = self.group_transforms.group
         self.subgroup = self.group_transforms.subgroup
 
-        super().__init__(kernel_size=kernel_size, **kwargs)
         self.group_valued_input = None
         self.group_order = self.group.order if transpose else self.subgroup.order
 
