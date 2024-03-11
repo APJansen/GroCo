@@ -14,9 +14,8 @@ def get_index_tensor(tensor) -> KerasTensor:
     Returns:
         A KerasTensor of indices.
     """
-    shape = tensor.shape
-    num_elements = ops.prod(shape)
-    index_tensor = ops.reshape(ops.arange(num_elements), shape)
+    num_elements = ops.size(tensor)
+    index_tensor = ops.reshape(ops.arange(num_elements), tensor.shape)
     return index_tensor
 
 
