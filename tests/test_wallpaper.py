@@ -46,7 +46,7 @@ class TestWallpaperGroup(TestCase):
         for group in wallpaper_group_dict.values():
             for coset_name, coset in group.cosets.items():
                 msg = f"Coset {coset_name} of group {group.name} does not contain identity."
-                self.assertEqual(ops.min(coset), 0, msg=msg)
+                self.assertEqual(min(coset), 0, msg=msg)
 
     def test_cosets_size(self):
         """Number of cosets times corresponding group order equals the full group order."""
