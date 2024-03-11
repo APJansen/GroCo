@@ -195,8 +195,9 @@ class Group:
         parent_indices = self.parent.subgroup[self.name]
         composition = ops.take(self.parent.composition, indices=parent_indices, axis=0)
         composition = ops.take(composition, indices=parent_indices, axis=1)
+        composition = ops.convert_to_numpy(composition)
         composition = [
-            self._external_to_internal_indices(composition[r].numpy()) for r in range(self.order)
+            self._external_to_internal_indices(composition[r]) for r in range(self.order)
         ]
         return ops.cast(composition, dtype="int32")
 
