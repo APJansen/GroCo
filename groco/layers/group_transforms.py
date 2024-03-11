@@ -201,7 +201,7 @@ class GroupTransforms(Layer):
 
     @staticmethod
     def _switch_in_out(kernel):
-        axes = list(range(kernel.shape.rank))
+        axes = list(range(ops.ndim(kernel)))
         axes[-1], axes[-2] = axes[-2], axes[-1]
         return ops.transpose(kernel, tuple(axes))
 
