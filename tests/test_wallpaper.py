@@ -33,6 +33,7 @@ class TestWallpaperGroup(TestCase):
                 ginv_h = ops.reshape(ginv_h, [-1])
 
                 # Check if the subgroup is closed
+                subgroup_indices = ops.convert_to_tensor(subgroup_indices)
                 equalities = ops.equal(
                     ops.expand_dims(ginv_h, axis=0), ops.expand_dims(subgroup_indices, axis=1)
                 )
