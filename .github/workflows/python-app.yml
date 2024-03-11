@@ -33,10 +33,24 @@ jobs:
         python -m pip install poetry
         poetry install
 
-    - name: Test with pytest
+    - name: Test using tensorflow backend
       run: |
+        poetry add tensorflow
+        export KERAS_BACKEND='tensorflow'
         poetry run pytest --cov
         poetry run coverage xml
+
+    - name: Test using jax backend
+      run: |
+        poetry add jax jaxlib
+        export KERAS_BACKEND='jax'
+        poetry run pytest
+
+    - name: Test using torch backend
+      run: |
+        poetry add torch
+        export KERAS_BACKEND='torch'
+        poetry run pytest
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
