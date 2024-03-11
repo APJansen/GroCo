@@ -196,7 +196,7 @@ class Group:
         composition = ops.take(self.parent.composition, indices=parent_indices, axis=0)
         composition = ops.take(composition, indices=parent_indices, axis=1)
         composition = [
-            self._convert_parent_indices(composition[r].numpy()) for r in range(self.order)
+            self._external_to_internal_indices(composition[r].numpy()) for r in range(self.order)
         ]
         return ops.cast(composition, dtype="int32")
 
@@ -219,7 +219,7 @@ class Group:
         parent_subgroups = self.parent.subgroup
         this_subgroup = set(parent_subgroups[self.name])
         subgroups = {
-            name: self._convert_parent_indices(indices)
+            name: self._external_to_internal_indices(indices)
             for name, indices in parent_subgroups.items()
             if set(indices).issubset(this_subgroup)
         }
@@ -231,18 +231,39 @@ class Group:
         parent_cosets = self.parent.cosets
         this_subgroup = set(self.parent.subgroup[self.name])
         cosets = {
-            name: self._convert_parent_indices([i for i in indices if i in this_subgroup])
+            name: self._external_to_internal_indices([i for i in indices if i in this_subgroup])
             for name, indices in parent_cosets.items()
             if name in self.subgroup.keys()
         }
         return cosets
 
-    def _convert_parent_indices(self, parent_indices):
-        mapping = {
-            parent: this
-            for parent, this in zip(list(self.parent.subgroup[self.name]), list(range(self.order)))
+    def _external_to_internal_indices(self, external_indices):
+        """
+        Translate indices of elements in parent group, to indices within the subgroup.
+
+        Args:
+            external_indices: 1d tensor of indices of subgroup elements viewed from within the
+                parent group.
+
+        Returns:
+            1d tensor of indices of the same elements, but viewed from within the subgroup.
+        """
+        # the relation between a subgroup's internal indices and its indices from within the parent
+        # group is that the internal indices are simply a range from 0 to the order, and they
+        # correspond to the indices in the parent group as given by the subgroup_external_indices.
+        # e.g.:
+        # subgroup_external_indices: [0, 3, 5, 7]
+        # subgroup_internal_indices: [0, 1, 2, 3]
+        # external_indices: [7, 3]
+        # internal_indices: [3, 1]
+        subgroup_external_indices = self.parent.subgroup[self.name]
+        subgroup_internal_indices = list(range(self.order))
+
+        external_to_internal = {
+            e: v for e, v in zip(subgroup_external_indices, subgroup_internal_indices)
         }
-        return [mapping[i] for i in parent_indices]
+        internal_indices = [external_to_internal[i] for i in external_indices]
+        return internal_indices
 
     def parse_subgroup(self, subgroup):
         parser = {None: None, "": self.name}
