@@ -123,7 +123,7 @@ class Group:
         shape = transformed_signal.shape
         transformed_signal = ops.reshape(
             transformed_signal,
-            shape[:group_axis] + (acting_group_order * self.order) + shape[group_axis + 2 :],
+            shape[:group_axis] + (acting_group_order * self.order,) + shape[group_axis + 2 :],
         )
         composition_indices = self._composition_flat_indices(acting_group, domain_group)
         transformed_signal = ops.take(
@@ -135,7 +135,7 @@ class Group:
         )
 
         # put the acting group as the specified axis, keeping the order of the other axes the same
-        permuted_axes = list(range(transformed_signal.shape.rank))
+        permuted_axes = list(range(ops.ndim(transformed_signal)))
         permuted_axes = permuted_axes[:group_axis] + permuted_axes[group_axis + 1 :]
         permuted_axes = (
             permuted_axes[:new_group_axis] + [group_axis] + permuted_axes[new_group_axis:]

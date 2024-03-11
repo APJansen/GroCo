@@ -13,7 +13,7 @@ def P4M_action(signal, spatial_axes=(0, 1), new_group_axis=2):
 
     signal = ops.concatenate([signal, ops.flip(signal, axis=width_axis)], axis=new_group_axis)
     signal = ops.concatenate([signal, ops.flip(signal, axis=height_axis)], axis=new_group_axis)
-    axes = list(range(signal.shape.rank))
+    axes = list(range(ops.ndim(signal)))
     axes[height_axis], axes[width_axis] = axes[width_axis], axes[height_axis]
     signal = ops.concatenate([signal, ops.transpose(signal, axes)], axis=new_group_axis)
     # this line is to make the order (e, R, R^2, R^3, F, R F, R^2 F, R^3 F)
@@ -33,7 +33,7 @@ def P4_action(signal, spatial_axes=(0, 1), new_group_axis=2):
     signal = ops.concatenate(
         [signal, ops.flip(ops.flip(signal, axis=width_axis), axis=height_axis)], axis=new_group_axis
     )
-    axes = list(range(signal.shape.rank))
+    axes = list(range(ops.ndim(signal)))
     axes[height_axis], axes[width_axis] = axes[width_axis], axes[height_axis]
     signal = ops.concatenate(
         [signal, ops.flip(ops.transpose(signal, axes), axis=height_axis)], axis=new_group_axis

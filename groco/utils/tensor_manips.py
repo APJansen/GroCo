@@ -33,7 +33,7 @@ def move_axis_to_left_of(tensor: KerasTensor, moved_axis: int, target_axis: int)
     Returns:
         The tensor with its axes moved.
     """
-    axes = tuple(range(tensor.shape.rank))
+    axes = tuple(range(ops.ndim(tensor)))
     axes = axes[:moved_axis] + axes[moved_axis + 1 :]
     if (
         moved_axis < target_axis

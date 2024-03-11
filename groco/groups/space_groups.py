@@ -12,7 +12,7 @@ Oh_parameters = list(itertools.product(Oh_permutation_tuples, Oh_flip_axes))
 def Oh_action(signal, spatial_axes=(0, 1, 2), new_group_axis=3):
     offset = spatial_axes[0]
     prefix = tuple(range(offset))
-    suffix = tuple(range(offset + 3, signal.shape.rank))
+    suffix = tuple(range(offset + 3, ops.ndim(signal)))
     Oh_params = [
         (prefix + tuple(p + offset for p in perm) + suffix, [f + offset for f in flip])
         for (perm, flip) in Oh_parameters
