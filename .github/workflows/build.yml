@@ -24,6 +24,9 @@ jobs:
         poetry run pytest --cov
         poetry run coverage xml
 
+    - name: Install groco
+      run: poetry install
+
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
       env:
