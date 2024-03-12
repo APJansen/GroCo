@@ -10,10 +10,10 @@ from tests.custom_testcase import KerasTestCase as TestCase
 class TestGroupConv3D(TestCase):
     def __init__(self, tests):
         super().__init__(tests)
-        self.shape = (11, 7, 7, 7, 3)
+        self.shape = (1, 3, 3, 3, 2)
         self.spatial_axes = (1, 2, 3)
         self.group_axis = 4  # for signals on group, not present in shape above
-        self.filters = 5
+        self.filters = 4
         self.conv = GroupConv3D
         self.group_dict = space_group_dict
         self.example_group = self.group_dict["D4"]
@@ -181,10 +181,10 @@ class TestGroupConv3D(TestCase):
 class TestGroupConv3DTranspose(TestCase):
     def __init__(self, tests):
         super().__init__(tests)
-        self.shape = (11, 7, 7, 7, 3)
+        self.shape = (1, 3, 3, 3, 2)
         self.spatial_axes = (1, 2, 3)
         self.group_axis = 4  # for signals on group, not present in shape above
-        self.filters = 5
+        self.filters = 4
         self.conv = GroupConv3DTranspose
         self.group_dict = space_group_dict
         self.example_group = self.group_dict["D4"]

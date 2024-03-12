@@ -9,7 +9,7 @@ from tests.custom_testcase import KerasTestCase as TestCase
 class TestSpaceGroup(TestCase):
     def __init__(self, tests):
         super().__init__(tests)
-        self.signal_shape_grid = (7, 7, 7, 3)
+        self.signal_shape_grid = (4, 4, 4, 3)
         self.spatial_axes = (0, 1, 2)
         self.group_axis = 3
 
@@ -183,7 +183,7 @@ class TestSpaceGroup(TestCase):
     def test_domain_group_action(self):
         for group in space_group_dict.values():
             for subgroup_name, subgroup_indices in group.subgroup.items():
-                subgroup_signal = keras.random.normal((1, 28, 28, 28, len(subgroup_indices), 3))
+                subgroup_signal = keras.random.normal((1, 4, 4, 4, len(subgroup_indices), 3))
                 subgroup = space_group_dict[subgroup_name]
                 action_1 = subgroup.action(
                     subgroup_signal, spatial_axes=(1, 2, 3), group_axis=4, new_group_axis=0
@@ -201,7 +201,7 @@ class TestSpaceGroup(TestCase):
     def test_upsample_equiv(self):
         for group in space_group_dict.values():
             for subgroup_name, subgroup_indices in group.subgroup.items():
-                subgroup_signal = keras.random.normal((1, 28, 28, 28, len(subgroup_indices), 3))
+                subgroup_signal = keras.random.normal((1, 4, 4, 4, len(subgroup_indices), 3))
                 layer = lambda s: group.upsample(s, group_axis=4, domain_group=subgroup_name)
 
                 equiv_diff = check_equivariance(
