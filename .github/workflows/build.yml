@@ -17,7 +17,7 @@ jobs:
       uses: packetcoders/action-setup-cache-python-poetry@main
       with:
         python-version: ${{ matrix.python-version }}
-        install-args: --all-extras
+        install-args: --with dev --with backends
 
     - name: Generate test coverage
       run: |

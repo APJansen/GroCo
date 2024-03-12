@@ -20,7 +20,7 @@ jobs:
       uses: packetcoders/action-setup-cache-python-poetry@main
       with:
         python-version: ${{ matrix.python-version }}
-        install-args: --with dev,backends
+        install-args: --with dev --with backends
 
     - name: Install groco
       run: poetry install
