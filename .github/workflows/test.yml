@@ -1,0 +1,39 @@
+name: Install and test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+        backend: ['tensorflow', 'jax', 'torch']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - uses: actions/cache@v4
+      id: cache-python-env
+      with:
+        path: ${{ env.pythonLocation }}
+        key: ${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install poetry
+        poetry install --with dev,backends
+
+    - name: Test
+      env:
+        KERAS_BACKEND: ${{ matrix.backend }}
+      run: |
+        poetry run pytest

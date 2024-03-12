@@ -1,4 +1,4 @@
-name: Install and test
+name: Build documentation, coverage, and scan with SonarCloud
 
 on:
   push:
@@ -6,21 +6,17 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12']
 
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+        fetch-depth: 0
 
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.9'
 
     - uses: actions/cache@v4
       id: cache-python-env
@@ -31,26 +27,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install poetry
-        poetry install
+        poetry install --with dev,backends
 
-    - name: Test using tensorflow backend
+    - name: Generate test coverage
       run: |
-        poetry add tensorflow
-        export KERAS_BACKEND='tensorflow'
         poetry run pytest --cov
         poetry run coverage xml
-
-    - name: Test using jax backend
-      run: |
-        poetry add jax jaxlib
-        export KERAS_BACKEND='jax'
-        poetry run pytest
-
-    - name: Test using torch backend
-      run: |
-        poetry add torch
-        export KERAS_BACKEND='torch'
-        poetry run pytest
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
