@@ -13,21 +13,11 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Setup Python, Poetry and Dependencies
+      uses: packetcoders/action-setup-cache-python-poetry@main
       with:
-        python-version: '3.9'
-
-    - uses: actions/cache@v4
-      id: cache-python-env
-      with:
-        path: ${{ env.pythonLocation }}
-        key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}
-
-    - name: Install dependencies
-      run: |
-        python -m pip install poetry
-        poetry install --with dev,backends
+        python-version: ${{ matrix.python-version }}
+        install-args: --all-extras
 
     - name: Generate test coverage
       run: |
