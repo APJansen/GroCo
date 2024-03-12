@@ -85,13 +85,9 @@ class Group:
             return self._action_on_group(group_axis=group_axis, domain_group=domain_group, **kwargs)
 
     def _action_on_grid(self, signal, new_group_axis: int, spatial_axes: tuple, acting_group: str):
-        transformed_signal = self._action(
-            signal, spatial_axes=spatial_axes, new_group_axis=new_group_axis
-        )
-        transformed_signal = ops.take(
-            transformed_signal, axis=new_group_axis, indices=self.subgroup[acting_group]
-        )
-        return transformed_signal
+        signal = self._action(signal, spatial_axes=spatial_axes, new_group_axis=new_group_axis)
+        signal = ops.take(signal, axis=new_group_axis, indices=self.subgroup[acting_group])
+        return signal
 
     def _action_on_group(
         self,
@@ -117,24 +113,19 @@ class Group:
             signal = self.upsample(signal, group_axis, domain_group)
 
         # action on grid
-        transformed_signal = self._action_on_grid(
+        signal = self._action_on_grid(
             signal, new_group_axis=group_axis, spatial_axes=spatial_axes, acting_group=acting_group
         )
 
         # act on point group:
-        # 1. flatten the two group axes
-        transformed_signal = utils.merge_axes(transformed_signal, group_axis, group_axis + 1)
-        # 2. Perform the actual group composition
+        signal = utils.merge_axes(signal, group_axis, group_axis + 1)
         composition_indices = self._composition_flat_indices(acting_group, domain_group)
-        transformed_signal = ops.take(
-            transformed_signal, axis=group_axis, indices=composition_indices
-        )
-        # 3. split back into two group axes
-        transformed_signal = utils.split_axes(transformed_signal, acting_group_order, group_axis)
+        signal = ops.take(signal, axis=group_axis, indices=composition_indices)
+        signal = utils.split_axes(signal, acting_group_order, group_axis)
 
-        transformed_signal = ops.moveaxis(transformed_signal, group_axis, new_group_axis)
+        signal = ops.moveaxis(signal, group_axis, new_group_axis)
 
-        return transformed_signal
+        return signal
 
     def upsample(self, signal, group_axis, domain_group):
         domain_group_indices = self.subgroup[domain_group]
@@ -191,11 +182,9 @@ class Group:
             return action
 
         def subgroup_action(signal, spatial_axes, new_group_axis):
-            group_transformed = self.parent._action(signal, spatial_axes, new_group_axis)
-            subgroup_transformed = ops.take(
-                group_transformed, indices=self.parent.subgroup[self.name], axis=new_group_axis
-            )
-            return subgroup_transformed
+            signal = self.parent._action(signal, spatial_axes, new_group_axis)
+            signal = ops.take(signal, indices=self.parent.subgroup[self.name], axis=new_group_axis)
+            return signal
 
         return subgroup_action
 
