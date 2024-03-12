@@ -1,5 +1,7 @@
 from keras import ops
 
+from groco import utils
+
 
 class Group:
     """
@@ -121,21 +123,14 @@ class Group:
 
         # act on point group:
         # 1. flatten the two group axes
-        shape = transformed_signal.shape
-        transformed_signal = ops.reshape(
-            transformed_signal,
-            shape[:group_axis] + (acting_group_order * self.order,) + shape[group_axis + 2 :],
-        )
+        transformed_signal = utils.merge_axes(transformed_signal, group_axis, group_axis + 1)
         # 2. Perform the actual group composition
         composition_indices = self._composition_flat_indices(acting_group, domain_group)
         transformed_signal = ops.take(
             transformed_signal, axis=group_axis, indices=composition_indices
         )
         # 3. split back into two group axes
-        transformed_signal = ops.reshape(
-            transformed_signal,
-            shape[:group_axis] + (acting_group_order, domain_group_order) + shape[group_axis + 2 :],
-        )
+        transformed_signal = utils.split_axes(transformed_signal, acting_group_order, group_axis)
 
         transformed_signal = ops.moveaxis(transformed_signal, group_axis, new_group_axis)
 

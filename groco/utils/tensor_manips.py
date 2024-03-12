@@ -38,27 +38,21 @@ def move_axis_to_left_of(tensor: KerasTensor, moved_axis: int, target_axis: int)
     return ops.moveaxis(tensor, source=moved_axis, destination=target_axis)
 
 
-def split_axes(tensor: KerasTensor, factor: int, split_axis: int, target_axis: int) -> KerasTensor:
+def split_axes(tensor: KerasTensor, left_size: int, right_axis: int) -> KerasTensor:
     """
-    Split `split_axis`, dividing its size by factor, putting the new axis directly to its left,
-    which is then moved to the `target_axis` index.
+    Split `right_axis`, creating a new axis of size `left_size` to its left.
 
     Args:
         tensor: The tensor to have its axis split.
-        factor: The number of elements to split from the split_axis.
-        split_axis: The index of the axis to be split.
-        target_axis: The index of the new axis.
+        left_size: The number of elements to split to the left.
+        right_axis: The index of the axis to be split.
 
     Returns:
         The tensor with its axis split.
     """
-    new_shape = split_shapes(tensor.shape, factor, split_axis)
+    new_shape = split_shapes(tensor.shape, left_size, right_axis)
     new_shape = format_batch_dim(new_shape)
-    tensor_reshaped = ops.reshape(tensor, new_shape)
-    tensor_transposed = move_axis_to_left_of(
-        tensor_reshaped, moved_axis=split_axis, target_axis=target_axis
-    )
-    return tensor_transposed
+    return ops.reshape(tensor, new_shape)
 
 
 def split_shapes(shape, factor: int, split_axis: int) -> list:

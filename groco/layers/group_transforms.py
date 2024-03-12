@@ -115,9 +115,7 @@ class GroupTransforms:
             group_channels_axis -= 1
         group_axis = self.group_axis + (self.data_format == "channels_first")
         factor = len(self.group.subgroup[self.acting_group])
-        return utils.split_axes(
-            outputs, factor=factor, split_axis=group_channels_axis, target_axis=group_axis
-        )
+        return utils.split_axes(outputs, left_size=factor, right_axis=group_channels_axis)
 
     def subgroup_pooling(self, inputs, pool_type: str):
         """
@@ -132,9 +130,9 @@ class GroupTransforms:
         return outputs
 
     def build(self, input_shape):
-        self.group_valued_input = (
-            len(input_shape) == self.dimensions + 3
-        )  # this includes the batch dimension
+        # apart from the spatial dimensions, there are feature and batch axes
+        # if there is a third axis, it is the group axis and the input is a signal on the group
+        self.group_valued_input = len(input_shape) == self.dimensions + 3
         if not self.group_valued_input:
             self.domain_group = None
         if self.data_format == "channels_last" and self.group_valued_input:
@@ -209,9 +207,7 @@ class GroupTransforms:
         group_channel_axis = self.dimensions
         group_axis = self.dimensions
         factor = len(self.group.subgroup[self.domain_group])
-        return utils.split_axes(
-            kernel, factor=factor, split_axis=group_channel_axis, target_axis=group_axis
-        )
+        return utils.split_axes(kernel, left_size=factor, right_axis=group_channel_axis)
 
     def _merge_kernel_group_axis(self, kernel):
         """
