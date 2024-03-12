@@ -178,7 +178,7 @@ class GroupTransforms:
         Compute a tensor of indices used to gather from the kernel to produce the group action on it.
         """
         if self.transpose:
-            kernel = self._switch_in_out(kernel)
+            kernel = ops.swapaxes(kernel, -1, -2)
         indices = utils.get_index_tensor(kernel)
 
         kwargs = {
@@ -197,14 +197,8 @@ class GroupTransforms:
 
         indices = self._merge_group_channels_out(indices)
         if self.transpose:
-            indices = self._switch_in_out(indices)
+            indices = ops.swapaxes(indices, -1, -2)
         return indices
-
-    @staticmethod
-    def _switch_in_out(kernel):
-        axes = list(range(ops.ndim(kernel)))
-        axes[-1], axes[-2] = axes[-2], axes[-1]
-        return ops.transpose(kernel, tuple(axes))
 
     def _restore_kernel_group_axis(self, kernel):
         """
