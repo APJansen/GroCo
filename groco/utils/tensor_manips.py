@@ -32,14 +32,10 @@ def move_axis_to_left_of(tensor: KerasTensor, moved_axis: int, target_axis: int)
     Returns:
         The tensor with its axes moved.
     """
-    axes = tuple(range(ops.ndim(tensor)))
-    axes = axes[:moved_axis] + axes[moved_axis + 1 :]
-    if (
-        moved_axis < target_axis
-    ):  # in this case after removing moved_axis, target_axis shifts left by one
+    # in this case after removing moved_axis, target_axis shifts left by one
+    if moved_axis < target_axis:
         target_axis -= 1
-    axes = axes[:target_axis] + (moved_axis,) + axes[target_axis:]
-    return ops.transpose(tensor, axes)
+    return ops.moveaxis(tensor, source=moved_axis, destination=target_axis)
 
 
 def split_axes(tensor: KerasTensor, factor: int, split_axis: int, target_axis: int) -> KerasTensor:
