@@ -19,13 +19,13 @@ jobs:
         python-version: ${{ matrix.python-version }}
         install-args: --with dev --with backends
 
+    - name: Install groco
+      run: poetry install
+
     - name: Generate test coverage
       run: |
         poetry run pytest --cov
         poetry run coverage xml
-
-    - name: Install groco
-      run: poetry install
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
