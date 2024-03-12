@@ -16,7 +16,7 @@ jobs:
     - name: Setup Python, Poetry and Dependencies
       uses: packetcoders/action-setup-cache-python-poetry@main
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.9'
         install-args: --with dev --with backends
 
     - name: Install groco
