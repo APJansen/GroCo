@@ -73,18 +73,25 @@ class Group:
             Tensor of the signal acted on by the group.
         """
         acting_group, domain_group = self.parse_subgroups(acting_group, domain_group)
-        kwargs = {
-            "signal": signal,
-            "new_group_axis": new_group_axis,
-            "spatial_axes": spatial_axes,
-            "acting_group": acting_group,
-        }
-        if domain_group is None:
-            return self._action_on_grid(**kwargs)
-        else:
-            return self._action_on_group(group_axis=group_axis, domain_group=domain_group, **kwargs)
+        action = self._action_on_group if domain_group else self._action_on_grid
+        signal = action(
+            signal,
+            spatial_axes=spatial_axes,
+            new_group_axis=new_group_axis,
+            group_axis=group_axis,
+            acting_group=acting_group,
+            domain_group=domain_group,
+        )
+        return signal
 
-    def _action_on_grid(self, signal, new_group_axis: int, spatial_axes: tuple, acting_group: str):
+    def _action_on_grid(
+        self,
+        signal,
+        new_group_axis: int,
+        spatial_axes: tuple,
+        acting_group: str,
+        **kwargs,
+    ):
         signal = self._action(signal, spatial_axes=spatial_axes, new_group_axis=new_group_axis)
         signal = ops.take(signal, axis=new_group_axis, indices=self.subgroup[acting_group])
         return signal
@@ -92,10 +99,10 @@ class Group:
     def _action_on_group(
         self,
         signal,
-        group_axis: int,
         new_group_axis: int,
         spatial_axes: tuple,
         acting_group: str,
+        group_axis: int,
         domain_group: str,
     ):
         """
