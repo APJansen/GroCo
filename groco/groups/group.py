@@ -154,17 +154,10 @@ class Group:
         index_to_subgroup = {val: index for index, val in enumerate(domain_group_indices)}
         for i in range(self.order):
             if i in domain_group_indices:
-                filled_signal.append(
-                    ops.take(
-                        signal,
-                        axis=group_axis,
-                        indices=[
-                            index_to_subgroup[i],
-                        ],
-                    )
-                )
+                x = ops.take(signal, axis=group_axis, indices=[index_to_subgroup[i]])
             else:
-                filled_signal.append(zeros)
+                x = zeros
+            filled_signal.append(x)
         return ops.concatenate(filled_signal, axis=group_axis)
 
     def _composition_flat_indices(self, acting_group, domain_group):
