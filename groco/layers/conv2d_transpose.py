@@ -62,7 +62,7 @@ class GroupConv2DTranspose(Conv2DTranspose):
     @backup_and_restore(("kernel", "bias", "filters"))
     def call(self, inputs):
         self.kernel, self.bias, self.filters, inputs = self.group_transforms.prepare_call(
-            self.kernel, self.bias, self.filters, inputs, self.use_bias, self.group_order
+            self.kernel, self.bias, self.filters, inputs, self.use_bias
         )
         outputs = super().call(inputs)
         return self.group_transforms.restore_group_axis(outputs)
