@@ -1,17 +1,17 @@
-# Group Convolutions in Keras with GroCo
+# Group Convolutions in Keras 3 with GroCo
 
 [![Documentation Status](https://readthedocs.org/projects/groco/badge/?version=latest)](https://groco.readthedocs.io/en/latest/?badge=latest)
 [![workflow scc badge](https://sonarcloud.io/api/project_badges/measure?project=APJansen_GroCo&metric=coverage)](https://sonarcloud.io/dashboard?id=APJansen_GroCo)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=APJansen_GroCo&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=APJansen_GroCo)
 
+GroCo implements group equivariant convolutions in Keras 3.
+It stays as close as possible to the interface of the standard convolution layers,
+and supports all the most common convolutional layers.
+This includes 2D and 3D convolutions, transposed convolutions, and pooling layers.
 
-The aim of GroCo is to generalize the convolutional layers and all related functionality in Keras to group convolutions, following [the original paper on group convolutions by Taco Cohen and Max Welling](http://proceedings.mlr.press/v48/cohenc16.html), and to keep the interface as close as possible to the standard layers.
+It is written in a fully backend-agnostic way, and trivially supports any backend
+that Keras supports (TensorFlow, PyTorch and JAX).
 
-It was inspired by the book, lectures and notebooks on the geometric deep learning by Michael Bronstein, Joan Bruna, Taco Cohen and Petar Veličković, found [here](https://geometricdeeplearning.com), which I highly recommend.
-
-The implementation by the authors themselves is in Chainer/Tensorflow 1, [GrouPy](https://github.com/tscohen/GrouPy).
-There is also another Keras implementation [keras-gcnn](https://github.com/basveeling/keras-gcnn) that I came across while developing this.
-Here we expand the functionality, to 3D convolutions, transpose convolutions, and hopefully eventually all of Keras's convolutional and related layers.
 
 # Installation
 
@@ -134,6 +134,12 @@ D4 | all rotations of a cuboid, preserving orientation | 8 |
 - something like `GroupReduce`, reducing equivariance to a subgroup, but rather than pooling keep all the features (merge with channel axis)
 
 # References
+
+GroCo was inspired by [the original paper on group convolutions by Taco Cohen and Max Welling](http://proceedings.mlr.press/v48/cohenc16.html) and the book, lectures and notebooks on the geometric deep learning by Michael Bronstein, Joan Bruna, Taco Cohen and Petar Veličković, found [here](https://geometricdeeplearning.com), which I highly recommend.
+
+The implementation by the authors themselves is in Chainer/Tensorflow 1, [GrouPy](https://github.com/tscohen/GrouPy).
+There is also another Keras implementation [keras-gcnn](https://github.com/basveeling/keras-gcnn) that I came across while developing this.
+Here we expand the functionality, to 3D convolutions, transpose convolutions, and hopefully eventually all of Keras's convolutional and related layers.
 
 - <a name="groupconv"/> Group Equivariant Convolutional Networks, Taco Cohen and Max Welling, 2016, [PMLR 48:2990-2999](http://proceedings.mlr.press/v48/cohenc16.html)
 
