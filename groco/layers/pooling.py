@@ -69,6 +69,7 @@ class GroupPooling(Layer):
     def build(self, input_shape):
         reshaped_input = self.group_transforms.build(input_shape)
         self.pooling.build(reshaped_input)
+        self.group_transforms.equivariant_padding.build(reshaped_input)
         self.pooling_indices = self.group_transforms.compute_pooling_indices()
 
     def get_config(self):
