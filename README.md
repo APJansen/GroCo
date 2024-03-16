@@ -27,7 +27,7 @@ More information on poetry available [here](https://python-poetry.org/).
 
 # Introduction to group convolutions
 
-[![intro colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/groco/blob/main/GroupConv_intro.ipynb)
+[![intro colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/groco/blob/main/notebooks/GroupConv_intro.ipynb)
 
 This Colab notebook is a standalone introduction to group convolutions, meant to be read after/in parallel with the lectures, book or paper mentioned above.
 It does not use the implementation in GroCo, but rather derives an early version of it from scratch, going into many of the nitty gritty aspects.
@@ -35,7 +35,7 @@ I hope it can be useful in parallel with the other sources.
 
 # Example notebook
 
-[![example colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/groco/blob/main/example_MNIST.ipynb)
+[![example colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/groco/blob/main/notebooks/example_MNIST.ipynb)
 
 This Colab notebook illustrates how to use GroCo by constructing a group convolutional network, training it on MNIST and comparing to a regular network.
 It also illustrates how to pool onto subgroups, which increases performance on MNIST. (Though not compared to the regular convolution, it is just used as a simple example but doesn't lend itself well to group convolutions as orientation matters in MNIST images.)
@@ -113,7 +113,7 @@ The largest wallpaper group on a square lattice, p4m, and all its subgroups have
 
 ## 3D
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/GroupConv/blob/SpaceGroups.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/GroupConv/blob/main/notebooks/SpaceGroups.ipynb)
 
 See this Colab notebook for a very simple derivation of these groups, from a tensor perspective.
 
