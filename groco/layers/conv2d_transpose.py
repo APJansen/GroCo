@@ -85,3 +85,8 @@ class GroupConv2DTranspose(Conv2DTranspose):
         config = super().get_config()
         config.update(self.group_transforms.get_config())
         return config
+
+    def compute_output_shape(self, input_shape):
+        input_shape_merged = self.group_transforms.reshaped_input
+        output_shape = super().compute_output_shape(input_shape_merged)
+        return self.group_transforms.correct_output_shape(output_shape)

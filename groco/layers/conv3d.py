@@ -89,6 +89,11 @@ class GroupConv3D(Conv3D):
         config.update(self.group_transforms.get_config())
         return config
 
+    def compute_output_shape(self, input_shape):
+        input_shape_merged = self.group_transforms.reshaped_input
+        output_shape = super().compute_output_shape(input_shape_merged)
+        return self.group_transforms.correct_output_shape(output_shape)
+
 
 OhConv3D = partial(GroupConv3D, group=space_groups.Oh)
 OConv3D = partial(GroupConv3D, group=space_groups.O)

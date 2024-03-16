@@ -232,6 +232,12 @@ class GroupTransforms:
         channels_out_axis = self.dimensions + 2
         return utils.merge_axes(kernel, merged_axis=group_axis, target_axis=channels_out_axis)
 
+    def correct_output_shape(self, output_shape):
+        """Insert the group axis in the correct place."""
+        return (
+            output_shape[: self.group_axis] + (self.group.order,) + output_shape[self.group_axis :]
+        )
+
     def get_config(self):
         config = {"group": self.group, "subgroup": self.subgroup.name}
         config.update(self.equivariant_padding.get_config())

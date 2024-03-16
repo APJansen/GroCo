@@ -89,6 +89,11 @@ class GroupConv2D(Conv2D):
         config.update(self.group_transforms.get_config())
         return config
 
+    def compute_output_shape(self, input_shape):
+        input_shape_merged = self.group_transforms.reshaped_input
+        output_shape = super().compute_output_shape(input_shape_merged)
+        return self.group_transforms.correct_output_shape(output_shape)
+
 
 P4MConv2D = partial(GroupConv2D, group=wallpaper_groups.P4M)
 P4Conv2D = partial(GroupConv2D, group=wallpaper_groups.P4)
