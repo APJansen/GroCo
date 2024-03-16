@@ -113,7 +113,6 @@ class GroupTransforms:
         group_channels_axis = self.channels_axis
         if self.group_valued_input and self.data_format == "channels_last":
             group_channels_axis -= 1
-        group_axis = self.group_axis + (self.data_format == "channels_first")
         factor = len(self.group.subgroup[self.acting_group])
         return utils.split_axes(outputs, left_size=factor, right_axis=group_channels_axis)
 
@@ -206,7 +205,6 @@ class GroupTransforms:
         (height, width, domain_group.order, in_channels, out_channels)
         """
         group_channel_axis = self.dimensions
-        group_axis = self.dimensions
         factor = len(self.group.subgroup[self.domain_group])
         return utils.split_axes(kernel, left_size=factor, right_axis=group_channel_axis)
 
