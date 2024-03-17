@@ -7,29 +7,32 @@ from groco.utils import check_equivariance
 from tests.custom_testcase import KerasTestCase as TestCase
 
 
-def get_conv_layer(dimension: int, transpose: bool):
+def get_attributes(dimension: int, transpose: bool):
     if dimension == 2:
-        return GroupConv2DTranspose if transpose else GroupConv2D
+        conv_layer = GroupConv2DTranspose if transpose else GroupConv2D
+        group_dict = wallpaper_group_dict
+        example_group = group_dict["P4"]
     elif dimension == 3:
-        return GroupConv3DTranspose if transpose else GroupConv3D
+        conv_layer = GroupConv3DTranspose if transpose else GroupConv3D
+        group_dict = space_group_dict
+        example_group = group_dict["D4"]
+
+    return conv_layer, group_dict, example_group
 
 
-class TestGroupConv3DTranspose(TestCase):
+class TestConvBase:
+    dimension = None
+    transpose = None
+
     def __init__(self, tests):
         super().__init__(tests)
-        self.dimension = 3
-        self.transpose = True
-        self.conv = get_conv_layer(self.dimension, self.transpose)
+
+        self.conv, self.group_dict, self.example_group = get_attributes(
+            self.dimension, self.transpose
+        )
 
         self.spatial_axes = tuple(range(1, self.dimension + 1))
         self.group_axis = self.dimension + 1
-
-        if self.dimension == 2:
-            self.group_dict = wallpaper_group_dict
-            self.example_group = self.group_dict["P4"]
-        elif self.dimension == 3:
-            self.group_dict = space_group_dict
-            self.example_group = self.group_dict["D4"]
 
         self.filters = 4
         self.xsize = 3
