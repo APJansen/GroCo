@@ -35,19 +35,20 @@ class TestConvBase:
         self.group_axis = self.dimension + 1
 
         self.filters = 4
+        self.kernel_size = 3
         self.xsize = 3
         self.input_features = 2
         self.shape = (1,) + (self.xsize,) * self.dimension + (self.input_features,)
 
     def test_lift_shape(self):
-        signal_on_grid = keras.random.normal(shape=self.shape, seed=42)
+        signal_on_grid = self.generate_signal(None)
         for group in self.group_dict.values():
             conv_layer = self.generate_layer(group)
             signal_on_group = conv_layer(signal_on_grid)
             self.assertEqual(signal_on_group.shape, self.shape[:-1] + (group.order, self.filters))
 
     def test_lift_shape_subgroup(self):
-        signal_on_grid = keras.random.normal(shape=self.shape, seed=42)
+        signal_on_grid = self.generate_signal(None)
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
                 subgroup = self.group_dict[subgroup_name]
@@ -59,9 +60,7 @@ class TestConvBase:
 
     def test_gc_shape(self):
         for group in self.group_dict.values():
-            signal_on_group = keras.random.normal(
-                shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
-            )
+            signal_on_group = self.generate_signal(group)
             conv_layer = self.generate_layer(group)
             new_signal = conv_layer(signal_on_group)
             self.assertEqual(new_signal.shape, signal_on_group.shape[:-1] + (self.filters,))
@@ -69,10 +68,8 @@ class TestConvBase:
     def test_gc_shape_subgroup(self):
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
-                out_size = self.group_dict[subgroup_name].order if self.transpose else group.order
-                signal = keras.random.normal(
-                    shape=self.shape[:-1] + (out_size, self.shape[-1]), seed=42
-                )
+                out_group = self.group_dict[subgroup_name] if self.transpose else group
+                signal = self.generate_signal(out_group)
                 conv_layer = self.generate_layer(group, subgroup=subgroup_name)
 
                 new_signal = conv_layer(signal)
@@ -80,7 +77,7 @@ class TestConvBase:
                 self.assertEqual(new_signal.shape, self.shape[:-1] + (out_size, self.filters))
 
     def test_lift_equiv(self):
-        signal_on_grid = keras.random.normal(shape=self.shape, seed=42)
+        signal_on_grid = self.generate_signal(None)
         for group in self.group_dict.values():
             conv_layer = self.conv(
                 group=group, kernel_size=3, filters=self.filters, padding="same_equiv"
@@ -88,7 +85,7 @@ class TestConvBase:
         self.check_equivariance(conv_layer, signal_on_grid, domain_group=None)
 
     def test_lift_equiv_subgroup(self):
-        signal_on_grid = keras.random.normal(shape=self.shape, seed=42)
+        signal_on_grid = self.generate_signal(None)
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
                 conv_layer = self.generate_layer(group, subgroup=subgroup_name)
@@ -102,19 +99,15 @@ class TestConvBase:
 
     def test_gc_equiv(self):
         for group in self.group_dict.values():
-            signal_on_group = keras.random.normal(
-                shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
-            )
+            signal_on_group = self.generate_signal(group)
             conv_layer = self.generate_layer(group)
             self.check_equivariance(conv_layer, signal_on_group)
 
     def test_gc_equiv_subgroup(self):
         for group in self.group_dict.values():
             for subgroup_name in group.subgroup.keys():
-                out_size = self.group_dict[subgroup_name].order if self.transpose else group.order
-                signal = keras.random.normal(
-                    shape=self.shape[:-1] + (out_size, self.shape[-1]), seed=42
-                )
+                out_group = self.group_dict[subgroup_name] if self.transpose else group
+                signal = self.generate_signal(out_group)
                 conv_layer = self.generate_layer(group, subgroup=subgroup_name)
                 self.check_equivariance(
                     conv_layer,
@@ -130,16 +123,23 @@ class TestConvBase:
             stride_list = [3] if self.transpose else [3, 5, 7]
             for strides in stride_list:
                 group = self.example_group
-                signal_on_group = keras.random.normal(
-                    shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
-                )
+                signal_on_group = self.generate_signal(group)
                 conv_layer = self.generate_layer(group, padding=padding, strides=strides)
                 self.check_equivariance(conv_layer, signal_on_group)
+
+    def generate_signal(self, group):
+        if type(group) == str:
+            group = self.group_dict[group]
+        if group == None:
+            shape = self.shape
+        else:
+            shape = self.shape[:-1] + (group.order, self.shape[-1])
+        return keras.random.normal(shape=shape, seed=42)
 
     def generate_layer(self, group, padding="same_equiv", strides=1, subgroup=""):
         return self.conv(
             group=group,
-            kernel_size=3,
+            kernel_size=self.kernel_size,
             filters=self.filters,
             padding=padding,
             strides=strides,
