@@ -101,16 +101,7 @@ class TestConvBase:
             conv_layer = self.conv(
                 group=group, kernel_size=3, filters=self.filters, padding="same_equiv"
             )
-            conv_layer(signal_on_grid)
-            conv_layer.bias = 1 + keras.random.normal(shape=conv_layer.bias.shape)
-            equiv_diff = check_equivariance(
-                conv_layer,
-                signal_on_grid,
-                spatial_axes=self.spatial_axes,
-                group_axis=self.group_axis,
-                domain_group=None,
-            )
-            self.assertAllLess(equiv_diff, 1e-4)
+        self.check_equivariance(conv_layer, signal_on_grid, domain_group=None)
 
     def test_lift_equiv_subgroup(self):
         signal_on_grid = keras.random.normal(shape=self.shape, seed=42)
@@ -123,18 +114,13 @@ class TestConvBase:
                     padding="same_equiv",
                     subgroup=subgroup_name,
                 )
-                conv_layer(signal_on_grid)
-                conv_layer.bias = 1 + keras.random.normal(shape=conv_layer.bias.shape)
-                equiv_diff = check_equivariance(
+                self.check_equivariance(
                     conv_layer,
                     signal_on_grid,
-                    spatial_axes=self.spatial_axes,
-                    group_axis=self.group_axis,
-                    acting_group=subgroup_name,
-                    target_group=group.name if self.transpose else subgroup_name,
                     domain_group=None,
+                    target_group=group.name if self.transpose else subgroup_name,
+                    acting_group=subgroup_name,
                 )
-                self.assertAllLess(equiv_diff, 1e-4)
 
     def test_gc_equiv(self):
         for group in self.group_dict.values():
@@ -144,13 +130,7 @@ class TestConvBase:
             conv_layer = self.conv(
                 group=group, kernel_size=3, filters=self.filters, padding="same_equiv"
             )
-            equiv_diff = check_equivariance(
-                conv_layer,
-                signal_on_group,
-                group_axis=self.group_axis,
-                spatial_axes=self.spatial_axes,
-            )
-            self.assertAllLess(equiv_diff, 1e-4)
+            self.check_equivariance(conv_layer, signal_on_group)
 
     def test_gc_equiv_subgroup(self):
         for group in self.group_dict.values():
@@ -166,17 +146,13 @@ class TestConvBase:
                     padding="same_equiv",
                     subgroup=subgroup_name,
                 )
-                equiv_diff = check_equivariance(
+                self.check_equivariance(
                     conv_layer,
                     signal,
-                    group_axis=self.group_axis,
-                    spatial_axes=self.spatial_axes,
                     acting_group=subgroup_name,
                     target_group=group.name if self.transpose else subgroup_name,
                     domain_group=subgroup_name if self.transpose else group.name,
                 )
-
-                self.assertAllLess(equiv_diff, 1e-4)
 
     def test_padding_equiv(self):
         for padding in ["same_equiv", "valid_equiv"]:
@@ -194,10 +170,18 @@ class TestConvBase:
                     filters=self.filters,
                     padding=padding,
                 )
-                equiv_diff = check_equivariance(
-                    conv_layer,
-                    signal_on_group,
-                    group_axis=self.group_axis,
-                    spatial_axes=self.spatial_axes,
-                )
-                self.assertAllLess(equiv_diff, 1e-4)
+                self.check_equivariance(conv_layer, signal_on_group)
+
+    def check_equivariance(self, layer, signal, domain_group="", acting_group="", target_group=""):
+        layer(signal)  # building
+        layer.bias = 1 + keras.random.normal(shape=layer.bias.shape)  # add random bias
+        equiv_diff = check_equivariance(
+            layer,
+            signal,
+            spatial_axes=self.spatial_axes,
+            group_axis=self.group_axis,
+            domain_group=domain_group,
+            acting_group=acting_group,
+            target_group=target_group,
+        )
+        self.assertAllLess(equiv_diff, 1e-4)
