@@ -108,10 +108,10 @@ class TestGroupConv3D(TestCase):
                     conv_layer,
                     signal_on_grid,
                     spatial_axes=self.spatial_axes,
-                    acting_group=subgroup_name,
-                    domain_group=None,
-                    target_group=subgroup_name,
                     group_axis=self.group_axis,
+                    acting_group=subgroup_name,
+                    target_group=subgroup_name,
+                    domain_group=None,
                 )
                 self.assertAllLess(equiv_diff, 1e-4)
 
@@ -133,10 +133,10 @@ class TestGroupConv3D(TestCase):
 
     def test_gc_equiv_subgroup(self):
         for group in self.group_dict.values():
+            signal_on_group = keras.random.normal(
+                shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
+            )
             for subgroup_name in group.subgroup.keys():
-                signal_on_group = keras.random.normal(
-                    shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
-                )
                 conv_layer = self.conv(
                     group=group,
                     kernel_size=3,
@@ -221,8 +221,8 @@ class TestGroupConv3DTranspose(TestCase):
                 conv_layer,
                 signal_on_grid,
                 spatial_axes=self.spatial_axes,
-                group_axis=self.group_axis,
                 domain_group=None,
+                group_axis=self.group_axis,
             )
             self.assertAllLess(equiv_diff, 1e-4)
 
@@ -287,13 +287,24 @@ class TestGroupConv3DTranspose(TestCase):
 
                 self.assertAllLess(equiv_diff, 1e-4)
 
-    #
-    # def test_padding_equiv(self):
-    #     for padding in ['valid_equiv']:
-    #         for strides in [3, 5]:
-    #             group = self.example_group
-    #             signal_on_group = keras.random.normal(shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42)
-    #             conv_layer = self.conv(group=group, kernel_size=3, strides=strides, filters=self.filters, padding=padding)
-    #             equiv_diff = check_equivariance(
-    #                 conv_layer, signal_on_group, group_axis=self.group_axis, spatial_axes=self.spatial_axes)
-    #             self.assertAllLess(equiv_diff, 1e-4)
+    def test_padding_equiv_valid(self):
+        padding = "valid_equiv"
+        for strides in [3, 5, 7]:
+            group = self.example_group
+            signal_on_group = keras.random.normal(
+                shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
+            )
+            conv_layer = self.conv(
+                group=group,
+                kernel_size=strides,
+                strides=strides,
+                filters=self.filters,
+                padding=padding,
+            )
+            equiv_diff = check_equivariance(
+                conv_layer,
+                signal_on_group,
+                group_axis=self.group_axis,
+                spatial_axes=self.spatial_axes,
+            )
+            self.assertAllLess(equiv_diff, 1e-4)
