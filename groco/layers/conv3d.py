@@ -60,7 +60,6 @@ class GroupConv3D(Conv3D):
         self.subgroup = self.group_transforms.subgroup
 
         self.group_valued_input = None
-        self.group_order = self.group.order if transpose else self.subgroup.order
 
     @backup_and_restore(("kernel", "bias", "filters"))
     def call(self, inputs):

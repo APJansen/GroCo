@@ -128,7 +128,7 @@ class TestConvBase:
                 self.check_equivariance(conv_layer, signal_on_group)
 
     def generate_shape(self, group, output=True):
-        if type(group) == str:
+        if isinstance(group, str):
             group = self.group_dict[group]
         if group == None:
             shape = self.shape

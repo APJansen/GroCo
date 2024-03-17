@@ -63,7 +63,6 @@ class GroupConv3DTranspose(Conv3DTranspose):
 
         super().__init__(kernel_size=kernel_size, **kwargs)
         self.group_valued_input = None
-        self.group_order = self.group.order if transpose else self.subgroup.order
 
     @backup_and_restore(("kernel", "bias", "filters"))
     def call(self, inputs):
