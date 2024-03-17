@@ -152,7 +152,7 @@ class GroupTransforms:
         self.reshaped_input = reshaped_input
         self.equivariant_padding.build(reshaped_input)
 
-    def compute_conv_indices(self, input_shape, kernel, bias, use_bias):
+    def compute_conv_indices(self, kernel, bias, use_bias):
         if use_bias:
             self._repeated_bias_indices = self._compute_repeated_bias_indices(bias)
         self._transformed_kernel_indices = self._compute_transformed_kernel_indices(kernel)
