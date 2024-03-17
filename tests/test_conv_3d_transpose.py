@@ -14,11 +14,11 @@ def get_conv_layer(dimension: int, transpose: bool):
         return GroupConv3DTranspose if transpose else GroupConv3D
 
 
-class TestGroupConv2D(TestCase):
+class TestGroupConv3DTranspose(TestCase):
     def __init__(self, tests):
         super().__init__(tests)
-        self.dimension = 2
-        self.transpose = False
+        self.dimension = 3
+        self.transpose = True
         self.conv = get_conv_layer(self.dimension, self.transpose)
 
         self.spatial_axes = tuple(range(1, self.dimension + 1))
@@ -28,8 +28,8 @@ class TestGroupConv2D(TestCase):
             self.group_dict = wallpaper_group_dict
             self.example_group = self.group_dict["P4"]
         elif self.dimension == 3:
-            self.group_dict = wallpaper_group_dict
-            self.example_group = self.group_dict["P4M"]
+            self.group_dict = space_group_dict
+            self.example_group = self.group_dict["D4"]
 
         self.filters = 4
         self.xsize = 3
