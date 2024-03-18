@@ -67,7 +67,7 @@ class GroupConv2D(Conv2D):
     def build(self, input_shape):
         self.group_transforms.build(input_shape)
         super().build(self.group_transforms.reshaped_input)
-        self.group_transforms.compute_conv_indices(self.kernel, self.bias, self.use_bias)
+        self.group_transforms.build_conv(self.kernel, self.bias, self.use_bias)
         if self.group_transforms.group_valued_input:
             if self.data_format == "channels_first":
                 channel_axis = 1
