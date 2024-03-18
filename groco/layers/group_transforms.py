@@ -179,6 +179,7 @@ class GroupTransforms:
         """
         if self.transpose:
             kernel = ops.swapaxes(kernel, -1, -2)
+
         indices = utils.get_index_tensor(kernel)
 
         kwargs = {
@@ -191,46 +192,27 @@ class GroupTransforms:
         if not self.group_valued_input:
             indices = self.group.action(indices, **kwargs)
         else:
-            indices = self._restore_kernel_group_axis(indices)
-            indices = self.group.action(indices, group_axis=self.dimensions, **kwargs)
-            indices = self._merge_kernel_group_axis(indices)
+            # Split the group axis from the channel axis, resulting in shape:
+            # (*spatial, domain_group.order, in_channels, out_channels)
+            factor = len(self.group.subgroup[self.domain_group])
+            indices = utils.split_axes(indices, left_size=factor, right_axis=-2)
 
-        indices = self._merge_group_channels_out(indices)
+            # Act on the group axis, resulting in shape:
+            # (*spatial, acting_group.order, domain_group.order, in_channels, out_channels)
+            indices = self.group.action(indices, group_axis=self.dimensions, **kwargs)
+
+            # Merge back the domain group axis with the in_channel axis, resulting in shape:
+            # (*spatial, acting_group.order, domain_group.order * in_channels, out_channels)
+            indices = utils.merge_axes(indices, merged_axis=-3, target_axis=-2)
+
+        # Merge the acting group axis with the out_channel axis, resulting in shape:
+        # (*spatial, domain_group.order * in_channels, acting_group.order * out_channels)
+        indices = utils.merge_axes(indices, merged_axis=-3, target_axis=-1)
+
         if self.transpose:
             indices = ops.swapaxes(indices, -1, -2)
+
         return indices
-
-    def _restore_kernel_group_axis(self, kernel):
-        """
-        Shapes in 2D:
-        (height, width, domain_group.order * in_channels, out_channels) ->
-        (height, width, domain_group.order, in_channels, out_channels)
-        """
-        group_channel_axis = self.dimensions
-        factor = len(self.group.subgroup[self.domain_group])
-        return utils.split_axes(kernel, left_size=factor, right_axis=group_channel_axis)
-
-    def _merge_kernel_group_axis(self, kernel):
-        """
-        Shapes in 2D:
-        (height, width, subgroup.order, group.order, in_channels, out_channels) ->
-        (height, width, subgroup.order, group.order * in_channels, out_channels)
-        """
-        group_axis = (
-            self.dimensions + 1
-        )  # here and below extra +1 because the subgroup axis is inserted before
-        channels_in_axis = self.dimensions + 1 + 1
-        return utils.merge_axes(kernel, merged_axis=group_axis, target_axis=channels_in_axis)
-
-    def _merge_group_channels_out(self, kernel):
-        """
-        Shapes in 2D:
-        (height, width, subgroup.order, group.order * in_channels, out_channels) ->
-        (height, width, group.order * in_channels, subgroup.order * out_channels)
-        """
-        group_axis = self.dimensions
-        channels_out_axis = self.dimensions + 2
-        return utils.merge_axes(kernel, merged_axis=group_axis, target_axis=channels_out_axis)
 
     def correct_output_shape(self, output_shape):
         """Insert the group axis in the correct place."""
