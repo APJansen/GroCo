@@ -114,7 +114,9 @@ class GroupTransforms:
         if self.group_valued_input and self.data_format == "channels_last":
             group_channels_axis -= 1
         factor = len(self.group.subgroup[self.acting_group])
-        return utils.split_axes(outputs, left_size=factor, right_axis=group_channels_axis)
+        out = utils.split_axes(outputs, left_size=factor, right_axis=group_channels_axis)
+        out = ops.moveaxis(out, group_channels_axis, self.group_axis)
+        return out
 
     def subgroup_pooling(self, inputs, pool_type: str):
         """

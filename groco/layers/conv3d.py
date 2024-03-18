@@ -76,7 +76,7 @@ class GroupConv3D(Conv3D):
         self.group_transforms.compute_conv_indices(self.kernel, self.bias, self.use_bias)
         if self.group_valued_input:
             if self.data_format == "channels_first":
-                channel_axis = -1 - self.rank
+                channel_axis = 1
             else:
                 channel_axis = -1
             self.input_spec.axes = {channel_axis: input_shape[self.group_transforms.channels_axis]}

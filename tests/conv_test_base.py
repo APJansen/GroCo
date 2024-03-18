@@ -127,22 +127,44 @@ class TestConvBase:
                 conv_layer = self.generate_layer(group, padding=padding, strides=strides)
                 self.check_equivariance(conv_layer, signal_on_group)
 
-    def generate_shape(self, group, output=True):
+    def test_channels_first(self):
+        # channels_first is not supported on the CPU for tensorflow, so we skip the test
+        if keras.backend.backend() == "tensorflow":
+            self.skipTest("channels_first is not supported on the CPU for tensorflow")
+        group = self.example_group
+        signal_on_group = self.generate_signal(group, data_format="channels_first")
+        conv_layer = self.generate_layer(group, data_format="channels_first")
+        self.check_equivariance(conv_layer, signal_on_group, data_format="channels_first")
+
+    def generate_shape(self, group, output=True, data_format="channels_last"):
         if isinstance(group, str):
             group = self.group_dict[group]
-        if group == None:
-            shape = self.shape
-        else:
-            shape = self.shape[:-1] + (group.order, self.shape[-1])
 
+        group_axis = self.group_axis
+        channel_axis = -1
+        shape = self.shape
+        if data_format == "channels_first":
+            # move channels first
+            shape = (shape[0], shape[-1]) + shape[1:-1]
+            channel_axis = 1
+            group_axis += 1
+
+        if group is not None:
+            shape = shape[:group_axis] + (group.order,) + shape[group_axis:]
         if output:
-            shape = shape[:-1] + (self.filters,)
+            shape_list = list(shape)
+            shape_list[channel_axis] = self.filters
+            shape = tuple(shape_list)
+
         return shape
 
-    def generate_signal(self, group):
-        return keras.random.normal(shape=self.generate_shape(group, output=False), seed=42)
+    def generate_signal(self, group, data_format="channels_last"):
+        shape = self.generate_shape(group, output=False, data_format=data_format)
+        return keras.random.normal(shape=shape, seed=42)
 
-    def generate_layer(self, group, padding="same_equiv", strides=1, subgroup=""):
+    def generate_layer(
+        self, group, padding="same_equiv", strides=1, subgroup="", data_format="channels_last"
+    ):
         return self.conv(
             group=group,
             kernel_size=self.kernel_size,
@@ -150,16 +172,32 @@ class TestConvBase:
             padding=padding,
             strides=strides,
             subgroup=subgroup,
+            data_format=data_format,
         )
 
-    def check_equivariance(self, layer, signal, domain_group="", acting_group="", target_group=""):
+    def check_equivariance(
+        self,
+        layer,
+        signal,
+        domain_group="",
+        acting_group="",
+        target_group="",
+        data_format="channels_last",
+    ):
         layer(signal)  # building
         layer.bias = 1 + keras.random.normal(shape=layer.bias.shape)  # add random bias
+
+        spatial_axes = self.spatial_axes
+        group_axis = self.group_axis
+        if data_format == "channels_first":
+            spatial_axes = tuple(i + 1 for i in spatial_axes)
+            group_axis += 1
+
         equiv_diff = check_equivariance(
             layer,
             signal,
-            spatial_axes=self.spatial_axes,
-            group_axis=self.group_axis,
+            spatial_axes=spatial_axes,
+            group_axis=group_axis,
             domain_group=domain_group,
             acting_group=acting_group,
             target_group=target_group,
