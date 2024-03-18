@@ -56,11 +56,6 @@ class GroupConv2D(Conv2D):
         kwargs["padding"] = self.group_transforms.built_in_padding_option
         super().__init__(kernel_size=kernel_size, **kwargs)
 
-        self.group = self.group_transforms.group
-        self.subgroup = self.group_transforms.subgroup
-
-        self.group_valued_input = None
-
     @backup_and_restore(("kernel", "bias", "filters"))
     def call(self, inputs):
         self.kernel, self.bias, self.filters, inputs = self.group_transforms.prepare_call(
@@ -71,10 +66,9 @@ class GroupConv2D(Conv2D):
 
     def build(self, input_shape):
         self.group_transforms.build(input_shape)
-        self.group_valued_input = self.group_transforms.group_valued_input
         super().build(self.group_transforms.reshaped_input)
         self.group_transforms.compute_conv_indices(self.kernel, self.bias, self.use_bias)
-        if self.group_valued_input:
+        if self.group_transforms.group_valued_input:
             if self.data_format == "channels_first":
                 channel_axis = 1
             else:

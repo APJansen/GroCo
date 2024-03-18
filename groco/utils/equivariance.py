@@ -32,7 +32,7 @@ def check_equivariance(
     Returns:
         maximal absolute difference between first transforming vs first applying layer.
     """
-    group = layer.group if group is None else group
+    group = layer.group_transforms.group if group is None else group
     acting_group, domain_group, target_group = group.parse_subgroups(
         acting_group, domain_group, target_group
     )
