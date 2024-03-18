@@ -46,8 +46,6 @@ class GroupPooling(Layer):
             **kwargs
         )
         kwargs["padding"] = self.group_transforms.built_in_padding_option
-        self.group = self.group_transforms.group
-        self.subgroup = self.group_transforms.subgroup
 
         self.pool_type = pool_type
         if self.dimensions == 1:
@@ -58,8 +56,6 @@ class GroupPooling(Layer):
             pool_layer = MaxPooling3D if self.pool_type == "max" else AveragePooling3D
         self.pooling = pool_layer(pool_size=pool_size, **kwargs)
 
-        self.pooling_indices = None  # created during build
-
     def call(self, inputs):
         inputs = self.group_transforms.subgroup_pooling(inputs, self.pool_type)
         inputs = self.group_transforms.merge_group_axis_and_pad(inputs)
@@ -69,7 +65,7 @@ class GroupPooling(Layer):
     def build(self, input_shape):
         self.group_transforms.build(input_shape)
         self.pooling.build(self.group_transforms.reshaped_input)
-        self.pooling_indices = self.group_transforms.build_pool()
+        self.group_transforms.build_pool()
 
     def get_config(self):
         config = self.pooling.get_config()
@@ -99,8 +95,6 @@ class GlobalGroupPooling(Layer):
         else:
             self.group_axis = self.dimensions + 1
 
-        self.pooling_indices = None  # created during build
-
     def call(self, inputs):
         inputs = self.pool_group(inputs)
         outputs = self.pooling(inputs)
@@ -121,7 +115,7 @@ class GlobalGroupPooling(Layer):
     def build(self, input_shape):
         reshaped_input = self.group_transforms.build(input_shape)
         self.pooling.build(reshaped_input)
-        self.pooling_indices = self.group_transforms.build_pool()
+        self.group_transforms.build_pool()
 
     def get_config(self):
         config = self.pooling.get_config()
