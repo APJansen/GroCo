@@ -234,8 +234,9 @@ class GroupTransforms:
 
     def correct_output_shape(self, output_shape):
         """Insert the group axis in the correct place."""
+        output_shape = list(output_shape)
         return (
-            output_shape[: self.group_axis] + (self.group.order,) + output_shape[self.group_axis :]
+            output_shape[: self.group_axis] + [self.group.order] + output_shape[self.group_axis :]
         )
 
     def get_config(self):
