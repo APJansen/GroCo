@@ -2,17 +2,22 @@ import keras
 from keras import ops
 
 from groco.groups import space_group_dict, wallpaper_group_dict
-from groco.layers import GroupMaxPooling2D, GroupMaxPooling3D
+from groco.layers import (
+    GlobalGroupMaxPooling2D,
+    GlobalGroupMaxPooling3D,
+    GroupMaxPooling2D,
+    GroupMaxPooling3D,
+)
 from groco.utils import check_equivariance
 from tests.custom_testcase import KerasTestCase as TestCase
 
 
-def get_attributes(dimension: int):
+def get_attributes(dimension: int, is_global: bool = False):
     if dimension == 2:
-        pool_layer = GroupMaxPooling2D
+        pool_layer = GroupMaxPooling2D if not is_global else GlobalGroupMaxPooling2D
         group_dict = wallpaper_group_dict
     elif dimension == 3:
-        pool_layer = GroupMaxPooling3D
+        pool_layer = GroupMaxPooling3D if not is_global else GlobalGroupMaxPooling3D
         group_dict = space_group_dict
 
     return pool_layer, group_dict
@@ -105,9 +110,42 @@ class TestGroupPoolingBase:
                 self.assertAllLess(equiv_diff, 1e-4)
 
 
+class TestGlobalGroupPoolingBase:
+    dimension = None
+
+    def __init__(self, tests):
+        super().__init__(tests)
+        self.xsize = 8
+        self.batch_size = 2
+        self.input_features = 3
+        self.shape = (self.batch_size,) + (self.xsize,) * self.dimension + (self.input_features,)
+        self.pooled_shape = (self.batch_size,) + (self.input_features,)
+        self.spatial_axes = tuple(range(1, self.dimension + 1))
+        self.group_axis = self.dimension + 1
+
+        self.pool, self.group_dict = get_attributes(self.dimension, is_global=True)
+
+    def test_pool_shape(self):
+        for group in self.group_dict.values():
+            signal_on_group = keras.random.normal(
+                shape=self.shape[:-1] + (group.order, self.shape[-1]), seed=42
+            )
+            pool_layer = self.pool()
+            pooled_signal = pool_layer(signal_on_group)
+            self.assertEqual(pooled_signal.shape, self.pooled_shape)
+
+
 class TestGroupPooling2D(TestGroupPoolingBase, TestCase):
     dimension = 2
 
 
 class TestGroupPooling3D(TestGroupPoolingBase, TestCase):
+    dimension = 3
+
+
+class TestGlobalGroupPooling2D(TestGlobalGroupPoolingBase, TestCase):
+    dimension = 2
+
+
+class TestGlobalGroupPooling3D(TestGlobalGroupPoolingBase, TestCase):
     dimension = 3
