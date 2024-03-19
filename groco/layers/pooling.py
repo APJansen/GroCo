@@ -15,6 +15,7 @@ from keras.layers import (
     MaxPooling3D,
 )
 
+from groco import utils
 from groco.layers.group_transforms import GroupTransforms
 
 
@@ -92,8 +93,10 @@ class GlobalGroupPooling(Layer):
 
         if "data_format" in kwargs and kwargs["data_format"] == "channels_first":
             self.group_axis = self.dimensions + 2
+            self.channels_axis = 1
         else:
             self.group_axis = self.dimensions + 1
+            self.channels_axis = -1
 
     def call(self, inputs):
         inputs = self.pool_group(inputs)
@@ -113,9 +116,13 @@ class GlobalGroupPooling(Layer):
             return outputs
 
     def build(self, input_shape):
-        reshaped_input = self.group_transforms.build(input_shape)
+        if len(input_shape) == self.dimensions + 3:
+            reshaped_input = utils.merge_shapes(
+                input_shape,
+                merged_axis=self.group_axis,
+                target_axis=self.channels_axis,
+            )
         self.pooling.build(reshaped_input)
-        self.group_transforms.build_pool()
 
     def get_config(self):
         config = self.pooling.get_config()
