@@ -21,13 +21,23 @@ isort = "^5.13.2"
 pre-commit = "^3.6.2"
 Sphinx = "^7.2.6"
 
-[tool.poetry.group.backends]
+[tool.poetry.group.tensorflow]
 optional = true
 
-[tool.poetry.group.backends.dependencies]
+[tool.poetry.group.torch]
+optional = true
+
+[tool.poetry.group.jax]
+optional = true
+
+[tool.poetry.group.tensorflow.dependencies]
 tensorflow = "^2.16.1"
-jax = "^0.4.25"
+
+[tool.poetry.group.torch.dependencies]
 torch = "^2.2.1"
+
+[tool.poetry.group.jax.dependencies]
+jax = "^0.4.25"
 jaxlib = "^0.4.25"
 
 [build-system]

@@ -17,12 +17,14 @@ jobs:
       uses: packetcoders/action-setup-cache-python-poetry@main
       with:
         python-version: '3.9'
-        install-args: --with dev --with backends
+        install-args: --with dev --with torch
 
     - name: Install groco
       run: poetry install
 
     - name: Generate test coverage
+      env:
+        KERAS_BACKEND: torch
       run: |
         poetry run pytest --cov
         poetry run coverage xml
