@@ -1,10 +1,10 @@
-# Group Convolutions in Keras 3 with GroCo
+# Group equivariant Convolutions in Keras 3 with GeqCo
 
-[![Documentation Status](https://readthedocs.org/projects/groco/badge/?version=latest)](https://groco.readthedocs.io/en/latest/?badge=latest)
-[![workflow scc badge](https://sonarcloud.io/api/project_badges/measure?project=APJansen_GroCo&metric=coverage)](https://sonarcloud.io/dashboard?id=APJansen_GroCo)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=APJansen_GroCo&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=APJansen_GroCo)
+[![Documentation Status](https://readthedocs.org/projects/geqco/badge/?version=latest)](https://geqco.readthedocs.io/en/latest/?badge=latest)
+[![workflow scc badge](https://sonarcloud.io/api/project_badges/measure?project=APJansen_geqco&metric=coverage)](https://sonarcloud.io/dashboard?id=APJansen_geqco)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=APJansen_geqco&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=APJansen_geqco)
 
-GroCo implements group equivariant convolutions in Keras 3.
+GeqCo implements group equivariant convolutions in Keras 3.
 It stays as close as possible to the interface of the standard convolution layers,
 and supports all the most common convolutional layers.
 This includes 2D and 3D convolutions, transposed convolutions, and pooling layers.
@@ -17,8 +17,8 @@ that Keras supports (TensorFlow, PyTorch and JAX).
 
 ## Using `poetry` (recommended)
 
-1. Clone repo: `git clone https://github.com/APJansen/GroCo.git`
-2. Navigate to the project folder: `cd groco`
+1. Clone repo: `git clone https://github.com/APJansen/geqco.git`
+2. Navigate to the project folder: `cd geqco`
 3. If necessary install poetry: `pip install poetry`
 4. Run `poetry install`
 
@@ -27,17 +27,17 @@ More information on poetry available [here](https://python-poetry.org/).
 
 # Introduction to group convolutions
 
-[![intro colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/groco/blob/main/notebooks/GroupConv_intro.ipynb)
+[![intro colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/geqco/blob/main/notebooks/GroupConv_intro.ipynb)
 
 This Colab notebook is a standalone introduction to group convolutions, meant to be read after/in parallel with the lectures, book or paper mentioned above.
-It does not use the implementation in GroCo, but rather derives an early version of it from scratch, going into many of the nitty gritty aspects.
+It does not use the implementation in GeqCo, but rather derives an early version of it from scratch, going into many of the nitty gritty aspects.
 I hope it can be useful in parallel with the other sources.
 
 # Example notebook
 
-[![example colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/groco/blob/main/notebooks/example_MNIST.ipynb)
+[![example colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/APJansen/geqco/blob/main/notebooks/example_MNIST.ipynb)
 
-This Colab notebook illustrates how to use GroCo by constructing a group convolutional network, training it on MNIST and comparing to a regular network.
+This Colab notebook illustrates how to use GeqCo by constructing a group convolutional network, training it on MNIST and comparing to a regular network.
 It also illustrates how to pool onto subgroups, which increases performance on MNIST. (Though not compared to the regular convolution, it is just used as a simple example but doesn't lend itself well to group convolutions as orientation matters in MNIST images.)
 
 
@@ -135,7 +135,7 @@ D4 | all rotations of a cuboid, preserving orientation | 8 |
 
 # References
 
-GroCo was inspired by [the original paper on group convolutions by Taco Cohen and Max Welling](http://proceedings.mlr.press/v48/cohenc16.html) and the book, lectures and notebooks on the geometric deep learning by Michael Bronstein, Joan Bruna, Taco Cohen and Petar Veličković, found [here](https://geometricdeeplearning.com), which I highly recommend.
+GeqCo was inspired by [the original paper on group convolutions by Taco Cohen and Max Welling](http://proceedings.mlr.press/v48/cohenc16.html) and the book, lectures and notebooks on the geometric deep learning by Michael Bronstein, Joan Bruna, Taco Cohen and Petar Veličković, found [here](https://geometricdeeplearning.com), which I highly recommend.
 
 The implementation by the authors themselves is in Chainer/Tensorflow 1, [GrouPy](https://github.com/tscohen/GrouPy).
 There is also another Keras implementation [keras-gcnn](https://github.com/basveeling/keras-gcnn) that I came across while developing this.

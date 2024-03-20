@@ -3,14 +3,14 @@ from keras import ops
 from keras.layers import Input
 from keras.models import Sequential
 
-from groco.groups import wallpaper_group_dict
-from groco.layers import (
+from geqco.groups import wallpaper_group_dict
+from geqco.layers import (
     GlobalGroupMaxPooling2D,
     GroupConv2D,
     GroupConv2DTranspose,
     GroupMaxPooling2D,
 )
-from groco.utils import check_equivariance
+from geqco.utils import check_equivariance
 from tests.custom_testcase import KerasTestCase as TestCase
 
 

@@ -1,1 +1,1 @@
-.. autoclass:: groco.layers.conv3d.GroupConv3D
+.. autoclass:: geqco.layers.conv3d.GroupConv3D

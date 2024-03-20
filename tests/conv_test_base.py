@@ -1,9 +1,9 @@
 import keras
 from keras import ops
 
-from groco.groups import space_group_dict, wallpaper_group_dict
-from groco.layers import GroupConv2D, GroupConv2DTranspose, GroupConv3D, GroupConv3DTranspose
-from groco.utils import check_equivariance
+from geqco.groups import space_group_dict, wallpaper_group_dict
+from geqco.layers import GroupConv2D, GroupConv2DTranspose, GroupConv3D, GroupConv3DTranspose
+from geqco.utils import check_equivariance
 from tests.custom_testcase import KerasTestCase as TestCase
 
 

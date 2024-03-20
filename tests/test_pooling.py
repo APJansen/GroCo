@@ -1,14 +1,14 @@
 import keras
 from keras import ops
 
-from groco.groups import space_group_dict, wallpaper_group_dict
-from groco.layers import (
+from geqco.groups import space_group_dict, wallpaper_group_dict
+from geqco.layers import (
     GlobalGroupMaxPooling2D,
     GlobalGroupMaxPooling3D,
     GroupMaxPooling2D,
     GroupMaxPooling3D,
 )
-from groco.utils import check_equivariance
+from geqco.utils import check_equivariance
 from tests.custom_testcase import KerasTestCase as TestCase
 
 

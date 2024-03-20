@@ -1,8 +1,8 @@
 import keras
 from keras import ops
 
-from groco.groups import wallpaper_group_dict
-from groco.utils import check_equivariance
+from geqco.groups import wallpaper_group_dict
+from geqco.utils import check_equivariance
 from tests.custom_testcase import KerasTestCase as TestCase
 
 

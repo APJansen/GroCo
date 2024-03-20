@@ -1,6 +1,6 @@
 from keras import ops
 
-from groco.groups.group import Group
+from geqco.groups.group import Group
 
 
 def P4M_action(signal, spatial_axes=(0, 1), new_group_axis=2):

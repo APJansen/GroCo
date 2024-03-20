@@ -19,7 +19,7 @@ sys.path.insert(0, basedir)
 
 # -- Project information -----------------------------------------------------
 
-project = "Groco"
+project = "geqco"
 copyright = "2022, Aron Jansen"
 author = "Aron Jansen"
 

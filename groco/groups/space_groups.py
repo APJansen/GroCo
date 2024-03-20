@@ -2,7 +2,7 @@ import itertools
 
 from keras import ops
 
-from groco.groups import Group
+from geqco.groups import Group
 
 Oh_flip_axes = [[], [1, 2], [0, 2], [0, 1], [2], [1], [0], [0, 1, 2]]
 Oh_permutation_tuples = [(0, 1, 2), (1, 2, 0), (2, 0, 1), (0, 2, 1), (2, 1, 0), (1, 0, 2)]

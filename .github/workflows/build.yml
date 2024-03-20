@@ -19,7 +19,7 @@ jobs:
         python-version: '3.9'
         install-args: --with dev --with torch
 
-    - name: Install groco
+    - name: Install geqco
       run: poetry install
 
     - name: Generate test coverage

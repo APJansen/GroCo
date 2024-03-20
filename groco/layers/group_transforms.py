@@ -1,9 +1,9 @@
 from keras import ops
 from keras.layers import Layer
 
-from groco import utils
-from groco.groups import Group, group_dict
-from groco.layers.padding import EquivariantPadding
+from geqco import utils
+from geqco.groups import Group, group_dict
+from geqco.layers.padding import EquivariantPadding
 
 
 class GroupTransforms:

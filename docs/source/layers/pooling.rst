@@ -2,26 +2,26 @@
 Pooling layers
 --------------
 
-.. autoclass:: groco.layers.pooling.GroupMaxPooling1D
+.. autoclass:: geqco.layers.pooling.GroupMaxPooling1D
 
-.. autoclass:: groco.layers.pooling.GroupMaxPooling2D
+.. autoclass:: geqco.layers.pooling.GroupMaxPooling2D
 
-.. autoclass:: groco.layers.pooling.GroupMaxPooling3D
+.. autoclass:: geqco.layers.pooling.GroupMaxPooling3D
 
-.. autoclass:: groco.layers.pooling.GroupAveragePooling1D
+.. autoclass:: geqco.layers.pooling.GroupAveragePooling1D
 
-.. autoclass:: groco.layers.pooling.GroupAveragePooling2D
+.. autoclass:: geqco.layers.pooling.GroupAveragePooling2D
 
-.. autoclass:: groco.layers.pooling.GroupAveragePooling3D
+.. autoclass:: geqco.layers.pooling.GroupAveragePooling3D
 
-.. autoclass:: groco.layers.pooling.GlobalGroupMaxPooling1D
+.. autoclass:: geqco.layers.pooling.GlobalGroupMaxPooling1D
 
-.. autoclass:: groco.layers.pooling.GlobalGroupMaxPooling2D
+.. autoclass:: geqco.layers.pooling.GlobalGroupMaxPooling2D
 
-.. autoclass:: groco.layers.pooling.GlobalGroupMaxPooling3D
+.. autoclass:: geqco.layers.pooling.GlobalGroupMaxPooling3D
 
-.. autoclass:: groco.layers.pooling.GlobalGroupAveragePooling1D
+.. autoclass:: geqco.layers.pooling.GlobalGroupAveragePooling1D
 
-.. autoclass:: groco.layers.pooling.GlobalGroupAveragePooling2D
+.. autoclass:: geqco.layers.pooling.GlobalGroupAveragePooling2D
 
-.. autoclass:: groco.layers.pooling.GlobalGroupAveragePooling3D
+.. autoclass:: geqco.layers.pooling.GlobalGroupAveragePooling3D

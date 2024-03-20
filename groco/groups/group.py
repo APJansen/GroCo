@@ -1,6 +1,6 @@
 from keras import ops
 
-from groco import utils
+from geqco import utils
 
 
 class Group:

@@ -1,7 +1,7 @@
 from keras.layers import Conv2DTranspose
 
-from groco.layers.group_transforms import GroupTransforms
-from groco.utils import backup_and_restore
+from geqco.layers.group_transforms import GroupTransforms
+from geqco.utils import backup_and_restore
 
 
 class GroupConv2DTranspose(Conv2DTranspose):

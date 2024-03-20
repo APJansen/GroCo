@@ -1,7 +1,7 @@
 import keras
 from keras import ops
 
-from groco.layers import EquivariantPadding
+from geqco.layers import EquivariantPadding
 from tests.custom_testcase import KerasTestCase as TestCase
 
 

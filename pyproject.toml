@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "groco"
+name = "GeqCo"
 version = "0.1.0"
 description = "Keras implementation of group convolutions"
 authors = ["Aron <aronpjansen@gmail.com>"]

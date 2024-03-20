@@ -15,8 +15,8 @@ from keras.layers import (
     MaxPooling3D,
 )
 
-from groco import utils
-from groco.layers.group_transforms import GroupTransforms
+from geqco import utils
+from geqco.layers.group_transforms import GroupTransforms
 
 
 class GroupPooling(Layer):

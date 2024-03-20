@@ -1,7 +1,7 @@
 API Documentation
 =================
 
-This part of the documentation covers all the interfaces of Groco.
+This part of the documentation covers all the interfaces of GeqCo.
 
 .. toctree::
    :maxdepth: 3
@@ -14,4 +14,4 @@ This part of the documentation covers all the interfaces of Groco.
 Internals
 --------
 
-.. autoclass:: groco.groups.group.Group
+.. autoclass:: geqco.groups.group.Group
