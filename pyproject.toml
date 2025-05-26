@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-keras = "^3.0.5"
+keras = "3.0.5"
 
 [tool.poetry.group.dev]
 optional = true
@@ -31,14 +31,14 @@ optional = true
 optional = true
 
 [tool.poetry.group.tensorflow.dependencies]
-tensorflow = "^2.16.1"
+tensorflow = "2.16.1"
 
 [tool.poetry.group.torch.dependencies]
-torch = "^2.2.1"
+torch = "2.2.1"
 
 [tool.poetry.group.jax.dependencies]
-jax = "^0.4.25"
-jaxlib = "^0.4.25"
+jax = "0.4.25"
+jaxlib = "0.4.25"
 
 [build-system]
 requires = ["poetry-core"]
